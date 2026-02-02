@@ -22,7 +22,7 @@ const Chat: React.FC<ChatProps> = ({ messages, isTyping }) => {
 
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-hide pb-4"> {/* Removed pb-20 as global audio player is gone */}
+    <div className="flex-1 overflow-y-auto p-4 space-y-6 pb-4 min-h-0"> {/* Removed scrollbar-hide for better UX */}
       {messages.map((msg) => (
         <div
           key={msg.id}
@@ -31,7 +31,7 @@ const Chat: React.FC<ChatProps> = ({ messages, isTyping }) => {
           {/* Avatar */}
           <div className={`
             w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm
-            ${msg.sender === 'agent' 
+            ${msg.sender === 'agent'
               ? 'bg-brand-amber text-brand-navy' // Agent: Amber bg, Navy icon
               : 'bg-brand-navy text-white'}      // User: Navy bg, White icon
           `}>
@@ -42,20 +42,20 @@ const Chat: React.FC<ChatProps> = ({ messages, isTyping }) => {
           <div className={`flex flex-col max-w-[85%] ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
             <div className={`
               px-5 py-4 text-sm leading-relaxed shadow-sm rounded-2xl
-              ${msg.sender === 'agent' 
-                ? 'bg-white border border-slate-200 text-slate-800 rounded-tl-none' 
+              ${msg.sender === 'agent'
+                ? 'bg-white border border-slate-200 text-slate-800 rounded-tl-none'
                 : 'bg-brand-navy text-white rounded-tr-none'}
             `}>
               <div className="whitespace-pre-wrap">{msg.text}</div>
-              
+
               {/* Attachments Preview */}
               {msg.attachments && msg.attachments.length > 0 && (
                 <div className="mt-3 flex flex-wrap gap-2">
                   {msg.attachments.map((file, idx) => (
                     <div key={idx} className="relative group overflow-hidden rounded-lg border border-white/20 w-24 h-24 bg-black/20">
-                      <img 
-                        src={file.data} 
-                        alt={file.name} 
+                      <img
+                        src={file.data}
+                        alt={file.name}
                         className="w-full h-full object-cover opacity-90"
                       />
                       <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[10px] p-1 truncate">
@@ -66,7 +66,7 @@ const Chat: React.FC<ChatProps> = ({ messages, isTyping }) => {
                 </div>
               )}
             </div>
-            
+
             {/* Metadata Row: Speaker & Timestamp */}
             <div className="flex items-center gap-2 mt-1 px-1 opacity-70 hover:opacity-100 transition-opacity">
               <div className={`text-[10px] ${msg.sender === 'agent' ? 'text-slate-400' : 'text-slate-400'}`}>
@@ -88,7 +88,7 @@ const Chat: React.FC<ChatProps> = ({ messages, isTyping }) => {
           </div>
         </div>
       )}
-      
+
       <div ref={messagesEndRef} />
     </div>
   );
