@@ -87,17 +87,16 @@ export class LiveAgent {
           // Must provide an array with a single Modality.AUDIO element
           responseModalities: [Modality.AUDIO],
           speechConfig: {
-            voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Aoede' } },
+            voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Fenrir' } },
           },
           // Enable transcription
           inputAudioTranscription: {},
           outputAudioTranscription: {},
           systemInstruction: SYSTEM_PROMPT + "\n\nCONTEXTE: Ceci est un APPEL VOCAL en direct. Sois concis, direct et empathique. Pas de listes à puces.\n\n" +
-            "Act as: ElevenLabs: Rachel (Confident/Warm).\n" +
+            "Act as: Professional Sound Engineer (Expert Visa & Culture).\n" +
             "Speak primarily in: French (France).\n" +
-            "Mimic the vocal characteristics and cadence associated with the Rachel (Confident/Warm) profile: high emotional intelligence, specific breathiness, and professional clarity.\n" +
             "Your voice tone description is: Natural and Balanced.\n" +
-            "Speak at a speed factor of approximately 0.5x.\n\n" +
+            "Speak at a speed factor of approximately 0.7x.\n\n" +
             "Be concise and helpful.",
         },
         callbacks: {
