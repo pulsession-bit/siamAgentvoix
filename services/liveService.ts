@@ -96,7 +96,7 @@ export class LiveAgent {
             "Act as: Professional Sound Engineer (Expert Visa & Culture).\n" +
             "Speak primarily in: French (France).\n" +
             "Your voice tone description is: Natural and Balanced.\n" +
-            "Speak at a speed factor of approximately 0.7x.\n\n" +
+            "Speak at a speed factor of approximately 0.5x.\n\n" +
             "Be concise and helpful.",
         },
         callbacks: {

@@ -337,7 +337,7 @@ function App() {
                   </div>
                 )}
 
-                <div className="flex-1 overflow-hidden relative">
+                <div className="flex-1 flex flex-col overflow-hidden relative">
                   <Chat messages={messages} isTyping={isTyping} />
                 </div>
 
