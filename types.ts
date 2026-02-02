@@ -39,6 +39,21 @@ export interface AgentAction {
   payload: CallPayload;
 }
 
+export interface ChatSummary {
+  visa_score: number;
+  visa_type: string;
+  executive_summary: string;
+  key_points: string[];
+  action_plan: {
+    step: string;
+    description: string;
+    timing: string;
+  }[];
+  required_documents: string[];
+  strengths: string[];
+  weaknesses: string[];
+}
+
 export enum AppStep {
   QUALIFICATION = 'QUALIFICATION',
   AUDIT = 'AUDIT',

@@ -7,7 +7,8 @@ import VisaSelect from './components/VisaSelect';
 import AuditScore from './components/AuditScore';
 import CallModal from './components/CallModal';
 import { ChatMessage, AppStep, VisaType, FileAttachment, AuditResult, CallPayload } from './types';
-import { startAuditSession, sendMessageToAgent, resumeAuditSession, isChatSessionActive, updateChatSessionHistoryWithTranscript } from './services/geminiService';
+import { startAuditSession, sendMessageToAgent, resumeAuditSession, isChatSessionActive, updateChatSessionHistoryWithTranscript, generateChatSummary } from './services/geminiService';
+import SummaryView from './components/SummaryView'; // Import Summary Component
 
 const STORAGE_KEY = 'siam_visa_pro_session_v1';
 
@@ -17,6 +18,8 @@ function App() {
   const [isTyping, setIsTyping] = useState(false);
   const [visaType, setVisaType] = useState<VisaType>(null);
   const [auditResult, setAuditResult] = useState<AuditResult | null>(null);
+  const [chatSummary, setChatSummary] = useState<import('./types').ChatSummary | null>(null); // State for Summary
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSessionLoaded, setIsSessionLoaded] = useState(false);
   const [isLoadingApp, setIsLoadingApp] = useState(true);
@@ -93,6 +96,20 @@ function App() {
     }
   };
 
+  const handleGenerateSummary = async () => {
+    setIsGeneratingSummary(true);
+    try {
+      const summary = await generateChatSummary();
+      if (summary) setChatSummary(summary);
+      setIsMobileMenuOpen(false);
+    } catch (e) {
+      console.error(e);
+      alert("Impossible de générer la synthèse pour le moment.");
+    } finally {
+      setIsGeneratingSummary(false);
+    }
+  };
+
   const addMessage = (text: string, sender: 'user' | 'agent' | 'system', attachments?: FileAttachment[]) => {
     setMessages(prev => [...prev, { id: Date.now().toString(), text, sender, timestamp: Date.now(), attachments }]);
   };
@@ -157,39 +174,52 @@ function App() {
 
         {/* Navigation Steps */}
         <nav className="space-y-6 flex-1">
-          <StepItem 
-            active={step === AppStep.QUALIFICATION} 
-            completed={step !== AppStep.QUALIFICATION} 
-            label="Qualification" 
-            desc="Sélection du type de visa" 
-            icon={<FileText size={18} />} 
+          <StepItem
+            active={step === AppStep.QUALIFICATION}
+            completed={step !== AppStep.QUALIFICATION}
+            label="Qualification"
+            desc="Sélection du type de visa"
+            icon={<FileText size={18} />}
           />
-          <StepItem 
-            active={step === AppStep.AUDIT} 
-            completed={step === AppStep.PAYMENT} 
-            label="Audit IA" 
-            desc="Vérification documentaire" 
-            icon={<ShieldCheck size={18} />} 
+          <StepItem
+            active={step === AppStep.AUDIT}
+            completed={step === AppStep.PAYMENT}
+            label="Audit IA"
+            desc="Vérification documentaire"
+            icon={<ShieldCheck size={18} />}
           />
-          <StepItem 
-            active={step === AppStep.PAYMENT} 
-            completed={false} 
-            label="Validation" 
-            desc="Paiement & Dépôt" 
-            icon={<CreditCard size={18} />} 
+          <StepItem
+            active={step === AppStep.PAYMENT}
+            completed={false}
+            label="Validation"
+            desc="Paiement & Dépôt"
+            icon={<CreditCard size={18} />}
           />
         </nav>
 
         {/* Sidebar Footer Actions */}
         <div className="mt-6 space-y-3 pt-6 border-t border-slate-800">
-          <button 
-            onClick={handleManualCallRequest} 
+          {/* NEW: Synthèse Button */}
+          <button
+            onClick={handleGenerateSummary}
+            disabled={isGeneratingSummary || messages.length < 5}
+            className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs transition-colors border
+              ${isGeneratingSummary ? 'bg-slate-800 text-slate-500 border-transparent cursor-wait' : 'bg-transparent text-brand-amber border-brand-amber/30 hover:bg-brand-amber/10'}
+              ${messages.length < 5 ? 'opacity-50 cursor-not-allowed' : ''}
+            `}
+          >
+            {isGeneratingSummary ? <Loader2 size={14} className="animate-spin" /> : <FileText size={16} />}
+            {isGeneratingSummary ? 'Génération...' : "Synthèse de l'Audit"}
+          </button>
+
+          <button
+            onClick={handleManualCallRequest}
             className="w-full flex items-center justify-center gap-2 bg-brand-amber text-brand-navy py-4 rounded-xl font-bold text-sm shadow-lg hover:bg-brand-yellow transition-colors"
           >
             <Phone size={18} /> Parler à un expert
           </button>
-          <button 
-            onClick={clearSession} 
+          <button
+            onClick={clearSession}
             className="w-full py-3 text-slate-500 text-xs flex items-center justify-center gap-2 hover:text-red-400 transition-colors"
           >
             <Trash2 size={14} /> Réinitialiser l'audit
@@ -197,7 +227,7 @@ function App() {
         </div>
 
         <div className="mt-4 text-center">
-           <span className="text-[9px] text-slate-600 uppercase tracking-tighter">System Status: <span className="text-green-500">Online</span></span>
+          <span className="text-[9px] text-slate-600 uppercase tracking-tighter">System Status: <span className="text-green-500">Online</span></span>
         </div>
       </div>
     </aside>
@@ -223,7 +253,7 @@ function App() {
       ) : (
         <>
           {renderSidebar()}
-          
+
           <div className="flex-1 flex flex-col h-full relative min-w-0">
             {/* Header / Nav Bar Mobile (Visible on Mobile only) */}
             <header className="flex-none bg-brand-navy p-4 flex items-center justify-between md:hidden border-b border-slate-800 z-30 shadow-md">
@@ -299,9 +329,9 @@ function App() {
                     </div>
                   </div>
                 )}
-                
+
                 <div className="flex-1 overflow-hidden relative">
-                   <Chat messages={messages} isTyping={isTyping} />
+                  <Chat messages={messages} isTyping={isTyping} />
                 </div>
 
                 <div className="flex-none">
@@ -310,17 +340,26 @@ function App() {
               </div>
             </main>
 
+            {/* Modal de Synthèse (Overlay) */}
+            {chatSummary && (
+              <div className="absolute inset-0 z-40 bg-brand-light/95 backdrop-blur-md p-4 overflow-y-auto animate-in fade-in duration-300">
+                <div className="max-w-5xl mx-auto">
+                  <SummaryView summary={chatSummary} onClose={() => setChatSummary(null)} />
+                </div>
+              </div>
+            )}
+
             {/* Modal de Call */}
             {callPayload && (
-              <CallModal 
-                payload={callPayload} 
-                onClose={(transcript) => { 
-                  setCallPayload(null); 
-                  if (transcript) { 
-                    addMessage(`📄 **RÉSUMÉ DE L'APPEL**\n\n${transcript}`, 'system'); 
-                    updateChatSessionHistoryWithTranscript(transcript); 
-                  } 
-                }} 
+              <CallModal
+                payload={callPayload}
+                onClose={(transcript) => {
+                  setCallPayload(null);
+                  if (transcript) {
+                    addMessage(`📄 **RÉSUMÉ DE L'APPEL**\n\n${transcript}`, 'system');
+                    updateChatSessionHistoryWithTranscript(transcript);
+                  }
+                }}
               />
             )}
           </div>
@@ -334,10 +373,10 @@ const StepItem = ({ active, completed, label, desc, icon }: any) => (
   <div className={`flex items-start gap-4 transition-all duration-300 ${active || completed ? 'opacity-100' : 'opacity-30'}`}>
     <div className={`
       w-10 h-10 rounded-full flex items-center justify-center border-2 flex-shrink-0 transition-colors
-      ${completed 
-        ? 'bg-green-500 border-green-500 text-white' 
-        : active 
-          ? 'border-brand-amber text-brand-amber bg-brand-navy' 
+      ${completed
+        ? 'bg-green-500 border-green-500 text-white'
+        : active
+          ? 'border-brand-amber text-brand-amber bg-brand-navy'
           : 'border-slate-700 text-slate-700'}
     `}>
       {completed ? <ShieldCheck size={18} /> : icon}

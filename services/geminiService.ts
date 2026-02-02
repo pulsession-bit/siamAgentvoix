@@ -39,7 +39,7 @@ const convertToGeminiHistory = (messages: ChatMessage[]): Content[] => {
 // Update to use the latest gemini-3-flash-preview model for chat
 export const startAuditSession = async (sessionId: string | null = null): Promise<string> => {
   const client = getClient();
-  
+
   // Initialize chat with system prompt
   chatSession = client.chats.create({
     model: 'gemini-3-flash-preview',
@@ -48,7 +48,7 @@ export const startAuditSession = async (sessionId: string | null = null): Promis
       temperature: 0.2, // Low temperature for consistent auditing
     },
   });
-  
+
   if (sessionId) {
     console.log(`Starting new Gemini session for Session ID: ${sessionId}`);
   }
@@ -57,7 +57,7 @@ export const startAuditSession = async (sessionId: string | null = null): Promis
   const response = await chatSession.sendMessage({
     message: "Bonjour. Je suis prêt à commencer. Présente-toi et demande-moi mon projet comme convenu."
   });
-  
+
   // Directly access .text property as per guidelines (not a method call)
   return response.text || "";
 };
@@ -76,7 +76,7 @@ export const resumeAuditSession = async (existingMessages: ChatMessage[], sessio
     },
     history: history
   });
-  
+
   if (sessionId) {
     console.log(`Resuming Gemini session for Session ID: ${sessionId}`);
   }
@@ -110,7 +110,7 @@ interface AgentResponse {
 }
 
 export const sendMessageToAgent = async (
-  text: string, 
+  text: string,
   images: FileAttachment[] = []
 ): Promise<AgentResponse> => {
   if (!chatSession) {
@@ -142,24 +142,24 @@ export const sendMessageToAgent = async (
 
     // Access .text property directly instead of calling .text()
     const fullText = result.text || "";
-    
+
     // Extract JSON block - More robust regex to handle case sensitivity and missing tags
     const jsonMatch = fullText.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
-    
+
     let auditResult: AuditResult | null = null;
     let action: AgentAction | null = null;
 
     if (jsonMatch && jsonMatch[1]) {
       try {
         const parsed = JSON.parse(jsonMatch[1]);
-        
+
         // Handle "action": "request_call" format
         if (parsed.action === 'request_call') {
           action = parsed;
         }
         // Handle Audit Result (heuristic based on fields)
         else if (parsed.audit_status || parsed.visa_type) {
-           auditResult = parsed;
+          auditResult = parsed;
         }
         // Handle legacy "type": "audit_result" format if it still occurs
         else if (parsed.type === 'audit_result' && parsed.data) {
@@ -187,5 +187,52 @@ export const sendMessageToAgent = async (
       auditResult: null,
       action: null
     };
+  }
+};
+
+// New function to generate a structured summary of the chat
+export const generateChatSummary = async (): Promise<import('../types').ChatSummary | null> => {
+  if (!chatSession) return null;
+
+  try {
+    const prompt = `
+      SYNTHÈSE DE FIN DE SESSION
+      Génère un résumé structuré de l'ensemble de notre conversation pour l'utilisateur au format JSON uniquement.
+      
+      Format attendu :
+      {
+        "visa_score": 0 à 100,
+        "visa_type": "Nom du visa identifié",
+        "executive_summary": "Synthèse narrative du profil et du projet (3-4 phrases).",
+        "strengths": ["Point fort 1", "Point fort 2"],
+        "weaknesses": ["Point faible 1", "Point faible 2"],
+        "key_points": ["Point clé 1", "Point clé 2"],
+        "action_plan": [
+           { "step": "Nom de l'étape", "description": "Quoi faire", "timing": "Quand (ex: 'Immédiat', 'Dans 1 semaine')"}
+        ],
+        "required_documents": ["Doc 1", "Doc 2"]
+      }
+      
+      Sois précis, professionnel et constructif.
+    `;
+
+    const result = await chatSession.sendMessage({ message: prompt });
+    const fullText = result.text || "";
+
+    // Extract JSON
+    const jsonMatch = fullText.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+    if (jsonMatch && jsonMatch[1]) {
+      return JSON.parse(jsonMatch[1]);
+    }
+    // Try parsing raw if no block
+    try {
+      return JSON.parse(fullText);
+    } catch {
+      return null;
+    }
+
+  } catch (error) {
+    console.error("Error generating summary:", error);
+    return null;
   }
 };
