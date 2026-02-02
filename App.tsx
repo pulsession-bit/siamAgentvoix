@@ -96,14 +96,14 @@ function App() {
 
   useEffect(() => {
     if (!isSessionLoaded || !sessionId) return;
-    const sessionData = { sessionId, messages, step, visaType, auditResult, userEmail, timestamp: Date.now() };
+    const sessionData = { sessionId, messages, step, visaType, auditResult, chatSummary, userEmail, timestamp: Date.now() };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(sessionData));
 
     // Cloud Persistence
     if (userEmail) {
       saveSessionToFirestore(userEmail, sessionData);
     }
-  }, [sessionId, messages, step, visaType, auditResult, userEmail, isSessionLoaded]);
+  }, [sessionId, messages, step, visaType, auditResult, chatSummary, userEmail, isSessionLoaded]);
 
   const clearSession = () => {
     if (confirm("Voulez-vous réinitialiser votre audit et recommencer ?")) {
@@ -144,7 +144,7 @@ function App() {
         setUserEmail(user.email);
         alert(`Connexion réussie : ${user.email}`);
         saveSessionToFirestore(user.email, {
-          sessionId, messages, step, visaType, auditResult, userEmail: user.email, timestamp: Date.now()
+          sessionId, messages, step, visaType, auditResult, chatSummary, userEmail: user.email, timestamp: Date.now()
         });
       }
     } catch (e) {
