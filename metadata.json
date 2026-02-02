@@ -1,0 +1,7 @@
+{
+  "name": "Copy of Siam Visa Pro - Audit AI",
+  "description": "An intelligent Visa Audit Agent for Thailand, using Gemini to scan documents, score compliance, and ensure 100% acceptance rates.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
