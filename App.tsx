@@ -27,7 +27,12 @@ function App() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [callPayload, setCallPayload] = useState<CallPayload | null>(null);
 
+  const initializationRef = React.useRef(false); // Ref to prevent double init
+
   useEffect(() => {
+    if (initializationRef.current) return;
+    initializationRef.current = true;
+
     let mounted = true;
     const initApp = async () => {
       try {
@@ -62,15 +67,17 @@ function App() {
 
         if (!sessionRestored || !isChatSessionActive()) {
           if (mounted) setSessionId(currentSessionId);
-          setIsTyping(true);
-          try {
-            const welcomeText = await startAuditSession(currentSessionId);
-            if (mounted) addMessage(welcomeText, 'agent');
-          } catch (error: any) {
-            if (mounted) addMessage(`Erreur d'initialisation IA: ${error.message}`, 'system');
-          } finally {
-            if (mounted) setIsTyping(false);
-          }
+
+          // Instant Welcome Mode
+          const instantWelcome = "Bonjour et bienvenue sur **Siam Visa Pro**.\n\nJe suis votre assistant expert en visas pour la Thaïlande. Mon rôle est de :\n1. Vous aider à choisir le bon visa.\n2. Vérifier votre dossier (Audit).\n3. Maximiser vos chances d'approbation.\n\nPour commencer, dites-moi :\n- Quelle est votre **nationalité** ?\n- Quel est le **but de votre séjour** (tourisme, travail, retraite...) ?\n- Combien de temps comptez-vous rester ?";
+
+          if (mounted && messages.length === 0) addMessage(instantWelcome, 'agent');
+
+          // Initialize Gemini in background without waiting for welcome generation
+          startAuditSession(currentSessionId, true).catch(err => {
+            console.error("Background session init failed", err);
+            if (mounted) addMessage(`Erreur connexion IA: ${err.message}`, 'system');
+          });
         }
         if (mounted) setIsSessionLoaded(true);
       } catch (err: any) {
@@ -281,7 +288,7 @@ function App() {
             <main className="flex-1 flex flex-col overflow-hidden relative">
               {/* Step Overlays */}
               {step === AppStep.QUALIFICATION && messages.length < 3 && (
-                <div className="absolute inset-0 z-20 bg-white/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 overflow-y-auto">
+                <div className="absolute inset-0 z-50 bg-brand-light flex flex-col items-center justify-center p-6 overflow-y-auto">
                   <div className="max-w-xl w-full text-center mb-8">
                     <h2 className="text-3xl font-bold text-brand-navy mb-2">Bienvenue sur votre Audit Visa</h2>
                     <p className="text-slate-500">Sélectionnez votre type de visa pour commencer l'analyse de conformité.</p>

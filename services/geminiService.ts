@@ -37,7 +37,7 @@ const convertToGeminiHistory = (messages: ChatMessage[]): Content[] => {
 };
 
 // Update to use the latest gemini-3-flash-preview model for chat
-export const startAuditSession = async (sessionId: string | null = null): Promise<string> => {
+export const startAuditSession = async (sessionId: string | null = null, skipWelcome: boolean = false): Promise<string> => {
   const client = getClient();
 
   // Initialize chat with system prompt
@@ -51,6 +51,10 @@ export const startAuditSession = async (sessionId: string | null = null): Promis
 
   if (sessionId) {
     console.log(`Starting new Gemini session for Session ID: ${sessionId}`);
+  }
+
+  if (skipWelcome) {
+    return "";
   }
 
   // Initial greeting trigger. This prompt instructs the model to follow step 3.1 of the System Prompt.
