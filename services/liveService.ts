@@ -84,6 +84,7 @@ export class LiveAgent {
       const fullSystemInstruction = SYSTEM_PROMPT +
         "\n\nCONTEXTE: Ceci est un APPEL VOCAL en direct. Sois concis, direct et empathique. Pas de listes à puces.\n" +
         (initialContext ? `\n[HISTORIQUE DE LA CONVERSATION PRÉCÉDENTE] :\n${initialContext}\n\n[FIN DE L'HISTORIQUE] - Reprends l'échange vocalement là où l'écrit s'est arrêté.\n\n` : "") +
+        "INSTRUCTION FINALE: Si l'utilisateur a terminé ou si l'audit est complet, conclus l'appel en disant explicitement : 'Je vais maintenant mettre fin à cet appel. Une synthèse complète de notre échange est en cours de génération pour vous.' puis arrête de parler.\n\n" +
         "Act as: Professional Sound Engineer (Expert Visa & Culture).\n" +
         "Speak primarily in: French (France).\n" +
         "Your voice tone description is: Natural and Balanced.\n" +

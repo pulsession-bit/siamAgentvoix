@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, FileText, CreditCard, Phone, Menu, X, Trash2, Loader2, AlertCircle, ChevronRight } from 'lucide-react';
+import { ShieldCheck, FileText, CreditCard, Phone, Menu, X, Trash2, Loader2, AlertCircle, ChevronRight, LogOut, Mic, Send, Paperclip, Play, Pause } from 'lucide-react';
 import Chat from './components/Chat';
 import InputArea from './components/InputArea';
 import VisaSelect from './components/VisaSelect';
@@ -9,7 +9,8 @@ import CallModal from './components/CallModal';
 import { ChatMessage, AppStep, VisaType, FileAttachment, AuditResult, CallPayload } from './types';
 import { startAuditSession, sendMessageToAgent, resumeAuditSession, isChatSessionActive, updateChatSessionHistoryWithTranscript, generateChatSummary } from './services/geminiService';
 import { saveSessionToFirestore } from './services/dbService';
-import { signInWithGoogle } from './services/firebaseConfig';
+import { auth, signInWithGoogle } from './services/firebaseConfig';
+import { signOut } from 'firebase/auth'; // Import signOut
 import SummaryView from './components/SummaryView'; // Import Summary Component
 
 const STORAGE_KEY = 'siam_visa_pro_session_v1';
@@ -153,6 +154,17 @@ function App() {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setUserEmail(null);
+      localStorage.removeItem(STORAGE_KEY);
+      window.location.reload();
+    } catch (e) {
+      console.error("Logout error", e);
+    }
+  };
+
   const handleUserMessage = async (text: string, files: FileAttachment[]) => {
     addMessage(text, 'user', files);
     setIsTyping(true);
@@ -245,7 +257,7 @@ function App() {
             {isGeneratingSummary ? 'Génération...' : "Synthèse de l'Audit"}
           </button>
 
-          {!userEmail && (
+          {!userEmail ? (
             <button
               onClick={handleGoogleLogin}
               className="w-full flex items-center justify-center gap-2 bg-white text-brand-navy py-3 rounded-xl font-bold text-xs shadow-md hover:bg-slate-100 transition-colors"
@@ -253,6 +265,19 @@ function App() {
               <img src="https://www.google.com/favicon.ico" alt="G" className="w-3 h-3" />
               Sauvegarder mon dossier
             </button>
+          ) : (
+            <div className="w-full space-y-2">
+              <div className="text-[10px] text-slate-500 text-center truncate px-2">
+                {userEmail}
+              </div>
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center justify-center gap-2 bg-slate-800 text-slate-300 py-3 rounded-xl font-bold text-xs hover:bg-red-900/20 hover:text-red-400 transition-colors"
+              >
+                <LogOut size={14} />
+                Se déconnecter
+              </button>
+            </div>
           )}
 
           <button
@@ -406,11 +431,13 @@ ${auditResult ? `[RÉSULTAT TECHNIQUE AUDIT] :
 ` : ''}
 [HISTORIQUE DES MESSAGES] :
 ${messages.map(m => `[${m.sender === 'user' ? 'CLIENT' : 'TOI (AI)'}]: ${m.text}`).join('\n')}`}
-                onClose={(transcript) => {
+                onClose={async (transcript) => {
                   setCallPayload(null);
                   if (transcript) {
                     addMessage(`📄 **RÉSUMÉ DE L'APPEL**\n\n${transcript}`, 'system');
                     updateChatSessionHistoryWithTranscript(transcript);
+                    // Generate and Save Summary immediately
+                    await handleGenerateSummary();
                   }
                 }}
               />

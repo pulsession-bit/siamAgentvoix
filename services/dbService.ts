@@ -4,19 +4,48 @@ import { doc, setDoc, getDoc } from 'firebase/firestore';
 export const saveSessionToFirestore = async (email: string, sessionData: any) => {
     if (!email) return;
     try {
-        // Sanitize email to be used as doc ID (or just use email if valid, typically we strip special chars or use a hash, but direct email is often OK for IDs if no '/' present)
-        // Firestore IDs cannot contain forward slashes. Emails don't have them usually.
-        const safeId = email.toLowerCase();
+        const safeId = email.toLowerCase(); // Common Key
+        const now = new Date().toISOString();
 
-        // We store in 'audit_sessions' collection
-        await setDoc(doc(db, "audit_sessions", safeId), {
-            ...sessionData,
-            lastUpdated: new Date().toISOString()
-        }, { merge: true });
+        // 1. LEAD (Master Entité - CRM)
+        const leadData = {
+            email: sessionData.userEmail || email,
+            source: 'AUDIT_IA_AGENT',
+            status: 'NEW_AUDIT',
+            updated_at: now
+            // We use merge: true, so we don't wipe existing lead info
+        };
 
-        console.log("Session saved to Firestore for", email);
-    } catch (e) {
-        console.error("Error saving session to Firestore:", e);
+        // 2. AUDIT (Entité Technique - Expert)
+        const auditData = {
+            lead_id: safeId, // Foreign Key -> leads/{email}
+            visa_type: sessionData.visaType,
+            audit_score: sessionData.auditResult?.confidence_score || 0,
+            audit_status: sessionData.auditResult?.audit_status || 'PENDING',
+
+            // Technical details
+            ai_data: {
+                audit_result: sessionData.auditResult || null,
+                summary: sessionData.chatSummary || null,
+            },
+
+            // History / Evidence
+            chat_history: sessionData.messages || [],
+            session_id: sessionData.sessionId,
+
+            updated_at: now
+        };
+
+        // Parallel Writes
+        await Promise.all([
+            setDoc(doc(db, "leads", safeId), leadData, { merge: true }),
+            setDoc(doc(db, "audit_sessions", safeId), auditData, { merge: true })
+        ]);
+
+        console.log("Lead & Audit synced for:", safeId);
+    } catch (e: any) {
+        console.error("Error saving to DB:", e);
+        alert("Erreur Sauvegarde Cloud: " + e.message);
     }
 };
 
