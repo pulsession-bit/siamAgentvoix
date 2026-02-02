@@ -27,12 +27,12 @@ export class LiveAgent {
   private processor: ScriptProcessorNode | null = null;
   private inputSource: MediaStreamAudioSourceNode | null = null;
   private analyser: AnalyserNode | null = null;
-  
+
   // Transcription State
   private transcriptionHistory: TranscriptItem[] = [];
   private currentInputTranscription: string = '';
   private currentOutputTranscription: string = '';
-  
+
   // Callback for realtime updates
   private onTranscriptUpdate: ((update: TranscriptUpdate) => void) | null = null;
 
@@ -51,7 +51,7 @@ export class LiveAgent {
 
     onStatusChange('connecting');
     this.onTranscriptUpdate = onTranscriptUpdate || null;
-    
+
     // Reset State
     this.transcriptionHistory = [];
     this.currentInputTranscription = '';
@@ -81,17 +81,24 @@ export class LiveAgent {
     try {
       this.sessionPromise = this.ai.live.connect({
         // Updated to the recommended gemini-2.5-flash-native-audio-preview-12-2025 model
+        // Updated to the recommended gemini-2.5-flash-native-audio-preview-12-2025 model
         model: 'gemini-2.5-flash-native-audio-preview-12-2025',
         config: {
           // Must provide an array with a single Modality.AUDIO element
-          responseModalities: [Modality.AUDIO], 
+          responseModalities: [Modality.AUDIO],
           speechConfig: {
-            voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } },
+            voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Aoede' } },
           },
           // Enable transcription
-          inputAudioTranscription: {}, 
+          inputAudioTranscription: {},
           outputAudioTranscription: {},
-          systemInstruction: SYSTEM_PROMPT + "\n\nCONTEXTE: Ceci est un APPEL VOCAL en direct. Sois concis, direct et empathique. Pas de listes à puces. Parle comme un humain au téléphone.",
+          systemInstruction: SYSTEM_PROMPT + "\n\nCONTEXTE: Ceci est un APPEL VOCAL en direct. Sois concis, direct et empathique. Pas de listes à puces.\n\n" +
+            "Act as: ElevenLabs: Rachel (Confident/Warm).\n" +
+            "Speak primarily in: French (France).\n" +
+            "Mimic the vocal characteristics and cadence associated with the Rachel (Confident/Warm) profile: high emotional intelligence, specific breathiness, and professional clarity.\n" +
+            "Your voice tone description is: Natural and Balanced.\n" +
+            "Speak at a speed factor of approximately 0.5x.\n\n" +
+            "Be concise and helpful.",
         },
         callbacks: {
           onopen: () => {
@@ -131,7 +138,7 @@ export class LiveAgent {
     this.processor.onaudioprocess = (e) => {
       const inputData = e.inputBuffer.getChannelData(0);
       const pcmBlob = this.createBlob(inputData);
-      
+
       // CRITICAL: Always use the session promise to send inputs to avoid race conditions
       this.sessionPromise?.then((session) => {
         session.sendRealtimeInput({ media: pcmBlob });
@@ -144,27 +151,27 @@ export class LiveAgent {
 
   private async handleServerMessage(message: LiveServerMessage) {
     const serverContent = message.serverContent;
-    
+
     // 1. Handle Transcription (Optimized for Low Latency)
     if (serverContent?.outputTranscription) {
       const chunk = serverContent.outputTranscription.text;
       this.currentOutputTranscription += chunk;
       // Stream update immediately
-      this.onTranscriptUpdate?.({ 
-        role: 'agent', 
-        text: this.currentOutputTranscription, 
-        isFinal: false 
+      this.onTranscriptUpdate?.({
+        role: 'agent',
+        text: this.currentOutputTranscription,
+        isFinal: false
       });
     }
-    
+
     if (serverContent?.inputTranscription) {
       const chunk = serverContent.inputTranscription.text;
       this.currentInputTranscription += chunk;
       // Stream update immediately
-      this.onTranscriptUpdate?.({ 
-        role: 'user', 
-        text: this.currentInputTranscription, 
-        isFinal: false 
+      this.onTranscriptUpdate?.({
+        role: 'user',
+        text: this.currentInputTranscription,
+        isFinal: false
       });
     }
 
@@ -189,11 +196,11 @@ export class LiveAgent {
     if (serverContent?.interrupted) {
       this.stopAllAudio();
       this.nextStartTime = this.outputAudioContext.currentTime; // Reset timing
-      
+
       // Clear current agent transcription as interrupted
       if (this.currentOutputTranscription) {
-         this.transcriptionHistory.push({ role: 'agent', text: this.currentOutputTranscription.trim() + "..." });
-         this.currentOutputTranscription = '';
+        this.transcriptionHistory.push({ role: 'agent', text: this.currentOutputTranscription.trim() + "..." });
+        this.currentOutputTranscription = '';
       }
       return;
     }
@@ -214,19 +221,19 @@ export class LiveAgent {
 
         const source = this.outputAudioContext.createBufferSource();
         source.buffer = audioBuffer;
-        
+
         // Connect to Analyzer for visual feedback
         if (this.analyser) {
           source.connect(this.analyser);
         } else {
           source.connect(this.outputAudioContext.destination);
         }
-        
+
         source.onended = () => this.sources.delete(source);
-        
+
         source.start(this.nextStartTime);
         this.nextStartTime += audioBuffer.duration;
-        
+
         this.sources.add(source);
       } catch (e) {
         console.error("Error decoding audio", e);
@@ -237,19 +244,19 @@ export class LiveAgent {
   // Method to get current output volume for visualization
   getOutputVolume(): number {
     if (!this.analyser) return 0;
-    
+
     const dataArray = new Uint8Array(this.analyser.frequencyBinCount);
     this.analyser.getByteFrequencyData(dataArray);
-    
+
     let sum = 0;
     for (let i = 0; i < dataArray.length; i++) {
-        sum += dataArray[i];
+      sum += dataArray[i];
     }
-    
+
     // Return average volume (0-255)
     return sum / dataArray.length;
   }
-  
+
   getFormattedTranscript(): string | null {
     // Flush pending transcripts
     if (this.currentInputTranscription.trim()) {
@@ -271,7 +278,7 @@ export class LiveAgent {
   disconnect() {
     this.isConnected = false;
     this.onTranscriptUpdate = null;
-    
+
     // Stop Audio Input
     if (this.mediaStream) {
       this.mediaStream.getTracks().forEach(track => track.stop());
@@ -293,8 +300,8 @@ export class LiveAgent {
     // Stop Audio Output
     this.stopAllAudio();
     if (this.analyser) {
-        this.analyser.disconnect();
-        this.analyser = null;
+      this.analyser.disconnect();
+      this.analyser = null;
     }
     if (this.outputAudioContext) {
       this.outputAudioContext.close();
@@ -306,7 +313,7 @@ export class LiveAgent {
 
   private stopAllAudio() {
     this.sources.forEach(source => {
-      try { source.stop(); } catch(e) {}
+      try { source.stop(); } catch (e) { }
     });
     this.sources.clear();
   }
