@@ -8,11 +8,14 @@ import AuditScore from './components/AuditScore';
 import CallModal from './components/CallModal';
 import { ChatMessage, AppStep, VisaType, FileAttachment, AuditResult, CallPayload } from './types';
 import { startAuditSession, sendMessageToAgent, resumeAuditSession, isChatSessionActive, updateChatSessionHistoryWithTranscript, generateChatSummary } from './services/geminiService';
+import { saveSessionToFirestore } from './services/dbService';
+import { signInWithGoogle } from './services/firebaseConfig';
 import SummaryView from './components/SummaryView'; // Import Summary Component
 
 const STORAGE_KEY = 'siam_visa_pro_session_v1';
 
 function App() {
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [step, setStep] = useState<AppStep>(AppStep.QUALIFICATION);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isTyping, setIsTyping] = useState(false);
@@ -55,6 +58,7 @@ function App() {
                 setStep(parsed.step || AppStep.QUALIFICATION);
                 setVisaType(parsed.visaType || null);
                 setAuditResult(parsed.auditResult || null);
+                setUserEmail(parsed.userEmail || null);
                 setSessionId(currentSessionId);
               }
               await resumeAuditSession(parsed.messages, currentSessionId);
@@ -92,9 +96,14 @@ function App() {
 
   useEffect(() => {
     if (!isSessionLoaded || !sessionId) return;
-    const sessionData = { sessionId, messages, step, visaType, auditResult, timestamp: Date.now() };
+    const sessionData = { sessionId, messages, step, visaType, auditResult, userEmail, timestamp: Date.now() };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(sessionData));
-  }, [sessionId, messages, step, visaType, auditResult, isSessionLoaded]);
+
+    // Cloud Persistence
+    if (userEmail) {
+      saveSessionToFirestore(userEmail, sessionData);
+    }
+  }, [sessionId, messages, step, visaType, auditResult, userEmail, isSessionLoaded]);
 
   const clearSession = () => {
     if (confirm("Voulez-vous réinitialiser votre audit et recommencer ?")) {
@@ -125,6 +134,23 @@ function App() {
     setVisaType(type);
     setStep(AppStep.AUDIT);
     handleUserMessage(`Je souhaite postuler pour un visa ${type}.`, []);
+  };
+
+  // Google Login Handler
+  const handleGoogleLogin = async () => {
+    try {
+      const user = await signInWithGoogle();
+      if (user && user.email) {
+        setUserEmail(user.email);
+        alert(`Connexion réussie : ${user.email}`);
+        saveSessionToFirestore(user.email, {
+          sessionId, messages, step, visaType, auditResult, userEmail: user.email, timestamp: Date.now()
+        });
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Erreur lors de la connexion Google.");
+    }
   };
 
   const handleUserMessage = async (text: string, files: FileAttachment[]) => {
@@ -218,6 +244,16 @@ function App() {
             {isGeneratingSummary ? <Loader2 size={14} className="animate-spin" /> : <FileText size={16} />}
             {isGeneratingSummary ? 'Génération...' : "Synthèse de l'Audit"}
           </button>
+
+          {!userEmail && (
+            <button
+              onClick={handleGoogleLogin}
+              className="w-full flex items-center justify-center gap-2 bg-white text-brand-navy py-3 rounded-xl font-bold text-xs shadow-md hover:bg-slate-100 transition-colors"
+            >
+              <img src="https://www.google.com/favicon.ico" alt="G" className="w-3 h-3" />
+              Sauvegarder mon dossier
+            </button>
+          )}
 
           <button
             onClick={handleManualCallRequest}
@@ -360,6 +396,16 @@ function App() {
             {callPayload && (
               <CallModal
                 payload={callPayload}
+                chatContext={`
+${auditResult ? `[RÉSULTAT TECHNIQUE AUDIT] :
+- Type Visa : ${auditResult.visa_type}
+- Score Confiance : ${auditResult.confidence_score}/100
+- Statut : ${auditResult.audit_status} 
+- Documents Manquants : ${auditResult.missing_docs?.join(', ') || 'Aucun'}
+- Problèmes Identifiés : ${auditResult.issues?.join(', ') || 'Aucun'}
+` : ''}
+[HISTORIQUE DES MESSAGES] :
+${messages.map(m => `[${m.sender === 'user' ? 'CLIENT' : 'TOI (AI)'}]: ${m.text}`).join('\n')}`}
                 onClose={(transcript) => {
                   setCallPayload(null);
                   if (transcript) {

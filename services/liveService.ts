@@ -45,7 +45,8 @@ export class LiveAgent {
 
   async connect(
     onStatusChange: (status: string) => void,
-    onTranscriptUpdate?: (update: TranscriptUpdate) => void
+    onTranscriptUpdate?: (update: TranscriptUpdate) => void,
+    initialContext: string = ""
   ) {
     if (this.isConnected) return;
 
@@ -79,8 +80,17 @@ export class LiveAgent {
 
     // 3. Connect to Gemini Live
     try {
+      // Build dynamic system instruction with history context
+      const fullSystemInstruction = SYSTEM_PROMPT +
+        "\n\nCONTEXTE: Ceci est un APPEL VOCAL en direct. Sois concis, direct et empathique. Pas de listes à puces.\n" +
+        (initialContext ? `\n[HISTORIQUE DE LA CONVERSATION PRÉCÉDENTE] :\n${initialContext}\n\n[FIN DE L'HISTORIQUE] - Reprends l'échange vocalement là où l'écrit s'est arrêté.\n\n` : "") +
+        "Act as: Professional Sound Engineer (Expert Visa & Culture).\n" +
+        "Speak primarily in: French (France).\n" +
+        "Your voice tone description is: Natural and Balanced.\n" +
+        "Speak at a speed factor of approximately 0.5x.\n\n" +
+        "Be concise and helpful.";
+
       this.sessionPromise = this.ai.live.connect({
-        // Updated to the recommended gemini-2.5-flash-native-audio-preview-12-2025 model
         // Updated to the recommended gemini-2.5-flash-native-audio-preview-12-2025 model
         model: 'gemini-2.5-flash-native-audio-preview-12-2025',
         config: {
@@ -92,12 +102,7 @@ export class LiveAgent {
           // Enable transcription
           inputAudioTranscription: {},
           outputAudioTranscription: {},
-          systemInstruction: SYSTEM_PROMPT + "\n\nCONTEXTE: Ceci est un APPEL VOCAL en direct. Sois concis, direct et empathique. Pas de listes à puces.\n\n" +
-            "Act as: Professional Sound Engineer (Expert Visa & Culture).\n" +
-            "Speak primarily in: French (France).\n" +
-            "Your voice tone description is: Natural and Balanced.\n" +
-            "Speak at a speed factor of approximately 0.5x.\n\n" +
-            "Be concise and helpful.",
+          systemInstruction: fullSystemInstruction,
         },
         callbacks: {
           onopen: () => {
