@@ -12,6 +12,7 @@ import { saveSessionToFirestore } from './services/dbService';
 import { auth, signInWithGoogle } from './services/firebaseConfig';
 import { signOut } from 'firebase/auth'; // Import signOut
 import SummaryView from './components/SummaryView'; // Import Summary Component
+import VoiceUpsellModal from './components/VoiceUpsellModal'; // Import Upsell Modal
 
 const STORAGE_KEY = 'siam_visa_pro_session_v1';
 
@@ -25,6 +26,7 @@ function App() {
   const [chatSummary, setChatSummary] = useState<import('./types').ChatSummary | null>(null); // State for Summary
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUpsellOpen, setIsUpsellOpen] = useState(false); // NEW: Upsell Modal State
   const [isSessionLoaded, setIsSessionLoaded] = useState(false);
   const [isLoadingApp, setIsLoadingApp] = useState(true);
   const [initializationError, setInitializationError] = useState<string | null>(null);
@@ -134,7 +136,18 @@ function App() {
   const handleVisaSelect = (type: VisaType) => {
     setVisaType(type);
     setStep(AppStep.AUDIT);
-    handleUserMessage(`Je souhaite postuler pour un visa ${type}.`, []);
+    setIsUpsellOpen(true);
+  };
+
+  const handleUpsellAccept = () => {
+    setIsUpsellOpen(false);
+    addMessage("📞 Lancement de l'audit vocal...", "system");
+    handleManualCallRequest();
+  };
+
+  const handleUpsellDecline = () => {
+    setIsUpsellOpen(false);
+    handleUserMessage(`Je souhaite postuler pour un visa ${visaType}.`, []);
   };
 
   // Google Login Handler
@@ -418,6 +431,13 @@ function App() {
             )}
 
             {/* Modal de Call */}
+            <VoiceUpsellModal
+              isOpen={isUpsellOpen}
+              onClose={handleUpsellDecline}
+              onAccept={handleUpsellAccept}
+              onDecline={handleUpsellDecline}
+            />
+
             {callPayload && (
               <CallModal
                 payload={callPayload}

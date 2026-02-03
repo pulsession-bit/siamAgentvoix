@@ -19,7 +19,7 @@ export const saveSessionToFirestore = async (email: string, sessionData: any) =>
         // 2. AUDIT (Entité Technique - Expert)
         const auditData = {
             lead_id: safeId, // Foreign Key -> leads/{email}
-            visa_type: sessionData.visaType,
+            visa_type: sessionData.visaType || null,
             audit_score: sessionData.auditResult?.confidence_score || 0,
             audit_status: sessionData.auditResult?.audit_status || 'PENDING',
 
@@ -31,7 +31,7 @@ export const saveSessionToFirestore = async (email: string, sessionData: any) =>
 
             // History / Evidence
             chat_history: sessionData.messages || [],
-            session_id: sessionData.sessionId,
+            session_id: sessionData.sessionId || null,
 
             updated_at: now
         };
