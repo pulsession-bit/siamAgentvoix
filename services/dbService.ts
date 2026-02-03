@@ -1,6 +1,8 @@
 import { db } from './firebaseConfig';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 
+const sanitize = (obj: any) => JSON.parse(JSON.stringify(obj));
+
 export const saveSessionToFirestore = async (email: string, sessionData: any) => {
     if (!email) return;
     try {
@@ -38,14 +40,16 @@ export const saveSessionToFirestore = async (email: string, sessionData: any) =>
 
         // Parallel Writes
         await Promise.all([
-            setDoc(doc(db, "leads", safeId), leadData, { merge: true }),
-            setDoc(doc(db, "audit_sessions", safeId), auditData, { merge: true })
+            setDoc(doc(db, "leads", safeId), sanitize(leadData), { merge: true }),
+            setDoc(doc(db, "audit_sessions", safeId), sanitize(auditData), { merge: true })
         ]);
 
         console.log("Lead & Audit synced for:", safeId);
     } catch (e: any) {
         console.error("Error saving to DB:", e);
-        alert("Erreur Sauvegarde Cloud: " + e.message);
+        if (e.code !== 'permission-denied') {
+            alert("Erreur Sauvegarde Cloud: " + e.message);
+        }
     }
 };
 

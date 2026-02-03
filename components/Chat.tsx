@@ -3,6 +3,8 @@
 import React, { useEffect, useRef } from 'react';
 import { ChatMessage, Sender } from '../types';
 import { Bot, User, Loader2 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface ChatProps {
   messages: ChatMessage[];
@@ -46,7 +48,30 @@ const Chat: React.FC<ChatProps> = ({ messages, isTyping }) => {
                 ? 'bg-white border border-slate-200 text-slate-800 rounded-tl-none'
                 : 'bg-brand-navy text-white rounded-tr-none'}
             `}>
-              <div className="whitespace-pre-wrap">{msg.text}</div>
+              <div className="text-sm prose prose-sm max-w-none">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    p: ({ node, ...props }) => <p className="mb-2 last:mb-0" {...props} />,
+                    strong: ({ node, ...props }) => <span className={`font-bold ${msg.sender === 'agent' ? 'text-brand-navy bg-brand-amber/10' : 'text-brand-amber bg-white/10'} px-1 rounded`} {...props} />,
+                    ul: ({ node, ...props }) => <ul className={`list-disc list-inside space-y-1 my-2 ${msg.sender === 'agent' ? 'marker:text-brand-amber' : 'marker:text-white/50'}`} {...props} />,
+                    ol: ({ node, ...props }) => <ol className="list-decimal list-inside space-y-1 my-2 pl-2" {...props} />,
+                    li: ({ node, ...props }) => <li className="ml-1" {...props} />,
+                    h1: ({ node, ...props }) => <h3 className={`text-lg font-bold ${msg.sender === 'agent' ? 'text-brand-navy' : 'text-white'} mb-2 mt-4 border-b ${msg.sender === 'agent' ? 'border-brand-amber/20' : 'border-white/20'} pb-1`} {...props} />,
+                    h2: ({ node, ...props }) => <h3 className={`text-md font-bold ${msg.sender === 'agent' ? 'text-brand-navy' : 'text-white'} mb-2 mt-3`} {...props} />,
+                    h3: ({ node, ...props }) => <h4 className={`text-sm font-bold ${msg.sender === 'agent' ? 'text-brand-blue' : 'text-brand-amber'} mb-1 mt-2 uppercase tracking-wide`} {...props} />,
+                    blockquote: ({ node, ...props }) => {
+                      const { cite, ...rest } = props as any;
+                      return (
+                        <div className={`${msg.sender === 'agent' ? 'bg-blue-50 border-brand-blue text-slate-600' : 'bg-white/10 border-brand-amber text-slate-200'} border-l-4 p-3 my-2 rounded-r-lg text-xs italic`} {...rest} />
+                      );
+                    },
+                    a: ({ node, ...props }) => <a className="underline text-brand-blue hover:text-brand-navy" target="_blank" rel="noopener noreferrer" {...props} />,
+                  }}
+                >
+                  {msg.text}
+                </ReactMarkdown>
+              </div>
 
               {/* Attachments Preview */}
               {msg.attachments && msg.attachments.length > 0 && (
