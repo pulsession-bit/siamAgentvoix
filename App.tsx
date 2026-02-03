@@ -1,151 +1,66 @@
-
-import React, { useState, useEffect } from 'react';
-import { ShieldCheck, FileText, CreditCard, Phone, Menu, X, Trash2, Loader2, AlertCircle, ChevronRight, LogOut, Mic, Send, Paperclip, Play, Pause } from 'lucide-react';
+import React, { useState } from 'react';
+import { ShieldCheck, FileText, CreditCard, Phone, Menu, X, Trash2, Loader2, AlertCircle, LogOut } from 'lucide-react';
 import Chat from './components/Chat';
 import InputArea from './components/InputArea';
 import VisaSelect from './components/VisaSelect';
 import AuditScore from './components/AuditScore';
 import CallModal from './components/CallModal';
-import { ChatMessage, AppStep, VisaType, FileAttachment, AuditResult, CallPayload } from './types';
-import { startAuditSession, sendMessageToAgent, resumeAuditSession, isChatSessionActive, updateChatSessionHistoryWithTranscript, generateChatSummary } from './services/geminiService';
-import { saveSessionToFirestore } from './services/dbService';
-import { auth, signInWithGoogle } from './services/firebaseConfig';
-import { signOut } from 'firebase/auth'; // Import signOut
-import SummaryView from './components/SummaryView'; // Import Summary Component
-import VoiceUpsellModal from './components/VoiceUpsellModal'; // Import Upsell Modal
+import SummaryView from './components/SummaryView';
+import VoiceUpsellModal from './components/VoiceUpsellModal';
+import { AppStep, FileAttachment } from './types';
 import { translations, Language } from './locales/translations';
-
-const STORAGE_KEY = 'siam_visa_pro_session_v1';
+import { useAuth, useChat, useSummary, useAudit, useSession } from './hooks';
+import { saveSessionToFirestore } from './services/dbService';
 
 function App() {
+  // Language
   const [language, setLanguage] = useState<Language>('fr');
   const t = translations[language];
-  const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [step, setStep] = useState<AppStep>(AppStep.QUALIFICATION);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isTyping, setIsTyping] = useState(false);
-  const [visaType, setVisaType] = useState<VisaType>(null);
-  const [auditResult, setAuditResult] = useState<AuditResult | null>(null);
-  const [chatSummary, setChatSummary] = useState<import('./types').ChatSummary | null>(null); // State for Summary
-  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+
+  // UI State
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isUpsellOpen, setIsUpsellOpen] = useState(false); // NEW: Upsell Modal State
-  const [isSessionLoaded, setIsSessionLoaded] = useState(false);
-  const [isLoadingApp, setIsLoadingApp] = useState(true);
-  const [initializationError, setInitializationError] = useState<string | null>(null);
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  const [callPayload, setCallPayload] = useState<CallPayload | null>(null);
+  const [isUpsellOpen, setIsUpsellOpen] = useState(false);
 
-  const initializationRef = React.useRef(false); // Ref to prevent double init
+  // Custom Hooks
+  const { userEmail, setUserEmail, login, logout } = useAuth();
+  const { messages, setMessages, isTyping, addMessage, sendMessage, appendTranscript } = useChat();
+  const { chatSummary, setChatSummary, isGeneratingSummary, generateSummary } = useSummary();
+  const {
+    step, setStep,
+    visaType, setVisaType,
+    auditResult, setAuditResult,
+    callPayload, setCallPayload,
+    handleVisaSelect: baseHandleVisaSelect,
+    requestCall,
+    updateAuditFromResponse,
+  } = useAudit();
 
-  useEffect(() => {
-    if (initializationRef.current) return;
-    initializationRef.current = true;
+  const {
+    sessionId,
+    isSessionLoaded,
+    isLoadingApp,
+    initializationError,
+    clearSession,
+  } = useSession({
+    messages, setMessages,
+    step, setStep,
+    visaType, setVisaType,
+    auditResult, setAuditResult,
+    chatSummary,
+    userEmail, setUserEmail,
+    addMessage,
+  });
 
-    let mounted = true;
-    const initApp = async () => {
-      try {
-        if (!process.env.API_KEY) {
-          if (mounted) setInitializationError("Erreur: Clé API manquante dans l'environnement.");
-          return;
-        }
-
-        let sessionRestored = false;
-        let currentSessionId = Date.now().toString();
-
-        const savedData = localStorage.getItem(STORAGE_KEY);
-        if (savedData) {
-          try {
-            const parsed = JSON.parse(savedData);
-            if (parsed.messages && parsed.messages.length > 0) {
-              currentSessionId = parsed.sessionId || currentSessionId;
-              if (mounted) {
-                setMessages(parsed.messages);
-                setStep(parsed.step || AppStep.QUALIFICATION);
-                setVisaType(parsed.visaType || null);
-                setAuditResult(parsed.auditResult || null);
-                setUserEmail(parsed.userEmail || null);
-                setSessionId(currentSessionId);
-              }
-              await resumeAuditSession(parsed.messages, currentSessionId);
-              sessionRestored = true;
-            }
-          } catch (e) {
-            localStorage.removeItem(STORAGE_KEY);
-          }
-        }
-
-        if (!sessionRestored || !isChatSessionActive()) {
-          if (mounted) setSessionId(currentSessionId);
-
-          // Instant Welcome Mode
-          const instantWelcome = "Bonjour et bienvenue sur **Siam Visa Pro**.\n\nJe suis votre assistant expert en visas pour la Thaïlande. Mon rôle est de :\n1. Vous aider à choisir le bon visa.\n2. Vérifier votre dossier (Audit).\n3. Maximiser vos chances d'approbation.\n\nPour commencer, dites-moi :\n- Quelle est votre **nationalité** ?\n- Quel est le **but de votre séjour** (tourisme, travail, retraite...) ?\n- Combien de temps comptez-vous rester ?";
-
-          if (mounted && messages.length === 0) addMessage(instantWelcome, 'agent');
-
-          // Initialize Gemini in background without waiting for welcome generation
-          startAuditSession(currentSessionId, true).catch(err => {
-            console.error("Background session init failed", err);
-            if (mounted) addMessage(`Erreur connexion IA: ${err.message}`, 'system');
-          });
-        }
-        if (mounted) setIsSessionLoaded(true);
-      } catch (err: any) {
-        if (mounted) setInitializationError(err.message);
-      } finally {
-        if (mounted) setIsLoadingApp(false);
-      }
-    };
-    initApp();
-    return () => { mounted = false; };
-  }, []);
-
-  useEffect(() => {
-    if (!isSessionLoaded || !sessionId) return;
-    const sessionData = { sessionId, messages, step, visaType, auditResult, chatSummary, userEmail, timestamp: Date.now() };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(sessionData));
-
-    // Cloud Persistence
-    if (userEmail) {
-      saveSessionToFirestore(userEmail, sessionData);
-    }
-  }, [sessionId, messages, step, visaType, auditResult, chatSummary, userEmail, isSessionLoaded]);
-
-  const clearSession = () => {
-    if (confirm("Voulez-vous réinitialiser votre audit et recommencer ?")) {
-      localStorage.removeItem(STORAGE_KEY);
-      window.location.reload();
-    }
-  };
-
-  const handleGenerateSummary = async () => {
-    setIsGeneratingSummary(true);
-    try {
-      const summary = await generateChatSummary();
-      if (summary) setChatSummary(summary);
-      setIsMobileMenuOpen(false);
-    } catch (e) {
-      console.error(e);
-      alert("Impossible de générer la synthèse pour le moment.");
-    } finally {
-      setIsGeneratingSummary(false);
-    }
-  };
-
-  const addMessage = (text: string, sender: 'user' | 'agent' | 'system', attachments?: FileAttachment[]) => {
-    setMessages(prev => [...prev, { id: Date.now().toString(), text, sender, timestamp: Date.now(), attachments }]);
-  };
-
-  const handleVisaSelect = (type: VisaType) => {
-    setVisaType(type);
-    setStep(AppStep.AUDIT);
+  // Handlers
+  const handleVisaSelect = (type: typeof visaType) => {
+    baseHandleVisaSelect(type);
     setIsUpsellOpen(true);
   };
 
   const handleUpsellAccept = () => {
     setIsUpsellOpen(false);
-    addMessage("📞 Lancement de l'audit vocal...", "system");
-    handleManualCallRequest();
+    addMessage('📞 Lancement de l\'audit vocal...', 'system');
+    requestCall();
   };
 
   const handleUpsellDecline = () => {
@@ -154,71 +69,87 @@ function App() {
     handleUserMessage(msg, []);
   };
 
-  // Google Login Handler
   const handleGoogleLogin = async () => {
     try {
-      const user = await signInWithGoogle();
-      if (user && user.email) {
-        setUserEmail(user.email);
-        alert(`Connexion réussie : ${user.email}`);
-        saveSessionToFirestore(user.email, {
-          sessionId, messages, step, visaType, auditResult, chatSummary, userEmail: user.email, timestamp: Date.now()
+      const email = await login();
+      if (email) {
+        alert(`Connexion réussie : ${email}`);
+        saveSessionToFirestore(email, {
+          sessionId, messages, step, visaType, auditResult, chatSummary, userEmail: email, timestamp: Date.now()
         });
       }
-    } catch (e) {
-      console.error(e);
-      alert("Erreur lors de la connexion Google.");
+    } catch (error: any) {
+      alert(error.message);
     }
   };
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
-      setUserEmail(null);
-      localStorage.removeItem(STORAGE_KEY);
+      await logout();
+      localStorage.removeItem('siam_visa_pro_session_v1');
       window.location.reload();
-    } catch (e) {
-      console.error("Logout error", e);
+    } catch (error) {
+      console.error('Logout error', error);
     }
   };
 
   const handleUserMessage = async (text: string, files: FileAttachment[]) => {
-    addMessage(text, 'user', files);
-    setIsTyping(true);
-    try {
-      const response = await sendMessageToAgent(text, files);
-      addMessage(response.text, 'agent');
-      if (response.auditResult) {
-        setAuditResult(response.auditResult);
-        if (response.auditResult.ready_for_payment) {
-          setStep(AppStep.PAYMENT);
-        }
-      }
-      if (response.action?.action === 'request_call') setCallPayload(response.action.payload);
-    } catch (error) {
-      addMessage("Désolé, une erreur de connexion est survenue.", 'system');
-    } finally {
-      setIsTyping(false);
+    const response = await sendMessage(text, files);
+    if (response?.auditResult) {
+      updateAuditFromResponse(response.auditResult);
+    }
+    if (response?.action?.action === 'request_call') {
+      setCallPayload(response.action.payload);
     }
   };
 
   const handleManualCallRequest = () => {
-    setCallPayload({
-      reason: 'user_request',
-      visaType: visaType || 'Non Défini',
-      userStage: step,
-      notes: 'Demande manuelle de l\'utilisateur.'
-    });
+    requestCall();
     setIsMobileMenuOpen(false);
   };
 
+  const handleGenerateSummary = async () => {
+    try {
+      await generateSummary();
+      setIsMobileMenuOpen(false);
+    } catch (error: any) {
+      alert(error.message);
+    }
+  };
+
+  const handleCallClose = async (transcript?: string) => {
+    setCallPayload(null);
+    if (transcript) {
+      appendTranscript(transcript);
+      await handleGenerateSummary();
+    }
+  };
+
+  // Build chat context for call modal
+  const buildChatContext = () => {
+    const auditContext = auditResult ? `[RÉSULTAT TECHNIQUE AUDIT] :
+- Type Visa : ${auditResult.visa_type}
+- Score Confiance : ${auditResult.confidence_score}/100
+- Statut : ${auditResult.audit_status}
+- Documents Manquants : ${auditResult.missing_docs?.join(', ') || 'Aucun'}
+- Problèmes Identifiés : ${auditResult.issues?.join(', ') || 'Aucun'}
+` : '';
+
+    const messagesContext = messages.map(m =>
+      `[${m.sender === 'user' ? 'CLIENT' : 'TOI (AI)'}]: ${m.text}`
+    ).join('\n');
+
+    return `${auditContext}[HISTORIQUE DES MESSAGES] :\n${messagesContext}`;
+  };
+
+  // Sidebar Component
   const renderSidebar = () => (
     <aside className={`
       fixed inset-0 z-50 md:static md:inset-auto w-full md:w-80 bg-brand-navy flex flex-col h-full transition-transform duration-300
       ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
     `}>
       <div className="p-6 flex flex-col h-full">
-        {/* Sidebar Header */}
+        {/* Header */}
         <div className="flex items-center justify-between mb-10">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-brand-amber rounded-lg flex items-center justify-center text-brand-navy shadow-lg shadow-brand-amber/20">
@@ -238,34 +169,15 @@ function App() {
           </button>
         </div>
 
-        {/* Navigation Steps */}
+        {/* Navigation */}
         <nav className="space-y-6 flex-1">
-          <StepItem
-            active={step === AppStep.QUALIFICATION}
-            completed={step !== AppStep.QUALIFICATION}
-            label="Qualification"
-            desc="Sélection du type de visa"
-            icon={<FileText size={18} />}
-          />
-          <StepItem
-            active={step === AppStep.AUDIT}
-            completed={step === AppStep.PAYMENT}
-            label="Audit IA"
-            desc="Vérification documentaire"
-            icon={<ShieldCheck size={18} />}
-          />
-          <StepItem
-            active={step === AppStep.PAYMENT}
-            completed={false}
-            label="Validation"
-            desc="Paiement & Dépôt"
-            icon={<CreditCard size={18} />}
-          />
+          <StepItem active={step === AppStep.QUALIFICATION} completed={step !== AppStep.QUALIFICATION} label="Qualification" desc="Sélection du type de visa" icon={<FileText size={18} />} />
+          <StepItem active={step === AppStep.AUDIT} completed={step === AppStep.PAYMENT} label="Audit IA" desc="Vérification documentaire" icon={<ShieldCheck size={18} />} />
+          <StepItem active={step === AppStep.PAYMENT} completed={false} label="Validation" desc="Paiement & Dépôt" icon={<CreditCard size={18} />} />
         </nav>
 
-        {/* Sidebar Footer Actions */}
+        {/* Footer */}
         <div className="mt-6 space-y-3 pt-6 border-t border-slate-800">
-          {/* NEW: Synthèse Button */}
           <button
             onClick={handleGenerateSummary}
             disabled={isGeneratingSummary || messages.length < 5}
@@ -288,9 +200,7 @@ function App() {
             </button>
           ) : (
             <div className="w-full space-y-2">
-              <div className="text-[10px] text-slate-500 text-center truncate px-2">
-                {userEmail}
-              </div>
+              <div className="text-[10px] text-slate-500 text-center truncate px-2">{userEmail}</div>
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center justify-center gap-2 bg-slate-800 text-slate-300 py-3 rounded-xl font-bold text-xs hover:bg-red-900/20 hover:text-red-400 transition-colors"
@@ -322,164 +232,157 @@ function App() {
     </aside>
   );
 
+  // Loading State
+  if (isLoadingApp) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[100dvh] w-full bg-brand-navy text-white">
+        {initializationError ? (
+          <div className="p-6 text-center max-w-sm">
+            <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+            <p className="text-sm font-medium">{initializationError}</p>
+            <button onClick={() => window.location.reload()} className="mt-4 text-brand-amber underline text-xs">Réessayer</button>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="w-10 h-10 animate-spin text-brand-amber" />
+            <p className="text-slate-400 text-sm animate-pulse tracking-widest uppercase">Initialisation de l'audit...</p>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col md:flex-row h-[100dvh] bg-brand-light overflow-hidden">
-      {isLoadingApp ? (
-        <div className="flex flex-col items-center justify-center h-full w-full bg-brand-navy text-white">
-          {initializationError ? (
-            <div className="p-6 text-center max-w-sm">
-              <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-              <p className="text-sm font-medium">{initializationError}</p>
-              <button onClick={() => window.location.reload()} className="mt-4 text-brand-amber underline text-xs">Réessayer</button>
+      {renderSidebar()}
+
+      <div className="flex-1 flex flex-col h-full relative min-w-0">
+        {/* Mobile Header */}
+        <header className="flex-none bg-brand-navy p-4 flex items-center justify-between md:hidden border-b border-slate-800 z-30 shadow-md">
+          <button onClick={() => setIsMobileMenuOpen(true)} className="text-white p-2 -ml-2">
+            <Menu size={24} />
+          </button>
+          <div className="flex flex-col items-center">
+            <span className="text-[9px] text-brand-amber font-black uppercase tracking-[0.2em] mb-0.5">Siam Visa Pro</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-white font-bold text-xs">
+                {step === AppStep.QUALIFICATION ? 'Qualification' : step === AppStep.AUDIT ? 'Audit IA' : 'Validation'}
+              </span>
+              <div className="flex gap-0.5">
+                <div className={`w-1 h-1 rounded-full ${step === AppStep.QUALIFICATION ? 'bg-brand-amber' : 'bg-green-500'}`} />
+                <div className={`w-1 h-1 rounded-full ${step === AppStep.AUDIT ? 'bg-brand-amber' : step === AppStep.PAYMENT ? 'bg-green-500' : 'bg-slate-700'}`} />
+                <div className={`w-1 h-1 rounded-full ${step === AppStep.PAYMENT ? 'bg-brand-amber' : 'bg-slate-700'}`} />
+              </div>
             </div>
-          ) : (
-            <div className="flex flex-col items-center gap-4">
-              <Loader2 className="w-10 h-10 animate-spin text-brand-amber" />
-              <p className="text-slate-400 text-sm animate-pulse tracking-widest uppercase">Initialisation de l'audit...</p>
+          </div>
+          <button onClick={handleManualCallRequest} className="p-2.5 bg-brand-amber text-brand-navy rounded-full shadow-lg active:scale-95 transition-transform">
+            <Phone size={18} />
+          </button>
+        </header>
+
+        <main className="flex-1 flex flex-col overflow-hidden relative">
+          {/* Qualification Overlay */}
+          {step === AppStep.QUALIFICATION && messages.length < 3 && (
+            <div className="absolute inset-0 z-50 bg-brand-light flex flex-col items-center justify-center p-6 overflow-y-auto">
+              <div className="max-w-xl w-full text-center mb-8">
+                <h2 className="text-3xl font-bold text-brand-navy mb-2">Bienvenue sur votre Audit Visa</h2>
+                <p className="text-slate-500">Sélectionnez votre type de visa pour commencer l'analyse de conformité.</p>
+              </div>
+              <VisaSelect onSelect={handleVisaSelect} selected={visaType} />
             </div>
           )}
-        </div>
-      ) : (
-        <>
-          {renderSidebar()}
 
-          <div className="flex-1 flex flex-col h-full relative min-w-0">
-            {/* Header / Nav Bar Mobile (Visible on Mobile only) */}
-            <header className="flex-none bg-brand-navy p-4 flex items-center justify-between md:hidden border-b border-slate-800 z-30 shadow-md">
-              <button onClick={() => setIsMobileMenuOpen(true)} className="text-white p-2 -ml-2">
-                <Menu size={24} />
-              </button>
-              <div className="flex flex-col items-center">
-                <span className="text-[9px] text-brand-amber font-black uppercase tracking-[0.2em] mb-0.5">Siam Visa Pro</span>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-white font-bold text-xs">
-                    {step === AppStep.QUALIFICATION ? "Qualification" : step === AppStep.AUDIT ? "Audit IA" : "Validation"}
-                  </span>
-                  <div className="flex gap-0.5">
-                    <div className={`w-1 h-1 rounded-full ${step === AppStep.QUALIFICATION ? 'bg-brand-amber' : 'bg-green-500'}`}></div>
-                    <div className={`w-1 h-1 rounded-full ${step === AppStep.AUDIT ? 'bg-brand-amber' : step === AppStep.PAYMENT ? 'bg-green-500' : 'bg-slate-700'}`}></div>
-                    <div className={`w-1 h-1 rounded-full ${step === AppStep.PAYMENT ? 'bg-brand-amber' : 'bg-slate-700'}`}></div>
-                  </div>
-                </div>
+          {/* Payment Overlay */}
+          {step === AppStep.PAYMENT && (
+            <div className="absolute inset-0 z-30 bg-white flex flex-col items-center justify-center p-8 text-center animate-in fade-in zoom-in-95 duration-500">
+              <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6 shadow-sm">
+                <ShieldCheck size={48} />
               </div>
-              <button onClick={handleManualCallRequest} className="p-2.5 bg-brand-amber text-brand-navy rounded-full shadow-lg active:scale-95 transition-transform">
-                <Phone size={18} />
-              </button>
-            </header>
-
-            <main className="flex-1 flex flex-col overflow-hidden relative">
-              {/* Step Overlays */}
-              {step === AppStep.QUALIFICATION && messages.length < 3 && (
-                <div className="absolute inset-0 z-50 bg-brand-light flex flex-col items-center justify-center p-6 overflow-y-auto">
-                  <div className="max-w-xl w-full text-center mb-8">
-                    <h2 className="text-3xl font-bold text-brand-navy mb-2">Bienvenue sur votre Audit Visa</h2>
-                    <p className="text-slate-500">Sélectionnez votre type de visa pour commencer l'analyse de conformité.</p>
-                  </div>
-                  <VisaSelect onSelect={handleVisaSelect} selected={visaType} />
-                </div>
-              )}
-
-              {step === AppStep.PAYMENT && (
-                <div className="absolute inset-0 z-30 bg-white flex flex-col items-center justify-center p-8 text-center animate-in fade-in zoom-in-95 duration-500">
-                  <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6 shadow-sm">
-                    <ShieldCheck size={48} />
-                  </div>
-                  <h2 className="text-3xl font-bold text-brand-navy mb-2">Dossier Validé !</h2>
-                  <div className="mb-8">
-                    <span className="inline-block px-4 py-1.5 bg-green-500 text-white rounded-full text-sm font-bold shadow-sm">
-                      Score de confiance : {auditResult?.confidence_score}%
-                    </span>
-                  </div>
-                  <p className="text-slate-600 mb-8 max-w-sm leading-relaxed">
-                    Félicitations ! Votre dossier est jugé conforme par notre IA. Nos experts sont prêts à procéder au dépôt officiel.
-                  </p>
-                  <div className="w-full max-w-sm bg-slate-50 p-6 rounded-2xl border border-slate-200 mb-8">
-                    <div className="flex justify-between items-center mb-4">
-                      <span className="text-slate-500 font-medium">Service de dépôt Siam Visa</span>
-                      <span className="text-brand-navy font-bold text-lg">1,000.00 €</span>
-                    </div>
-                    <button className="w-full bg-brand-navy text-white font-bold py-4 rounded-xl shadow-xl hover:bg-brand-dark transition-all flex items-center justify-center gap-2">
-                      <CreditCard size={20} />
-                      Procéder au paiement
-                    </button>
-                  </div>
-                  <button onClick={() => setStep(AppStep.AUDIT)} className="text-slate-400 hover:text-brand-navy text-sm flex items-center gap-1 transition-colors">
-                    Réviser mes documents
-                  </button>
-                </div>
-              )}
-
-              {/* Chat View */}
-              <div className="flex-1 flex flex-col overflow-hidden">
-                {auditResult && step === AppStep.AUDIT && (
-                  <div className="p-4 bg-white border-b border-slate-200 flex-none overflow-y-auto max-h-[35%] shadow-sm">
-                    <div className="max-w-3xl mx-auto">
-                      <AuditScore result={auditResult} />
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex-1 flex flex-col overflow-hidden relative">
-                  <Chat messages={messages} isTyping={isTyping} lang={language} />
-                </div>
-
-                <div className="flex-none">
-                  <InputArea onSendMessage={handleUserMessage} disabled={step === AppStep.PAYMENT} />
-                </div>
+              <h2 className="text-3xl font-bold text-brand-navy mb-2">Dossier Validé !</h2>
+              <div className="mb-8">
+                <span className="inline-block px-4 py-1.5 bg-green-500 text-white rounded-full text-sm font-bold shadow-sm">
+                  Score de confiance : {auditResult?.confidence_score}%
+                </span>
               </div>
-            </main>
+              <p className="text-slate-600 mb-8 max-w-sm leading-relaxed">
+                Félicitations ! Votre dossier est jugé conforme par notre IA. Nos experts sont prêts à procéder au dépôt officiel.
+              </p>
+              <div className="w-full max-w-sm bg-slate-50 p-6 rounded-2xl border border-slate-200 mb-8">
+                <div className="flex justify-between items-center mb-4">
+                  <span className="text-slate-500 font-medium">Service de dépôt Siam Visa</span>
+                  <span className="text-brand-navy font-bold text-lg">1,000.00 €</span>
+                </div>
+                <button className="w-full bg-brand-navy text-white font-bold py-4 rounded-xl shadow-xl hover:bg-brand-dark transition-all flex items-center justify-center gap-2">
+                  <CreditCard size={20} />
+                  Procéder au paiement
+                </button>
+              </div>
+              <button onClick={() => setStep(AppStep.AUDIT)} className="text-slate-400 hover:text-brand-navy text-sm flex items-center gap-1 transition-colors">
+                Réviser mes documents
+              </button>
+            </div>
+          )}
 
-            {/* Modal de Synthèse (Overlay) */}
-            {chatSummary && (
-              <div className="absolute inset-0 z-40 bg-brand-light/95 backdrop-blur-md p-4 overflow-y-auto animate-in fade-in duration-300">
-                <div className="max-w-5xl mx-auto">
-                  <SummaryView summary={chatSummary} onClose={() => setChatSummary(null)} />
+          {/* Chat View */}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {auditResult && step === AppStep.AUDIT && (
+              <div className="p-4 bg-white border-b border-slate-200 flex-none overflow-y-auto max-h-[35%] shadow-sm">
+                <div className="max-w-3xl mx-auto">
+                  <AuditScore result={auditResult} />
                 </div>
               </div>
             )}
 
-            {/* Modal de Call */}
-            <VoiceUpsellModal
-              isOpen={isUpsellOpen}
-              onClose={handleUpsellDecline}
-              onAccept={handleUpsellAccept}
-              onDecline={handleUpsellDecline}
-              lang={language}
-            />
+            <div className="flex-1 flex flex-col overflow-hidden relative">
+              <Chat messages={messages} isTyping={isTyping} lang={language} />
+            </div>
 
-            {callPayload && (
-              <CallModal
-                payload={callPayload}
-                lang={language}
-                chatContext={`
-${auditResult ? `[RÉSULTAT TECHNIQUE AUDIT] :
-- Type Visa : ${auditResult.visa_type}
-- Score Confiance : ${auditResult.confidence_score}/100
-- Statut : ${auditResult.audit_status} 
-- Documents Manquants : ${auditResult.missing_docs?.join(', ') || 'Aucun'}
-- Problèmes Identifiés : ${auditResult.issues?.join(', ') || 'Aucun'}
-` : ''}
-[HISTORIQUE DES MESSAGES] :
-${messages.map(m => `[${m.sender === 'user' ? 'CLIENT' : 'TOI (AI)'}]: ${m.text}`).join('\n')}`}
-                onClose={async (transcript) => {
-                  setCallPayload(null);
-                  if (transcript) {
-                    addMessage(`📄 **RÉSUMÉ DE L'APPEL**\n\n${transcript}`, 'system');
-                    updateChatSessionHistoryWithTranscript(transcript);
-                    // Generate and Save Summary immediately
-                    await handleGenerateSummary();
-                  }
-                }}
-              />
-            )}
+            <div className="flex-none">
+              <InputArea onSendMessage={handleUserMessage} disabled={step === AppStep.PAYMENT} />
+            </div>
           </div>
-        </>
-      )}
+        </main>
+
+        {/* Summary Modal */}
+        {chatSummary && (
+          <div className="absolute inset-0 z-40 bg-brand-light/95 backdrop-blur-md p-4 overflow-y-auto animate-in fade-in duration-300">
+            <div className="max-w-5xl mx-auto">
+              <SummaryView summary={chatSummary} onClose={() => setChatSummary(null)} />
+            </div>
+          </div>
+        )}
+
+        {/* Voice Upsell Modal */}
+        <VoiceUpsellModal
+          isOpen={isUpsellOpen}
+          onClose={handleUpsellDecline}
+          onAccept={handleUpsellAccept}
+          onDecline={handleUpsellDecline}
+          lang={language}
+        />
+
+        {/* Call Modal */}
+        {callPayload && (
+          <CallModal
+            payload={callPayload}
+            lang={language}
+            chatContext={buildChatContext()}
+            onClose={handleCallClose}
+          />
+        )}
+      </div>
     </div>
   );
 }
 
-const StepItem = ({ active, completed, label, desc, icon }: any) => (
+// Step Item Component
+const StepItem = ({ active, completed, label, desc, icon }: {
+  active: boolean;
+  completed: boolean;
+  label: string;
+  desc: string;
+  icon: React.ReactNode;
+}) => (
   <div className={`flex items-start gap-4 transition-all duration-300 ${active || completed ? 'opacity-100' : 'opacity-30'}`}>
     <div className={`
       w-10 h-10 rounded-full flex items-center justify-center border-2 flex-shrink-0 transition-colors
