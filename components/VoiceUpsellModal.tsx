@@ -25,8 +25,11 @@ const VoiceUpsellModal: React.FC<VoiceUpsellModalProps> = ({ isOpen, onClose, on
                 </button>
 
                 <div className="relative z-10 text-center">
-                    <div className="w-16 h-16 mx-auto bg-brand-navy rounded-full flex items-center justify-center mb-6 shadow-xl shadow-brand-navy/20">
-                        <Phone className="text-brand-amber animate-pulse" size={32} />
+                    <div className="relative w-24 h-24 mx-auto mb-6">
+                        <div className="absolute inset-0 bg-brand-amber/30 rounded-full animate-ping opacity-75"></div>
+                        <div className="relative w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-xl overflow-hidden border-4 border-white">
+                            <img src="https://img.antiquiscore.com/global/Natt.webp" alt="Natt Agent" className="w-full h-full object-cover" />
+                        </div>
                     </div>
 
                     <h3 className="text-2xl font-bold text-brand-navy mb-2">Passez à la vitesse supérieure</h3>

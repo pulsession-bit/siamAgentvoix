@@ -32,12 +32,16 @@ const Chat: React.FC<ChatProps> = ({ messages, isTyping }) => {
         >
           {/* Avatar */}
           <div className={`
-            w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm
+            w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm overflow-hidden
             ${msg.sender === 'agent'
-              ? 'bg-brand-amber text-brand-navy' // Agent: Amber bg, Navy icon
-              : 'bg-brand-navy text-white'}      // User: Navy bg, White icon
+              ? 'bg-white border-2 border-brand-amber' // White bg with amber border for image
+              : 'bg-brand-navy text-white'}
           `}>
-            {msg.sender === 'agent' ? <Bot size={18} /> : <User size={18} />}
+            {msg.sender === 'agent' ? (
+              <img src="https://img.antiquiscore.com/global/Natt.webp" alt="Natt Agent" className="w-full h-full object-cover" />
+            ) : (
+              <User size={18} />
+            )}
           </div>
 
           {/* Bubble Container */}
@@ -104,8 +108,8 @@ const Chat: React.FC<ChatProps> = ({ messages, isTyping }) => {
 
       {isTyping && (
         <div className="flex gap-3">
-          <div className="w-8 h-8 rounded-full bg-brand-amber text-brand-navy flex items-center justify-center shadow-sm">
-            <Bot size={18} />
+          <div className="w-8 h-8 rounded-full bg-white border-2 border-brand-amber flex items-center justify-center shadow-sm overflow-hidden">
+            <img src="https://img.antiquiscore.com/global/Natt.webp" alt="Natt Agent" className="w-full h-full object-cover" />
           </div>
           <div className="bg-white border border-slate-200 rounded-2xl rounded-tl-none px-4 py-3 flex items-center gap-2 shadow-sm">
             <span className="text-xs text-slate-500 font-medium">L'auditeur analyse...</span>
