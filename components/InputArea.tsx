@@ -48,8 +48,8 @@ const InputArea: React.FC<InputAreaProps> = ({ onSendMessage, disabled }) => {
         } else if (event.error === 'no-speech') {
           // No speech detected, just stop silently
         } else {
-           // Other errors
-           console.warn("Speech Error:", event.error);
+          // Other errors
+          console.warn("Speech Error:", event.error);
         }
       };
 
@@ -87,25 +87,25 @@ const InputArea: React.FC<InputAreaProps> = ({ onSendMessage, disabled }) => {
   };
 
   return (
-    <div className="bg-brand-navy border-t border-brand-dark p-4">
+    <div className="bg-brand-navy border-t border-brand-dark p-4 pb-8 md:pb-4 sticky bottom-0 z-20">
       <form onSubmit={handleSubmit} className="flex gap-2 items-center">
-        
+
         {/* Microphone Button */}
         {isSpeechSupported && (
-           <button
-             type="button"
-             onClick={toggleListening}
-             disabled={disabled}
-             className={`
+          <button
+            type="button"
+            onClick={toggleListening}
+            disabled={disabled}
+            className={`
                p-3 rounded-xl transition-all duration-300
-               ${isListening 
-                 ? 'bg-red-500 text-white ring-2 ring-red-400 ring-offset-2 ring-offset-brand-navy animate-pulse' 
-                 : 'text-brand-light hover:text-white hover:bg-brand-dark'}
+               ${isListening
+                ? 'bg-red-500 text-white ring-2 ring-red-400 ring-offset-2 ring-offset-brand-navy animate-pulse'
+                : 'text-brand-light hover:text-white hover:bg-brand-dark'}
              `}
-             title={isListening ? "Arrêter d'écouter" : "Dicter un message"}
-           >
-             {isListening ? <MicOff size={20} /> : <Mic size={20} />}
-           </button>
+            title={isListening ? "Arrêter d'écouter" : "Dicter un message"}
+          >
+            {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+          </button>
         )}
 
         <input
@@ -116,7 +116,7 @@ const InputArea: React.FC<InputAreaProps> = ({ onSendMessage, disabled }) => {
           className={`
             flex-1 
             bg-white 
-            text-brand-navy placeholder-slate-500 font-medium
+            text-base text-brand-navy placeholder-slate-500 font-medium
             border-0 rounded-xl px-4 py-3 
             focus:ring-2 focus:ring-brand-amber focus:outline-none 
             transition-all 
@@ -124,7 +124,7 @@ const InputArea: React.FC<InputAreaProps> = ({ onSendMessage, disabled }) => {
           `}
           disabled={disabled}
         />
-        
+
         <button
           type="submit"
           disabled={disabled || !text.trim()}

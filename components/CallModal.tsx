@@ -4,14 +4,17 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Phone, X, Mic, MicOff, Signal } from 'lucide-react';
 import { CallPayload } from '../types';
 import { LiveAgent, TranscriptUpdate } from '../services/liveService';
+import { translations, Language } from '../locales/translations';
 
 interface CallModalProps {
   payload: CallPayload;
   onClose: (transcript?: string | null) => void;
   chatContext?: string;
+  lang: Language;
 }
 
-const CallModal: React.FC<CallModalProps> = ({ payload, onClose, chatContext = "" }) => {
+const CallModal: React.FC<CallModalProps> = ({ payload, onClose, chatContext = "", lang }) => {
+  const t = translations[lang];
   const [status, setStatus] = useState<'idle' | 'connecting' | 'connected' | 'error'>('idle');
   const [isMuted, setIsMuted] = useState(false);
   const [visualizerWidth, setVisualizerWidth] = useState(5); // Start small
@@ -92,9 +95,9 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose, chatContext = "
         {/* GLOBAL BACKGROUND: Secretary Image + Overlay covering the whole modal */}
         <div className="absolute inset-0 z-0">
           <img
-            src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=600&auto=format&fit=crop"
-            alt="Secrétaire Siam Visa"
-            className="w-full h-full object-cover grayscale-[20%]"
+            src="https://img.antiquiscore.com/global/Natt.webp"
+            alt="Agent IA Siam Visa"
+            className="w-full h-full object-cover grayscale-[10%]"
           />
           {/* Gradient overlay for readability across the whole card */}
           <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-white/80 to-white"></div>

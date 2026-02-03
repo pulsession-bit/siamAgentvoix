@@ -5,13 +5,16 @@ import { ChatMessage, Sender } from '../types';
 import { Bot, User, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { translations, Language } from '../locales/translations';
 
 interface ChatProps {
   messages: ChatMessage[];
   isTyping: boolean;
+  lang: Language;
 }
 
-const Chat: React.FC<ChatProps> = ({ messages, isTyping }) => {
+const Chat: React.FC<ChatProps> = ({ messages, isTyping, lang }) => {
+  const t = translations[lang];
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -112,7 +115,7 @@ const Chat: React.FC<ChatProps> = ({ messages, isTyping }) => {
             <img src="https://img.antiquiscore.com/global/Natt.webp" alt="Natt Agent" className="w-full h-full object-cover" />
           </div>
           <div className="bg-white border border-slate-200 rounded-2xl rounded-tl-none px-4 py-3 flex items-center gap-2 shadow-sm">
-            <span className="text-xs text-slate-500 font-medium">L'auditeur analyse...</span>
+            <span className="text-xs text-slate-500 font-medium">{t.auditor_analyzing}</span>
             <Loader2 className="w-3 h-3 animate-spin text-brand-blue" />
           </div>
         </div>

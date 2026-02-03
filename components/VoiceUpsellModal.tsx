@@ -1,15 +1,18 @@
 import React from 'react';
 import { Phone, MessageSquare, X } from 'lucide-react';
+import { translations, Language } from '../locales/translations';
 
 interface VoiceUpsellModalProps {
     isOpen: boolean;
     onClose: () => void;
     onAccept: () => void;
     onDecline: () => void;
+    lang: Language;
 }
 
-const VoiceUpsellModal: React.FC<VoiceUpsellModalProps> = ({ isOpen, onClose, onAccept, onDecline }) => {
+const VoiceUpsellModal: React.FC<VoiceUpsellModalProps> = ({ isOpen, onClose, onAccept, onDecline, lang }) => {
     if (!isOpen) return null;
+    const t = translations[lang];
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
@@ -32,10 +35,11 @@ const VoiceUpsellModal: React.FC<VoiceUpsellModalProps> = ({ isOpen, onClose, on
                         </div>
                     </div>
 
-                    <h3 className="text-2xl font-bold text-brand-navy mb-2">Passez à la vitesse supérieure</h3>
-                    <p className="text-slate-600 mb-8 text-sm leading-relaxed">
-                        Notre expert IA vocal peut qualifier votre dossier <strong>3x plus vite</strong> qu'à l'écrit. Voulez-vous essayer l'expérience vocale ?
-                    </p>
+                    <h3 className="text-2xl font-bold text-brand-navy mb-2">{t.upsell_title}</h3>
+                    <p
+                        className="text-slate-600 mb-8 text-sm leading-relaxed"
+                        dangerouslySetInnerHTML={{ __html: t.upsell_desc }}
+                    />
 
                     <div className="space-y-3">
                         <button
@@ -43,7 +47,7 @@ const VoiceUpsellModal: React.FC<VoiceUpsellModalProps> = ({ isOpen, onClose, on
                             className="w-full py-4 bg-brand-amber text-brand-navy font-bold rounded-xl shadow-lg hover:bg-brand-yellow transition-all flex items-center justify-center gap-3 transform active:scale-95"
                         >
                             <Phone size={20} />
-                            Oui, démarrer l'appel (Recommandé)
+                            {t.upsell_accept}
                         </button>
 
                         <button
@@ -51,7 +55,7 @@ const VoiceUpsellModal: React.FC<VoiceUpsellModalProps> = ({ isOpen, onClose, on
                             className="w-full py-3 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-colors flex items-center justify-center gap-3"
                         >
                             <MessageSquare size={18} />
-                            Non, je préfère écrire
+                            {t.upsell_decline}
                         </button>
                     </div>
                 </div>

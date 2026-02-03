@@ -13,10 +13,13 @@ import { auth, signInWithGoogle } from './services/firebaseConfig';
 import { signOut } from 'firebase/auth'; // Import signOut
 import SummaryView from './components/SummaryView'; // Import Summary Component
 import VoiceUpsellModal from './components/VoiceUpsellModal'; // Import Upsell Modal
+import { translations, Language } from './locales/translations';
 
 const STORAGE_KEY = 'siam_visa_pro_session_v1';
 
 function App() {
+  const [language, setLanguage] = useState<Language>('fr');
+  const t = translations[language];
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [step, setStep] = useState<AppStep>(AppStep.QUALIFICATION);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -147,7 +150,8 @@ function App() {
 
   const handleUpsellDecline = () => {
     setIsUpsellOpen(false);
-    handleUserMessage(`Je souhaite postuler pour un visa ${visaType}.`, []);
+    const msg = t.upsell_decline_msg.replace('{visaType}', visaType || 'Tourist');
+    handleUserMessage(msg, []);
   };
 
   // Google Login Handler
@@ -223,6 +227,10 @@ function App() {
             <div>
               <span className="font-bold text-white text-lg block leading-none">Siam Visa Pro</span>
               <span className="text-[10px] text-brand-amber font-bold uppercase tracking-widest mt-1 block">Audit AI Agent</span>
+              <div className="flex gap-2 mt-2">
+                <button onClick={() => setLanguage('fr')} className={`text-[10px] px-2 py-0.5 rounded border transition-colors ${language === 'fr' ? 'bg-brand-amber text-brand-navy border-brand-amber' : 'text-slate-500 border-slate-700 hover:border-slate-500'}`}>FR</button>
+                <button onClick={() => setLanguage('en')} className={`text-[10px] px-2 py-0.5 rounded border transition-colors ${language === 'en' ? 'bg-brand-amber text-brand-navy border-brand-amber' : 'text-slate-500 border-slate-700 hover:border-slate-500'}`}>EN</button>
+              </div>
             </div>
           </div>
           <button onClick={() => setIsMobileMenuOpen(false)} className="md:hidden text-slate-400 hover:text-white p-2">
@@ -412,7 +420,7 @@ function App() {
                 )}
 
                 <div className="flex-1 flex flex-col overflow-hidden relative">
-                  <Chat messages={messages} isTyping={isTyping} />
+                  <Chat messages={messages} isTyping={isTyping} lang={language} />
                 </div>
 
                 <div className="flex-none">
@@ -436,11 +444,13 @@ function App() {
               onClose={handleUpsellDecline}
               onAccept={handleUpsellAccept}
               onDecline={handleUpsellDecline}
+              lang={language}
             />
 
             {callPayload && (
               <CallModal
                 payload={callPayload}
+                lang={language}
                 chatContext={`
 ${auditResult ? `[RÉSULTAT TECHNIQUE AUDIT] :
 - Type Visa : ${auditResult.visa_type}
