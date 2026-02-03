@@ -2,8 +2,10 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { ChatMessage, AppStep, VisaType, AuditResult, ChatSummary } from '../types';
 import { startAuditSession, resumeAuditSession, isChatSessionActive } from '../services/geminiService';
 import { saveSessionToFirestore } from '../services/dbService';
+import { AUDIT_SESSION_KEY } from '../contexts/AuthContext';
 
-const STORAGE_KEY = 'siam_visa_pro_session_v1';
+// Use v2 key to align with AuthContext
+const STORAGE_KEY = AUDIT_SESSION_KEY;
 
 interface SessionData {
   sessionId: string;
@@ -26,8 +28,7 @@ interface UseSessionProps {
   auditResult: AuditResult | null;
   setAuditResult: React.Dispatch<React.SetStateAction<AuditResult | null>>;
   chatSummary: ChatSummary | null;
-  userEmail: string | null;
-  setUserEmail: React.Dispatch<React.SetStateAction<string | null>>;
+  userEmail: string | null; // Read-only, managed by AuthContext
   addMessage: (text: string, sender: 'user' | 'agent' | 'system') => void;
 }
 
@@ -61,8 +62,7 @@ export function useSession({
   auditResult,
   setAuditResult,
   chatSummary,
-  userEmail,
-  setUserEmail,
+  userEmail, // Now read-only from AuthContext
   addMessage,
 }: UseSessionProps): UseSessionReturn {
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -89,7 +89,7 @@ export function useSession({
         let sessionRestored = false;
         let currentSessionId = Date.now().toString();
 
-        // Try to restore from localStorage
+        // Try to restore audit session from localStorage
         const savedData = localStorage.getItem(STORAGE_KEY);
         if (savedData) {
           try {
@@ -101,7 +101,7 @@ export function useSession({
                 setStep(parsed.step || AppStep.QUALIFICATION);
                 setVisaType(parsed.visaType || null);
                 setAuditResult(parsed.auditResult || null);
-                setUserEmail(parsed.userEmail || null);
+                // Note: userEmail is now managed by AuthContext, not restored here
                 setSessionId(currentSessionId);
               }
               await resumeAuditSession(parsed.messages, currentSessionId);
@@ -157,7 +157,7 @@ export function useSession({
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(sessionData));
 
-    // Cloud persistence
+    // Cloud persistence (only if user is authenticated)
     if (userEmail) {
       saveSessionToFirestore(userEmail, sessionData);
     }

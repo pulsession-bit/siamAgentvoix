@@ -22,7 +22,7 @@ function App() {
   const [isUpsellOpen, setIsUpsellOpen] = useState(false);
 
   // Custom Hooks
-  const { userEmail, setUserEmail, login, logout } = useAuth();
+  const { userEmail, login, logout } = useAuth();
   const { messages, setMessages, isTyping, addMessage, sendMessage, appendTranscript } = useChat();
   const { chatSummary, setChatSummary, isGeneratingSummary, generateSummary } = useSummary();
   const {
@@ -47,7 +47,7 @@ function App() {
     visaType, setVisaType,
     auditResult, setAuditResult,
     chatSummary,
-    userEmail, setUserEmail,
+    userEmail,
     addMessage,
   });
 
@@ -85,8 +85,7 @@ function App() {
 
   const handleLogout = async () => {
     try {
-      await logout();
-      localStorage.removeItem('siam_visa_pro_session_v1');
+      await logout(); // Clears Firebase + localStorage automatically
       window.location.reload();
     } catch (error) {
       console.error('Logout error', error);
