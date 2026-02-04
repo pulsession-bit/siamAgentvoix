@@ -1,6 +1,6 @@
 
 
-export type VisaType = 'DTV' | 'Retirement' | 'Tourism' | 'Business' | null;
+export type VisaType = 'DTV' | 'Retirement' | 'Tourism' | 'Business' | 'Expatriation' | null;
 
 export type Sender = 'user' | 'agent' | 'system';
 

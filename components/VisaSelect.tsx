@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { VisaType } from '../types';
-import { Briefcase, Plane, Sun, Users } from 'lucide-react';
+import { Briefcase, Plane, Sun, Users, Home } from 'lucide-react';
 
 interface VisaSelectProps {
   onSelect: (type: VisaType) => void;
@@ -9,58 +8,83 @@ interface VisaSelectProps {
 }
 
 const VisaSelect: React.FC<VisaSelectProps> = ({ onSelect, selected }) => {
-  const options: { type: VisaType; label: string; icon: React.ReactNode; desc: string }[] = [
-    { 
-      type: 'DTV', 
-      label: 'DTV Visa', 
-      icon: <Briefcase className="w-6 h-6" />, 
-      desc: 'Nomades digitaux, Muay Thai, Cuisine' 
+  const options: { type: VisaType; label: string; icon: React.ReactNode; desc: string; color: string }[] = [
+    {
+      type: 'DTV',
+      label: 'DTV Visa',
+      icon: <Briefcase className="w-6 h-6" />,
+      desc: 'Nomades digitaux, Muay Thai, Cuisine',
+      color: 'bg-blue-50 text-blue-600'
     },
-    { 
-      type: 'Retirement', 
-      label: 'Retraite (O-A/O-X)', 
-      icon: <Users className="w-6 h-6" />, 
-      desc: '+50 ans, Longue durée' 
+    {
+      type: 'Retirement',
+      label: 'Retraite (O-A/O-X)',
+      icon: <Users className="w-6 h-6" />,
+      desc: '+50 ans, Longue durée',
+      color: 'bg-green-50 text-green-600'
     },
-    { 
-      type: 'Tourism', 
-      label: 'Tourisme (TR)', 
-      icon: <Plane className="w-6 h-6" />, 
-      desc: 'Séjour < 60 jours' 
+    {
+      type: 'Tourism',
+      label: 'Tourisme (TR)',
+      icon: <Plane className="w-6 h-6" />,
+      desc: 'Séjour < 60 jours',
+      color: 'bg-sky-50 text-sky-600'
     },
-    { 
-      type: 'Business', 
-      label: 'Business (Non-B)', 
-      icon: <Sun className="w-6 h-6" />, 
-      desc: 'Travail et Affaires' 
+    {
+      type: 'Business',
+      label: 'Business (Non-B)',
+      icon: <Sun className="w-6 h-6" />,
+      desc: 'Travail et Création Entreprise',
+      color: 'bg-amber-50 text-amber-600'
+    },
+    {
+      type: 'Expatriation',
+      label: 'Relocation & Expatriation',
+      icon: <Home className="w-6 h-6" />,
+      desc: 'Visa, Logement, École, Banque & Installation',
+      color: 'bg-indigo-50 text-indigo-600'
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl mx-auto p-4">
-      {options.map((opt) => (
-        <button
-          key={opt.type}
-          onClick={() => onSelect(opt.type)}
-          className={`
-            relative p-6 rounded-xl border-2 transition-all duration-200 flex flex-col items-start text-left gap-3
-            ${selected === opt.type 
-              ? 'border-brand-amber bg-yellow-50 text-brand-navy shadow-md transform scale-[1.02]' 
-              : 'border-slate-200 bg-white text-slate-600 hover:border-brand-amber/50 hover:shadow-sm'}
-          `}
-        >
-          <div className={`p-3 rounded-lg ${selected === opt.type ? 'bg-brand-amber text-brand-navy' : 'bg-slate-100 text-slate-500'}`}>
-            {opt.icon}
-          </div>
-          <div>
-            <h3 className="font-bold text-lg">{opt.label}</h3>
-            <p className="text-sm opacity-80">{opt.desc}</p>
-          </div>
-          {selected === opt.type && (
-            <div className="absolute top-4 right-4 w-3 h-3 bg-brand-amber rounded-full animate-pulse" />
-          )}
-        </button>
-      ))}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl mx-auto p-4 pb-24 md:pb-4">
+      {options.map((opt) => {
+        const isSelected = selected === opt.type;
+        return (
+          <button
+            key={opt.type}
+            onClick={() => onSelect(opt.type)}
+            className={`
+                group relative p-5 rounded-2xl border-2 transition-all duration-300 flex items-start text-left gap-4 overflow-hidden
+                ${isSelected
+                ? 'border-brand-amber bg-white shadow-xl ring-1 ring-brand-amber translate-y-[-2px]'
+                : 'border-slate-100 bg-white text-slate-600 hover:border-brand-amber/30 hover:shadow-lg hover:translate-y-[-2px]'}
+              `}
+          >
+            {/* Icon Box */}
+            <div className={`
+                p-3 rounded-xl transition-colors duration-300 flex-shrink-0
+                ${isSelected ? 'bg-brand-amber text-brand-navy' : opt.color}
+              `}>
+              {opt.icon}
+            </div>
+
+            {/* Text */}
+            <div className="flex-1 min-w-0">
+              <h3 className={`font-bold text-lg mb-1 ${isSelected ? 'text-brand-navy' : 'text-slate-800'}`}>{opt.label}</h3>
+              <p className={`text-xs leading-relaxed ${isSelected ? 'text-slate-600' : 'text-slate-500'}`}>{opt.desc}</p>
+            </div>
+
+            {/* Selection Indicator */}
+            {isSelected && (
+              <div className="absolute top-3 right-3 w-2 h-2 bg-brand-amber rounded-full shadow-sm animate-pulse" />
+            )}
+
+            {/* Premium Glow Effect on Hover */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none opacity-50" />
+          </button>
+        );
+      })}
     </div>
   );
 };
