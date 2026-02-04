@@ -87,7 +87,7 @@ const InputArea: React.FC<InputAreaProps> = ({ onSendMessage, disabled }) => {
   };
 
   return (
-    <div className="bg-brand-navy border-t border-brand-dark p-4 pb-8 md:pb-4 sticky bottom-0 z-20">
+    <div className="bg-brand-navy border-t border-brand-dark p-3 pb-5 md:p-4 md:pb-4 sticky bottom-0 z-20 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
       <form onSubmit={handleSubmit} className="flex gap-2 items-center">
 
         {/* Microphone Button */}

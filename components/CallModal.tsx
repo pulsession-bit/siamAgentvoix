@@ -90,7 +90,7 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose, chatContext = "
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-navy/80 backdrop-blur-sm transition-opacity">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100 opacity-100 flex flex-col h-[500px] relative">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100 opacity-100 flex flex-col h-[90svh] md:h-[600px] relative">
 
         {/* GLOBAL BACKGROUND: Secretary Image + Overlay covering the whole modal */}
         <div className="absolute inset-0 z-0">
@@ -156,9 +156,9 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose, chatContext = "
 
               <button
                 onClick={startCall}
-                className="w-full bg-brand-amber hover:bg-brand-yellow text-brand-navy font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3"
+                className="w-full bg-brand-amber hover:bg-brand-yellow text-brand-navy font-bold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 text-sm"
               >
-                <Phone size={24} />
+                <Phone size={20} />
                 <span>Lancer l'appel</span>
               </button>
             </div>
@@ -221,19 +221,19 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose, chatContext = "
               </div>
 
               {/* Controls */}
-              <div className="flex items-center justify-center gap-6 mt-auto">
+              <div className="flex items-center justify-center gap-4 mt-auto">
                 <button
                   onClick={() => setIsMuted(!isMuted)}
-                  className={`p-4 rounded-full transition-all shadow-md ${isMuted ? 'bg-slate-200 text-slate-600' : 'bg-white text-brand-navy hover:bg-slate-50 border border-slate-200'}`}
+                  className={`p-3 rounded-full transition-all shadow-md ${isMuted ? 'bg-slate-200 text-slate-600' : 'bg-white text-brand-navy hover:bg-slate-50 border border-slate-200'}`}
                 >
-                  {isMuted ? <MicOff size={24} /> : <Mic size={24} />}
+                  {isMuted ? <MicOff size={20} /> : <Mic size={20} />}
                 </button>
 
                 <button
                   onClick={endCall}
-                  className="p-5 bg-slate-700 hover:bg-slate-800 text-white rounded-full shadow-lg hover:shadow-slate-700/30 transition-all transform hover:scale-105 border-4 border-white"
+                  className="p-4 bg-slate-700 hover:bg-slate-800 text-white rounded-full shadow-lg hover:shadow-slate-700/30 transition-all transform hover:scale-105 border-4 border-white"
                 >
-                  <Phone size={28} className="rotate-[135deg]" />
+                  <Phone size={24} className="rotate-[135deg]" />
                 </button>
               </div>
             </div>

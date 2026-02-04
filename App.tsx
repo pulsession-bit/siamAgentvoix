@@ -172,6 +172,29 @@ function App() {
           </button>
         </div>
 
+        {/* Expert CTA */}
+        <div className="mb-6">
+          <button
+            onClick={handleManualCallRequest}
+            className="w-full relative group overflow-hidden bg-gradient-to-r from-brand-amber to-brand-yellow rounded-xl p-[2px] shadow-lg hover:shadow-brand-amber/20 transition-all duration-300 transform hover:scale-[1.02]"
+          >
+            <div className="bg-brand-navy rounded-[10px] p-3 flex items-center gap-3 h-full">
+              <div className="w-10 h-10 rounded-full border border-brand-amber/50 overflow-hidden bg-white flex-shrink-0">
+                <img src="https://img.antiquiscore.com/global/Natt.webp" alt="Expert" className="w-full h-full object-cover" />
+              </div>
+
+              <div className="flex-1 text-left min-w-0">
+                <div className="text-[9px] text-brand-amber font-bold uppercase tracking-wider mb-0.5">Assistance Live</div>
+                <div className="text-white font-bold text-sm truncate">Parler à un expert</div>
+              </div>
+
+              <div className="bg-brand-amber text-brand-navy p-2 rounded-full animate-pulse shadow-sm">
+                <Phone size={16} />
+              </div>
+            </div>
+          </button>
+        </div>
+
         {/* Navigation */}
         <nav className="space-y-6 flex-1">
           <StepItem active={step === AppStep.QUALIFICATION} completed={step !== AppStep.QUALIFICATION} label="Qualification" desc="Sélection du type de visa" icon={<FileText size={18} />} />
@@ -214,12 +237,7 @@ function App() {
             </div>
           )}
 
-          <button
-            onClick={handleManualCallRequest}
-            className="w-full flex items-center justify-center gap-2 bg-brand-amber text-brand-navy py-4 rounded-xl font-bold text-sm shadow-lg hover:bg-brand-yellow transition-colors"
-          >
-            <Phone size={18} /> Parler à un expert
-          </button>
+
           <button
             onClick={clearSession}
             className="w-full py-3 text-slate-500 text-xs flex items-center justify-center gap-2 hover:text-red-400 transition-colors"
@@ -279,20 +297,32 @@ function App() {
               </div>
             </div>
           </div>
-          <button onClick={handleManualCallRequest} className="p-2.5 bg-brand-amber text-brand-navy rounded-full shadow-lg active:scale-95 transition-transform">
-            <Phone size={18} />
+          <button
+            onClick={handleManualCallRequest}
+            className="w-10 h-10 rounded-full border-2 border-brand-amber overflow-hidden bg-white shadow-lg relative group"
+          >
+            <img src="https://img.antiquiscore.com/global/Natt.webp" alt="Expert" className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-black/10 group-active:bg-brand-amber/30 transition-colors" />
+            <div className="absolute bottom-0 right-0 bg-brand-amber text-brand-navy p-0.5 rounded-full border border-white">
+              <Phone size={10} />
+            </div>
           </button>
         </header>
 
         <main className="flex-1 flex flex-col overflow-hidden relative">
           {/* Qualification Overlay */}
           {step === AppStep.QUALIFICATION && messages.length < 3 && (
-            <div className="absolute inset-0 z-50 bg-brand-light flex flex-col items-center justify-center p-6 overflow-y-auto">
-              <div className="max-w-xl w-full text-center mb-8">
-                <h2 className="text-3xl font-bold text-brand-navy mb-2">Bienvenue sur votre Audit Visa</h2>
-                <p className="text-slate-500">Sélectionnez votre type de visa pour commencer l'analyse de conformité.</p>
+            <div className="absolute inset-0 z-50 bg-brand-navy flex flex-col items-center justify-start md:justify-center p-6 pt-32 md:pt-6 overflow-y-auto">
+              <div className="text-center mb-8 max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-5 duration-700">
+                <h1 className="text-3xl md:text-5xl font-black text-white mb-4 drop-shadow-sm tracking-tight leading-tight">
+                  Audit Visa
+                </h1>
+                <p className="text-lg text-white/80 font-medium">
+                  Sélectionnez votre type de visa pour commencer l'analyse de conformité.
+                </p>
               </div>
-              <VisaSelect onSelect={handleVisaSelect} selected={visaType} />
+
+              <VisaSelect selected={visaType} onSelect={handleVisaSelect} />
             </div>
           )}
 
