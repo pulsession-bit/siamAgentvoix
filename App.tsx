@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import { ShieldCheck, FileText, CreditCard, Phone, Menu, X, Trash2, Loader2, AlertCircle, LogOut } from 'lucide-react';
 import Chat from './components/Chat';
 import InputArea from './components/InputArea';
 import VisaSelect from './components/VisaSelect';
 import AuditScore from './components/AuditScore';
-import CallModal from './components/CallModal';
-import SummaryView from './components/SummaryView';
-import VoiceUpsellModal from './components/VoiceUpsellModal';
+
+// Lazy Load Heavy Modals
+const CallModal = lazy(() => import('./components/CallModal'));
+const SummaryView = lazy(() => import('./components/SummaryView'));
+const VoiceUpsellModal = lazy(() => import('./components/VoiceUpsellModal'));
 import { AppStep, FileAttachment } from './types';
 import { translations, Language } from './locales/translations';
 import { useAuth, useChat, useSummary, useAudit, useSession } from './hooks';
@@ -342,33 +344,35 @@ function App() {
           </div>
         </main>
 
-        {/* Summary Modal */}
-        {chatSummary && (
-          <div className="absolute inset-0 z-40 bg-brand-light/95 backdrop-blur-md p-4 overflow-y-auto animate-in fade-in duration-300">
-            <div className="max-w-5xl mx-auto">
-              <SummaryView summary={chatSummary} onClose={() => setChatSummary(null)} />
+        <Suspense fallback={null}>
+          {/* Summary Modal */}
+          {chatSummary && (
+            <div className="absolute inset-0 z-40 bg-brand-light/95 backdrop-blur-md p-4 overflow-y-auto animate-in fade-in duration-300">
+              <div className="max-w-5xl mx-auto">
+                <SummaryView summary={chatSummary} onClose={() => setChatSummary(null)} />
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Voice Upsell Modal */}
-        <VoiceUpsellModal
-          isOpen={isUpsellOpen}
-          onClose={handleUpsellDecline}
-          onAccept={handleUpsellAccept}
-          onDecline={handleUpsellDecline}
-          lang={language}
-        />
-
-        {/* Call Modal */}
-        {callPayload && (
-          <CallModal
-            payload={callPayload}
+          {/* Voice Upsell Modal */}
+          <VoiceUpsellModal
+            isOpen={isUpsellOpen}
+            onClose={handleUpsellDecline}
+            onAccept={handleUpsellAccept}
+            onDecline={handleUpsellDecline}
             lang={language}
-            chatContext={buildChatContext()}
-            onClose={handleCallClose}
           />
-        )}
+
+          {/* Call Modal */}
+          {callPayload && (
+            <CallModal
+              payload={callPayload}
+              lang={language}
+              chatContext={buildChatContext()}
+              onClose={handleCallClose}
+            />
+          )}
+        </Suspense>
       </div>
     </div>
   );
