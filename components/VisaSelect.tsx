@@ -10,6 +10,13 @@ interface VisaSelectProps {
 const VisaSelect: React.FC<VisaSelectProps> = ({ onSelect, selected }) => {
   const options: { type: VisaType; label: string; icon: React.ReactNode; desc: string; color: string }[] = [
     {
+      type: 'Expatriation',
+      label: 'Relocation & Expatriation',
+      icon: <Home className="w-6 h-6" />,
+      desc: 'Accompagnement VIP : Visa, Logement, École, Banque & Installation',
+      color: 'bg-indigo-50 text-indigo-600'
+    },
+    {
       type: 'DTV',
       label: 'DTV Visa',
       icon: <Briefcase className="w-6 h-6" />,
@@ -37,25 +44,21 @@ const VisaSelect: React.FC<VisaSelectProps> = ({ onSelect, selected }) => {
       desc: 'Travail et Création Entreprise',
       color: 'bg-amber-50 text-amber-600'
     },
-    {
-      type: 'Expatriation',
-      label: 'Relocation & Expatriation',
-      icon: <Home className="w-6 h-6" />,
-      desc: 'Visa, Logement, École, Banque & Installation',
-      color: 'bg-indigo-50 text-indigo-600'
-    },
   ];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl mx-auto p-4 pb-24 md:pb-4">
       {options.map((opt) => {
         const isSelected = selected === opt.type;
+        const isFeatured = opt.type === 'Expatriation';
+
         return (
           <button
             key={opt.type}
             onClick={() => onSelect(opt.type)}
             className={`
                 group relative p-5 rounded-2xl border-2 transition-all duration-300 flex items-start text-left gap-4 overflow-hidden
+                ${isFeatured ? 'md:col-span-2' : ''}
                 ${isSelected
                 ? 'border-brand-amber bg-white shadow-xl ring-1 ring-brand-amber translate-y-[-2px]'
                 : 'border-slate-100 bg-white text-slate-600 hover:border-brand-amber/30 hover:shadow-lg hover:translate-y-[-2px]'}
