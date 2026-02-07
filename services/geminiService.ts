@@ -122,31 +122,39 @@ interface AgentResponse {
 
 export const sendMessageToAgent = async (
   text: string,
-  images: FileAttachment[] = []
+  images: FileAttachment[] = [],
+  previousHistory: ChatMessage[] = []
 ): Promise<AgentResponse> => {
-  if (!chatSession) {
-    // Fallback should not happen if App handles init correctly, but here for robustness.
-    console.warn("Chat session not initialized, attempting to start a new one.");
-    await startAuditSession();
-  }
+  const client = getClient();
 
-  if (!chatSession) throw new Error("Session failed to initialize after fallback");
-
-  const parts: any[] = [{ text }];
-
-  // Add images if present
-  images.forEach((img) => {
-    // Remove data:image/png;base64, prefix if present for the API call
-    const cleanData = img.data.split(',')[1] || img.data;
-    parts.push({
-      inlineData: {
-        mimeType: img.type,
-        data: cleanData
-      }
-    });
-  });
+  // Re-initialize chat session with full history for every request
+  // This prevents internal SDK state corruption which causes browser freezes/loops on subsequent requests
+  const history = convertToGeminiHistory(previousHistory);
 
   try {
+    chatSession = client.chats.create({
+      model: 'gemini-3-flash-preview',
+      config: {
+        systemInstruction: SYSTEM_PROMPT,
+        temperature: 0.2, // Low temperature for consistent auditing
+      },
+      history: history
+    });
+
+    const parts: any[] = [{ text }];
+
+    // Add images if present
+    images.forEach((img) => {
+      // Remove data:image/png;base64, prefix if present for the API call
+      const cleanData = img.data.split(',')[1] || img.data;
+      parts.push({
+        inlineData: {
+          mimeType: img.type,
+          data: cleanData
+        }
+      });
+    });
+
     let messageContent: string | any[] = text;
 
     if (images.length > 0) {
@@ -200,7 +208,7 @@ export const sendMessageToAgent = async (
   } catch (error) {
     console.error("Gemini Error:", error);
     return {
-      text: "Une erreur technique est survenue lors de l'analyse. Veuillez réessayer.",
+      text: "Une erreur technique est survenue lors de l'analyse. Veuillez réessayer. (Réinitialisation session)",
       auditResult: null,
       action: null
     };

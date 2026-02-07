@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { ChatMessage, FileAttachment, AuditResult, ActionResponse } from '../types';
+import { ChatMessage, FileAttachment, AuditResult, AgentAction } from '../types';
 import { sendMessageToAgent, generateChatSummary, updateChatSessionHistoryWithTranscript } from '../services/geminiService';
 import type { ChatSummary } from '../types';
 
@@ -10,7 +10,7 @@ interface UseChatReturn {
   addMessage: (text: string, sender: 'user' | 'agent' | 'system', attachments?: FileAttachment[]) => void;
   sendMessage: (text: string, files: FileAttachment[]) => Promise<{
     auditResult?: AuditResult;
-    action?: ActionResponse;
+    action?: AgentAction;
   } | null>;
   appendTranscript: (transcript: string) => void;
 }
@@ -41,7 +41,8 @@ export function useChat(): UseChatReturn {
     setIsTyping(true);
 
     try {
-      const response = await sendMessageToAgent(text, files);
+      // Pass current history to rebuild session context
+      const response = await sendMessageToAgent(text, files, messages);
       addMessage(response.text, 'agent');
 
       return {
@@ -54,7 +55,7 @@ export function useChat(): UseChatReturn {
     } finally {
       setIsTyping(false);
     }
-  }, [addMessage]);
+  }, [addMessage, messages]);
 
   const appendTranscript = useCallback((transcript: string) => {
     addMessage(`📄 **RÉSUMÉ DE L'APPEL**\n\n${transcript}`, 'system');
