@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { ChatMessage, AppStep, VisaType, AuditResult, ChatSummary } from '../types';
-import { startAuditSession, resumeAuditSession, isChatSessionActive } from '../services/geminiService';
+import { startAuditSession, resumeAuditSession, isChatSessionActive, setCurrentUserEmail } from '../services/geminiService';
 import { saveSessionToFirestore } from '../services/dbService';
 import { AUDIT_SESSION_KEY } from '../contexts/AuthContext';
 
@@ -40,17 +40,32 @@ interface UseSessionReturn {
   clearSession: () => void;
 }
 
-const INSTANT_WELCOME = `Bonjour et bienvenue sur **Siam Visa Pro**.
+function getWelcomeMessage(email: string | null): string {
+  const base = `Bonjour et bienvenue sur **Siam Visa Pro**.
 
 Je suis votre assistant expert en visas pour la Thaïlande. Mon rôle est de :
 1. Vous aider à choisir le bon visa.
 2. Vérifier votre dossier (Audit).
-3. Maximiser vos chances d'approbation.
+3. Maximiser vos chances d'approbation.`;
+
+  if (email) {
+    return `${base}
+
+J'ai bien votre email : **${email}**.
+
+Pour commencer, merci de m'indiquer :
+- Vos **Prénom et Nom**.
+- Votre **nationalité**.
+- Le **but de votre séjour** (tourisme, travail, retraite...) et la durée prévue.`;
+  }
+
+  return `${base}
 
 Pour commencer et créer votre dossier, merci de m'indiquer :
 - Vos **Prénom, Nom et Email** (pour vous recontacter en cas de besoin).
 - Votre **nationalité**.
 - Le **but de votre séjour** (tourisme, travail, retraite...) et la durée prévue.`;
+}
 
 export function useSession({
   messages,
@@ -86,6 +101,9 @@ export function useSession({
           return;
         }
 
+        // Sync email to geminiService early for session restore
+        setCurrentUserEmail(userEmail);
+
         let sessionRestored = false;
         let currentSessionId = Date.now().toString();
 
@@ -118,7 +136,7 @@ export function useSession({
 
           // Show instant welcome message
           if (mounted && messages.length === 0) {
-            addMessage(INSTANT_WELCOME, 'agent');
+            addMessage(getWelcomeMessage(userEmail), 'agent');
           }
 
           // Initialize Gemini in background

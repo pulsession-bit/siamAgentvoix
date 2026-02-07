@@ -5,9 +5,10 @@ import { Briefcase, Plane, Sun, Users, Home } from 'lucide-react';
 interface VisaSelectProps {
   onSelect: (type: VisaType) => void;
   selected: VisaType;
+  disabled?: boolean;
 }
 
-const VisaSelect: React.FC<VisaSelectProps> = ({ onSelect, selected }) => {
+const VisaSelect: React.FC<VisaSelectProps> = ({ onSelect, selected, disabled = false }) => {
   const options: { type: VisaType; label: string; icon: React.ReactNode; desc: string; color: string }[] = [
     {
       type: 'Expatriation',
@@ -55,10 +56,12 @@ const VisaSelect: React.FC<VisaSelectProps> = ({ onSelect, selected }) => {
         return (
           <button
             key={opt.type}
-            onClick={() => onSelect(opt.type)}
+            onClick={() => !disabled && onSelect(opt.type)}
+            disabled={disabled}
             className={`
                 group relative p-5 rounded-2xl border-2 transition-all duration-300 flex items-start text-left gap-4 overflow-hidden
                 ${isFeatured ? 'md:col-span-2' : ''}
+                ${disabled ? 'opacity-40 cursor-not-allowed' : ''}
                 ${isSelected
                 ? 'border-brand-amber bg-white shadow-xl ring-1 ring-brand-amber translate-y-[-2px]'
                 : 'border-slate-100 bg-white text-slate-600 hover:border-brand-amber/30 hover:shadow-lg hover:translate-y-[-2px]'}

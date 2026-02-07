@@ -1,5 +1,5 @@
-import React, { useState, Suspense, lazy } from 'react';
-import { ShieldCheck, FileText, CreditCard, Phone, Menu, X, Trash2, Loader2, AlertCircle, LogOut } from 'lucide-react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
+import { ShieldCheck, FileText, CreditCard, Phone, Menu, X, Trash2, Loader2, AlertCircle, LogOut, Mail } from 'lucide-react';
 import { Analytics } from "@vercel/analytics/react"
 import Chat from './components/Chat';
 import InputArea from './components/InputArea';
@@ -15,6 +15,8 @@ import { AppStep, FileAttachment } from './types';
 import { translations, Language } from './locales/translations';
 import { useAuth, useChat, useSummary, useAudit, useSession } from './hooks';
 import { saveSessionToFirestore } from './services/dbService';
+import { setCurrentUserEmail } from './services/geminiService';
+import { AUDIT_SESSION_KEY } from './contexts/AuthContext';
 
 function App() {
   // Language
@@ -24,6 +26,19 @@ function App() {
   // UI State
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUpsellOpen, setIsUpsellOpen] = useState(false);
+
+  // Email capture state (restored from localStorage for persistence)
+  const [capturedEmail, setCapturedEmail] = useState<string>(() => {
+    try {
+      const saved = localStorage.getItem(AUDIT_SESSION_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return parsed.userEmail || '';
+      }
+    } catch {}
+    return '';
+  });
+  const [emailError, setEmailError] = useState('');
 
   // Custom Hooks
   const { userEmail, login, logout } = useAuth();
@@ -39,6 +54,14 @@ function App() {
     updateAuditFromResponse,
   } = useAudit();
 
+  // Google OAuth email takes priority over manually captured email
+  const effectiveEmail = userEmail || (capturedEmail.trim() || null);
+
+  // Keep geminiService in sync with current email
+  useEffect(() => {
+    setCurrentUserEmail(effectiveEmail);
+  }, [effectiveEmail]);
+
   const {
     sessionId,
     isSessionLoaded,
@@ -51,9 +74,21 @@ function App() {
     visaType, setVisaType,
     auditResult, setAuditResult,
     chatSummary,
-    userEmail,
+    userEmail: effectiveEmail,
     addMessage,
   });
+
+  // Email helpers
+  const isValidEmail = (email: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  const handleEmailSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isValidEmail(capturedEmail)) {
+      setEmailError('Veuillez entrer un email valide.');
+      return;
+    }
+    setEmailError('');
+  };
 
   // Handlers
   const handleVisaSelect = (type: typeof visaType) => {
@@ -321,7 +356,47 @@ function App() {
                 </p>
               </div>
 
-              <VisaSelect selected={visaType} onSelect={handleVisaSelect} />
+              {/* Email capture - only shown if not logged in via Google */}
+              {!userEmail && (
+                <div className="w-full max-w-md mx-auto mb-8 animate-in fade-in slide-in-from-bottom-3 duration-500">
+                  <form onSubmit={handleEmailSubmit} className="flex flex-col gap-2">
+                    <label className="text-sm text-white/70 font-medium text-center">
+                      Votre email pour recevoir les résultats de l'audit
+                    </label>
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                          type="email"
+                          value={capturedEmail}
+                          onChange={(e) => {
+                            setCapturedEmail(e.target.value);
+                            if (emailError) setEmailError('');
+                          }}
+                          placeholder="votre@email.com"
+                          className="w-full bg-white text-brand-navy placeholder-slate-400 font-medium border-0 rounded-xl pl-10 pr-4 py-3 focus:ring-2 focus:ring-brand-amber focus:outline-none transition-all text-base"
+                          autoComplete="email"
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        disabled={!capturedEmail.trim()}
+                        className="bg-brand-amber text-brand-navy px-5 py-3 rounded-xl font-bold text-sm hover:bg-brand-yellow disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md"
+                      >
+                        OK
+                      </button>
+                    </div>
+                    {emailError && (
+                      <p className="text-red-400 text-xs text-center mt-1">{emailError}</p>
+                    )}
+                    {isValidEmail(capturedEmail) && !emailError && (
+                      <p className="text-green-400 text-xs text-center mt-1">Email confirm&eacute;</p>
+                    )}
+                  </form>
+                </div>
+              )}
+
+              <VisaSelect selected={visaType} onSelect={handleVisaSelect} disabled={!effectiveEmail} />
             </div>
           )}
 

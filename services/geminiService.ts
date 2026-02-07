@@ -2,12 +2,18 @@
 
 
 import { GoogleGenAI, GenerateContentResponse, Chat, Content } from "@google/genai";
-import { SYSTEM_PROMPT } from '../constants';
+import { getSystemPrompt } from '../constants';
 import { AuditResult, FileAttachment, AgentAction, ChatMessage } from '../types';
 
 let aiClient: GoogleGenAI | null = null;
 // Use Chat type instead of ChatSession as per @google/genai guidelines
 export let chatSession: Chat | null = null;
+
+// Module-level email state for dynamic system prompt
+let currentUserEmail: string | null = null;
+export const setCurrentUserEmail = (email: string | null) => {
+  currentUserEmail = email;
+};
 
 const getClient = () => {
   if (!aiClient) {
@@ -63,7 +69,7 @@ export const startAuditSession = async (sessionId: string | null = null, skipWel
   chatSession = client.chats.create({
     model: 'gemini-3-flash-preview',
     config: {
-      systemInstruction: SYSTEM_PROMPT,
+      systemInstruction: getSystemPrompt(currentUserEmail),
       temperature: 0.2, // Low temperature for consistent auditing
     },
   });
@@ -94,7 +100,7 @@ export const resumeAuditSession = async (existingMessages: ChatMessage[], sessio
   chatSession = client.chats.create({
     model: 'gemini-3-flash-preview',
     config: {
-      systemInstruction: SYSTEM_PROMPT,
+      systemInstruction: getSystemPrompt(currentUserEmail),
       temperature: 0.2,
     },
     history: history
@@ -154,7 +160,7 @@ export const sendMessageToAgent = async (
     chatSession = client.chats.create({
       model: 'gemini-3-flash-preview',
       config: {
-        systemInstruction: SYSTEM_PROMPT,
+        systemInstruction: getSystemPrompt(currentUserEmail),
         temperature: 0.2, // Low temperature for consistent auditing
       },
       history: history
