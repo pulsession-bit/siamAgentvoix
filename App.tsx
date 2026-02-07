@@ -15,7 +15,7 @@ import { AppStep, FileAttachment } from './types';
 import { translations, Language } from './locales/translations';
 import { useAuth, useChat, useSummary, useAudit, useSession } from './hooks';
 import { saveSessionToFirestore } from './services/dbService';
-import { setCurrentUserEmail } from './services/geminiService';
+import { setCurrentUserEmail, setCurrentLanguage } from './services/geminiService';
 import { AUDIT_SESSION_KEY } from './contexts/AuthContext';
 
 function App() {
@@ -35,7 +35,7 @@ function App() {
         const parsed = JSON.parse(saved);
         return parsed.userEmail || '';
       }
-    } catch {}
+    } catch { }
     return '';
   });
   const [emailError, setEmailError] = useState('');
@@ -61,6 +61,11 @@ function App() {
   useEffect(() => {
     setCurrentUserEmail(effectiveEmail);
   }, [effectiveEmail]);
+
+  // Keep geminiService in sync with current language
+  useEffect(() => {
+    setCurrentLanguage(language);
+  }, [language]);
 
   const {
     sessionId,
@@ -446,7 +451,7 @@ function App() {
             </div>
 
             <div className="flex-none">
-              <InputArea onSendMessage={handleUserMessage} disabled={step === AppStep.PAYMENT} />
+              <InputArea onSendMessage={handleUserMessage} disabled={step === AppStep.PAYMENT} lang={language} />
             </div>
           </div>
         </main>

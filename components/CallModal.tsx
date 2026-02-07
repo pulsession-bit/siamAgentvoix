@@ -74,7 +74,8 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose, chatContext = "
       (update) => {
         setLiveTranscript(update);
       },
-      chatContext // Pass the chat context here
+      chatContext, // Pass the chat context here
+      lang
     );
   };
 
@@ -109,7 +110,7 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose, chatContext = "
             <h2 className="text-xl font-bold text-brand-navy flex items-center gap-2">
               Siam Visa
               <span className="text-brand-navy/40 font-light mx-1">|</span>
-              <span className="font-medium text-lg">Canal Sécurisé</span>
+              <span className="font-medium text-lg">{t.call_secure_channel}</span>
               {status === 'connected' && (
                 <span className="flex items-center gap-1 ml-2 text-green-600">
                   <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
@@ -140,14 +141,14 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose, chatContext = "
                 <Phone size={40} />
               </div>
               <div className="bg-white/40 backdrop-blur-sm p-4 rounded-xl">
-                <h3 className="text-lg font-bold text-brand-navy">Prêt à discuter ?</h3>
+                <h3 className="text-lg font-bold text-brand-navy">{t.call_ready}</h3>
                 <p className="text-slate-800 text-sm mt-2 font-medium">
-                  {payload.notes || "Nous allons clarifier votre dossier ensemble."}
+                  {payload.notes || t.call_default_topic}
                 </p>
               </div>
 
               <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 text-left border border-slate-200 shadow-sm">
-                <p className="text-xs text-slate-500 uppercase font-bold mb-1">Sujet de l'appel</p>
+                <p className="text-xs text-slate-500 uppercase font-bold mb-1">{t.call_subject}</p>
                 <div className="flex gap-2 flex-wrap">
                   <span className="px-2 py-1 bg-white border rounded text-xs text-slate-700 font-medium shadow-sm">{payload.visaType}</span>
                   <span className="px-2 py-1 bg-white border rounded text-xs text-slate-700 font-medium shadow-sm">{payload.reason}</span>
@@ -159,7 +160,7 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose, chatContext = "
                 className="w-full bg-brand-amber hover:bg-brand-yellow text-brand-navy font-bold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 text-sm"
               >
                 <Phone size={20} />
-                <span>Lancer l'appel</span>
+                <span>{t.call_start_btn}</span>
               </button>
             </div>
           )}
@@ -174,7 +175,7 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose, chatContext = "
                 </div>
               </div>
               <div className="bg-white/80 backdrop-blur px-4 py-2 rounded-lg shadow-sm border border-white/50">
-                <p className="text-slate-800 font-bold">Établissement de la connexion...</p>
+                <p className="text-slate-800 font-bold">{t.call_connecting}</p>
                 <p className="text-xs text-slate-500 mt-1">Gemini Live API Initializing</p>
               </div>
             </div>
@@ -215,7 +216,7 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose, chatContext = "
                   </div>
                 ) : (
                   <div className="text-slate-500 text-sm italic opacity-70 bg-white/50 px-4 py-2 rounded-full backdrop-blur-sm">
-                    En attente de parole...
+                    {t.call_waiting_speech}
                   </div>
                 )}
               </div>
@@ -245,16 +246,16 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose, chatContext = "
                 <X size={40} />
               </div>
               <div className="bg-white/90 p-4 rounded-xl shadow-sm border border-red-100">
-                <h3 className="text-lg font-bold text-slate-800">Échec de la connexion</h3>
+                <h3 className="text-lg font-bold text-slate-800">{t.call_error_title}</h3>
                 <p className="text-slate-500 text-sm mt-1">
-                  Impossible d'établir la liaison avec l'agent vocal. Vérifiez votre micro ou réessayez plus tard.
+                  {t.call_error_desc}
                 </p>
               </div>
               <button
                 onClick={() => onClose(null)}
                 className="mt-4 px-6 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg font-medium transition-colors shadow-sm"
               >
-                Fermer
+                {t.call_close_btn}
               </button>
             </div>
           )}

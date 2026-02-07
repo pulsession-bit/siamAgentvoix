@@ -33,6 +33,16 @@ export const translations = {
         call_ended: "Appel terminé",
         mic_error: "Microphone inaccessible",
         end_call_btn: "Raccrocher",
+        call_secure_channel: "Canal Sécurisé",
+        call_ready: "Prêt à discuter ?",
+        call_default_topic: "Nous allons clarifier votre dossier ensemble.",
+        call_subject: "Sujet de l'appel",
+        call_start_btn: "Lancer l'appel",
+        call_connecting: "Établissement de la connexion...",
+        call_waiting_speech: "En attente de parole...",
+        call_error_title: "Échec de la connexion",
+        call_error_desc: "Impossible d'établir la liaison avec l'agent vocal. Vérifiez votre micro ou réessayez plus tard.",
+        call_close_btn: "Fermer",
 
         // Summary
         summary_title: "Synthèse de l'Audit",
@@ -70,6 +80,16 @@ export const translations = {
         call_ended: "Call ended",
         mic_error: "Microphone inaccessible",
         end_call_btn: "Hang up",
+        call_secure_channel: "Secure Channel",
+        call_ready: "Ready to talk?",
+        call_default_topic: "We will clarify your file together.",
+        call_subject: "Call Subject",
+        call_start_btn: "Start Call",
+        call_connecting: "Connecting...",
+        call_waiting_speech: "Waiting for speech...",
+        call_error_title: "Connection Failed",
+        call_error_desc: "Unable to connect to the voice agent. Check your microphone or try again later.",
+        call_close_btn: "Close",
 
         // Summary
         summary_title: "Audit Summary",

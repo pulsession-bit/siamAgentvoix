@@ -7,12 +7,21 @@ interface TTSConfig {
   pitch: number;
 }
 
-const DEFAULT_CONFIG: TTSConfig = {
-  languageCode: 'fr-FR',
-  name: 'fr-FR-Wavenet-D', // Voix masculine naturelle
-  ssmlGender: 'MALE',
-  speakingRate: 0.95, // Légèrement plus lent pour le naturel
-  pitch: -1.0,        // Légèrement plus grave
+const VOICE_CONFIGS: Record<string, TTSConfig> = {
+  fr: {
+    languageCode: 'fr-FR',
+    name: 'fr-FR-Wavenet-D', // Voix masculine naturelle
+    ssmlGender: 'MALE',
+    speakingRate: 0.95,
+    pitch: -1.0,
+  },
+  en: {
+    languageCode: 'en-US',
+    name: 'en-US-Journey-D', // Natural male voice for consistency
+    ssmlGender: 'MALE',
+    speakingRate: 1.0,
+    pitch: 0.0,
+  }
 };
 
 // Helper to construct SSML with pauses for better prosody
@@ -37,28 +46,30 @@ const buildSsml = (text: string): string => {
 };
 
 export const playTextToSpeech = async (
-  text: string, 
-  apiKey: string | undefined
+  text: string,
+  apiKey: string | undefined,
+  language: 'fr' | 'en' = 'fr'
 ): Promise<HTMLAudioElement> => {
   if (!apiKey) {
     throw new Error("API Key missing for TTS");
   }
 
   const ssml = buildSsml(text);
+  const config = VOICE_CONFIGS[language] || VOICE_CONFIGS.fr;
 
   const url = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`;
 
   const payload = {
     input: { ssml },
     voice: {
-      languageCode: DEFAULT_CONFIG.languageCode,
-      name: DEFAULT_CONFIG.name,
-      ssmlGender: DEFAULT_CONFIG.ssmlGender,
+      languageCode: config.languageCode,
+      name: config.name,
+      ssmlGender: config.ssmlGender,
     },
     audioConfig: {
       audioEncoding: 'MP3', // MP3 is safer for universal HTML5 Audio support than OGG_OPUS in some containers
-      speakingRate: DEFAULT_CONFIG.speakingRate,
-      pitch: DEFAULT_CONFIG.pitch,
+      speakingRate: config.speakingRate,
+      pitch: config.pitch,
       volumeGainDb: 0.0,
     },
   };
@@ -91,7 +102,7 @@ export const playTextToSpeech = async (
   // Convert base64 to audio blob
   const audioBlob = await fetch(`data:audio/mp3;base64,${data.audioContent}`).then(r => r.blob());
   const audioUrl = URL.createObjectURL(audioBlob);
-  
+
   const audio = new Audio(audioUrl);
   return audio;
 };

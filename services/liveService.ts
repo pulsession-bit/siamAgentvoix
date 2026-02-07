@@ -46,7 +46,8 @@ export class LiveAgent {
   async connect(
     onStatusChange: (status: string) => void,
     onTranscriptUpdate?: (update: TranscriptUpdate) => void,
-    initialContext: string = ""
+    initialContext: string = "",
+    language: 'fr' | 'en' = 'fr'
   ) {
     if (this.isConnected) return;
 
@@ -81,15 +82,30 @@ export class LiveAgent {
     // 3. Connect to Gemini Live
     try {
       // Build dynamic system instruction with history context
-      const fullSystemInstruction = SYSTEM_PROMPT +
-        "\n\nCONTEXTE: Ceci est un APPEL VOCAL en direct. Sois concis, direct et empathique. Pas de listes à puces.\n" +
-        (initialContext ? `\n[HISTORIQUE DE LA CONVERSATION PRÉCÉDENTE] :\n${initialContext}\n\n[FIN DE L'HISTORIQUE] - Reprends l'échange vocalement là où l'écrit s'est arrêté.\n\n` : "") +
-        "INSTRUCTION FINALE: Si l'utilisateur a terminé ou si l'audit est complet, conclus l'appel en disant explicitement : 'Je vais maintenant mettre fin à cet appel. Une synthèse complète de notre échange est en cours de génération pour vous.' puis arrête de parler.\n\n" +
-        "Act as: Professional Sound Engineer (Expert Visa & Culture).\n" +
-        "Speak primarily in: French (France).\n" +
-        "Your voice tone description is: Natural and Balanced.\n" +
-        "Speak at a speed factor of approximately 0.5x.\n\n" +
-        "Be concise and helpful.";
+      let instructions = "";
+
+      if (language === 'en') {
+        instructions = SYSTEM_PROMPT + // Ideally SYSTEM_PROMPT should also be localized, but assuming it's the base knowledge
+          "\n\nCONTEXT: This is a LIVE VOICE CALL. Be concise, direct, and empathetic. No bullet points.\n" +
+          (initialContext ? `\n[PREVIOUS CONVERSATION HISTORY] :\n${initialContext}\n\n[END OF HISTORY] - Resume the exchange vocally where the text left off.\n\n` : "") +
+          "FINAL INSTRUCTION: If the user has finished or the audit is complete, conclude the call by explicitly saying: 'I will now end this call. A complete summary of our exchange is being generated for you.' then stop speaking.\n\n" +
+          "Act as: Professional Sound Engineer (Expert Visa & Culture).\n" +
+          "Speak primarily in: English (US).\n" +
+          "Your voice tone description is: Natural and Balanced.\n" +
+          "Speak at a speed factor of approximately 1.0x.\n\n" + // Nominal speed for English
+          "Be concise and helpful.";
+      } else {
+        // French (Default)
+        instructions = SYSTEM_PROMPT +
+          "\n\nCONTEXTE: Ceci est un APPEL VOCAL en direct. Sois concis, direct et empathique. Pas de listes à puces.\n" +
+          (initialContext ? `\n[HISTORIQUE DE LA CONVERSATION PRÉCÉDENTE] :\n${initialContext}\n\n[FIN DE L'HISTORIQUE] - Reprends l'échange vocalement là où l'écrit s'est arrêté.\n\n` : "") +
+          "INSTRUCTION FINALE: Si l'utilisateur a terminé ou si l'audit est complet, conclus l'appel en disant explicitement : 'Je vais maintenant mettre fin à cet appel. Une synthèse complète de notre échange est en cours de génération pour vous.' puis arrête de parler.\n\n" +
+          "Act as: Professional Sound Engineer (Expert Visa & Culture).\n" +
+          "Speak primarily in: French (France).\n" +
+          "Your voice tone description is: Natural and Balanced.\n" +
+          "Speak at a speed factor of approximately 0.95x.\n\n" +
+          "Be concise and helpful.";
+      }
 
       this.sessionPromise = this.ai.live.connect({
         // Updated to the recommended gemini-2.5-flash-native-audio-preview-12-2025 model
@@ -103,7 +119,7 @@ export class LiveAgent {
           // Enable transcription
           inputAudioTranscription: {},
           outputAudioTranscription: {},
-          systemInstruction: fullSystemInstruction,
+          systemInstruction: instructions,
         },
         callbacks: {
           onopen: () => {

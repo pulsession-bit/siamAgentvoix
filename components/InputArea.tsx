@@ -1,14 +1,15 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { Send, Mic, MicOff } from 'lucide-react';
 import { FileAttachment } from '../types';
+import { Language } from '../locales/translations';
 
 interface InputAreaProps {
   onSendMessage: (text: string, files: FileAttachment[]) => void;
   disabled: boolean;
+  lang: Language;
 }
 
-const InputArea: React.FC<InputAreaProps> = ({ onSendMessage, disabled }) => {
+const InputArea: React.FC<InputAreaProps> = ({ onSendMessage, disabled, lang }) => {
   const [text, setText] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [isSpeechSupported, setIsSpeechSupported] = useState(false);
@@ -29,7 +30,7 @@ const InputArea: React.FC<InputAreaProps> = ({ onSendMessage, disabled }) => {
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = false;
-      recognition.lang = 'fr-FR';
+      recognition.lang = lang === 'en' ? 'en-US' : 'fr-FR';
 
       recognition.onstart = () => {
         setIsListening(true);

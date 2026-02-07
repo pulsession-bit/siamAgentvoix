@@ -4,6 +4,7 @@
 import { GoogleGenAI, GenerateContentResponse, Chat, Content } from "@google/genai";
 import { getSystemPrompt } from '../constants';
 import { AuditResult, FileAttachment, AgentAction, ChatMessage } from '../types';
+import { Language } from '../locales/translations';
 
 let aiClient: GoogleGenAI | null = null;
 // Use Chat type instead of ChatSession as per @google/genai guidelines
@@ -13,6 +14,11 @@ export let chatSession: Chat | null = null;
 let currentUserEmail: string | null = null;
 export const setCurrentUserEmail = (email: string | null) => {
   currentUserEmail = email;
+};
+
+let currentLanguage: Language = 'fr';
+export const setCurrentLanguage = (lang: Language) => {
+  currentLanguage = lang;
 };
 
 const getClient = () => {
@@ -69,7 +75,7 @@ export const startAuditSession = async (sessionId: string | null = null, skipWel
   chatSession = client.chats.create({
     model: 'gemini-3-flash-preview',
     config: {
-      systemInstruction: getSystemPrompt(currentUserEmail),
+      systemInstruction: getSystemPrompt(currentUserEmail, currentLanguage),
       temperature: 0.2, // Low temperature for consistent auditing
     },
   });
@@ -83,8 +89,12 @@ export const startAuditSession = async (sessionId: string | null = null, skipWel
   }
 
   // Initial greeting trigger. This prompt instructs the model to follow step 3.1 of the System Prompt.
+  const initialTrigger = currentLanguage === 'en'
+    ? "Hello. I am ready to start. Introduce yourself and ask me about my project as agreed."
+    : "Bonjour. Je suis prêt à commencer. Présente-toi et demande-moi mon projet comme convenu.";
+
   const response = await chatSession.sendMessage({
-    message: "Bonjour. Je suis prêt à commencer. Présente-toi et demande-moi mon projet comme convenu."
+    message: initialTrigger
   });
 
   // Directly access .text property as per guidelines (not a method call)
@@ -100,7 +110,7 @@ export const resumeAuditSession = async (existingMessages: ChatMessage[], sessio
   chatSession = client.chats.create({
     model: 'gemini-3-flash-preview',
     config: {
-      systemInstruction: getSystemPrompt(currentUserEmail),
+      systemInstruction: getSystemPrompt(currentUserEmail, currentLanguage),
       temperature: 0.2,
     },
     history: history
@@ -160,7 +170,7 @@ export const sendMessageToAgent = async (
     chatSession = client.chats.create({
       model: 'gemini-3-flash-preview',
       config: {
-        systemInstruction: getSystemPrompt(currentUserEmail),
+        systemInstruction: getSystemPrompt(currentUserEmail, currentLanguage),
         temperature: 0.2, // Low temperature for consistent auditing
       },
       history: history
@@ -245,7 +255,26 @@ export const generateChatSummary = async (): Promise<import('../types').ChatSumm
   if (!chatSession) return null;
 
   try {
-    const prompt = `
+    const prompt = currentLanguage === 'en' ? `
+      SESSION SUMMARY
+      Generate a structured summary of our entire conversation for the user in JSON format only.
+      
+      Expected format based on the French structure but with English content where appropriate:
+      {
+        "visa_score": 0 to 100,
+        "visa_type": "Identified Visa Name",
+        "executive_summary": "Narrative summary of profile and project (3-4 sentences).",
+        "strengths": ["Strength 1", "Strength 2"],
+        "weaknesses": ["Weakness 1", "Weakness 2"],
+        "key_points": ["Key point 1", "Key point 2"],
+        "action_plan": [
+           { "step": "Step Name", "description": "What to do", "timing": "When (e.g., 'Immediate', 'In 1 week')"}
+        ],
+        "required_documents": ["Doc 1", "Doc 2"]
+      }
+      
+      Be precise, professional, and constructive.
+    ` : `
       SYNTHÈSE DE FIN DE SESSION
       Génère un résumé structuré de l'ensemble de notre conversation pour l'utilisateur au format JSON uniquement.
       
