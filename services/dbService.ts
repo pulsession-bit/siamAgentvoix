@@ -19,6 +19,7 @@ import {
     LegacyAuditSession,
     AuditPayload
 } from './ingressAdapter';
+import { ChatSummary, AuditResult } from '../types';
 
 const sanitize = (obj: any) => {
     try {
@@ -364,5 +365,89 @@ export const sendTestEmail = async (to: string) => {
     } catch (e: any) {
         console.error("Error sending test email:", e);
         throw e;
+    }
+};
+
+export const sendAuditEmail = async (
+    to: string,
+    summary: ChatSummary,
+    audit: AuditResult | null
+) => {
+    try {
+        console.log(`Sending audit email to ${to}...`);
+        const mailRef = collection(db, "mail");
+        const score = summary.visa_score || audit?.confidence_score || 0;
+        const visa = summary.visa_type || audit?.visa_type || 'Visa';
+
+        const htmlContent = `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #334155;">
+            <div style="background-color: #0f172a; padding: 24px; text-align: center; border-radius: 12px 12px 0 0;">
+              <h1 style="color: #fff; margin: 0; font-size: 24px;">Siam Visa Pro</h1>
+              <p style="color: #fbbf24; margin: 8px 0 0; font-weight: bold;">Rapport d'Audit Officiel</p>
+            </div>
+            
+            <div style="padding: 24px; background-color: #f8fafc; border: 1px solid #e2e8f0;">
+              <h2 style="color: #0f172a; margin-top: 0;">Résultat de votre analyse</h2>
+              
+              <div style="display: flex; align-items: center; gap: 16px; background: #fff; padding: 16px; border-radius: 8px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                <div style="width: 64px; height: 64px; border-radius: 50%; background: ${score >= 70 ? '#effdf5' : score >= 50 ? '#fffbeb' : '#fef2f2'}; color: ${score >= 70 ? '#15803d' : score >= 50 ? '#b45309' : '#b91c1c'}; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; border: 2px solid currentColor;">
+                  ${score}%
+                </div>
+                <div>
+                  <p style="margin: 0; font-weight: bold; font-size: 16px;">Visa cible : ${visa}</p>
+                  <p style="margin: 4px 0 0; color: #64748b; font-size: 14px;">Score de confiance global</p>
+                </div>
+              </div>
+    
+              <h3>Synthèse Exécutive</h3>
+              <p style="line-height: 1.6;">${summary.executive_summary || 'Aucune synthèse disponible.'}</p>
+    
+              <div style="margin-top: 24px;">
+                <h3 style="color: #15803d;">Forces du dossier</h3>
+                <ul>
+                  ${(summary.strengths || []).map(s => `<li>${s}</li>`).join('')}
+                </ul>
+              </div>
+    
+              <div style="margin-top: 16px;">
+                <h3 style="color: #b91c1c;">Points de vigilance</h3>
+                <ul>
+                  ${(summary.weaknesses || []).map(w => `<li>${w}</li>`).join('')}
+                </ul>
+              </div>
+    
+              <h3>Plan d'Action Recommandé</h3>
+              <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+                ${(summary.action_plan || []).map(step => `
+                  <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 12px 0;"><strong>${step.step}</strong></td>
+                    <td style="padding: 12px; color: #475569;">${step.description}</td>
+                    <td style="padding: 12px 0; text-align: right; font-size: 12px; color: #64748b;">${step.timing}</td>
+                  </tr>
+                `).join('')}
+              </table>
+    
+              <div style="text-align: center; margin-top: 32px;">
+                <a href="https://siamvisapro.com" style="background-color: #fbbf24; color: #0f172a; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Accéder à mon dossier sécurisé</a>
+              </div>
+            </div>
+            
+            <div style="text-align: center; padding: 24px; font-size: 12px; color: #94a3b8;">
+              <p>© 2024 Siam Visa Pro. Ceci est un document généré par IA à titre informatif.</p>
+            </div>
+          </div>
+        `;
+
+        await addDoc(mailRef, {
+            to: [to],
+            message: {
+                subject: `Votre Audit Visa "${visa}" - Résultat : ${score}%`,
+                html: htmlContent,
+            },
+            timestamp: Timestamp.now()
+        });
+        console.log(`Audit email sent to ${to}`);
+    } catch (e) {
+        console.error("Error sending audit email:", e);
     }
 };

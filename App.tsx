@@ -14,7 +14,7 @@ const VoiceUpsellModal = lazy(() => import('./components/VoiceUpsellModal'));
 import { AppStep, FileAttachment } from './types';
 import { translations, Language } from './locales/translations';
 import { useAuth, useChat, useSummary, useAudit, useSession } from './hooks';
-import { saveSessionToFirestore, sendTestEmail } from './services/dbService';
+import { saveSessionToFirestore, sendTestEmail, sendAuditEmail } from './services/dbService';
 import { setCurrentUserEmail, setCurrentLanguage } from './services/geminiService';
 import { AUDIT_SESSION_KEY } from './contexts/AuthContext';
 
@@ -153,8 +153,14 @@ function App() {
 
   const handleGenerateSummary = async () => {
     try {
-      await generateSummary();
+      const summary = await generateSummary();
       setIsMobileMenuOpen(false);
+
+      if (summary && effectiveEmail) {
+        sendAuditEmail(effectiveEmail, summary, auditResult).then(() => {
+          addMessage("📧 Une copie officielle de votre audit a été envoyée par email.", 'system');
+        }).catch(err => console.error("Email send failed", err));
+      }
     } catch (error: any) {
       alert(error.message);
     }
