@@ -10,7 +10,7 @@ import AuditScore from './components/AuditScore';
 const CallModal = lazy(() => import('./components/CallModal'));
 const SummaryView = lazy(() => import('./components/SummaryView'));
 const VoiceUpsellModal = lazy(() => import('./components/VoiceUpsellModal'));
-import IntroAnimation from './components/IntroAnimation';
+
 import { AppStep, FileAttachment } from './types';
 import { translations, Language } from './locales/translations';
 import { useAuth, useChat, useSummary, useAudit, useSession } from './hooks';
@@ -24,7 +24,6 @@ function App() {
   // UI State
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUpsellOpen, setIsUpsellOpen] = useState(false);
-  const [showIntro, setShowIntro] = useState(true);
 
   // Custom Hooks
   const { userEmail, login, logout } = useAuth();
@@ -276,7 +275,6 @@ function App() {
 
   return (
     <div className="flex flex-col md:flex-row h-[100dvh] bg-brand-light overflow-hidden">
-      {showIntro && <IntroAnimation onComplete={() => setShowIntro(false)} />}
       {renderSidebar()}
 
       <div className="flex-1 flex flex-col h-full relative min-w-0">
