@@ -28,7 +28,7 @@ const AuditScore: React.FC<AuditScoreProps> = ({ result }) => {
 
         {/* Chart Section */}
         <div className="relative w-32 h-32 md:w-48 md:h-48 flex-shrink-0 mx-auto md:mx-0">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={100}>
             <RadialBarChart
               innerRadius="70%"
               outerRadius="100%"

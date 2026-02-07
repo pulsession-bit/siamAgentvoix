@@ -36,5 +36,10 @@ service cloud.firestore {
         allow read, write: if true; // TEMPORARY
       }
     }
+
+    // --- Mail Trigger (Extension) ---
+    match /mail/{mailId} {
+      allow create: if true; // Allow triggering emails for testing
+    }
   }
 }
