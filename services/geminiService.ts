@@ -28,12 +28,31 @@ export const isChatSessionActive = (): boolean => {
 
 // Helper to convert UI messages to Gemini History
 const convertToGeminiHistory = (messages: ChatMessage[]): Content[] => {
-  return messages
-    .filter(m => m.sender === 'user' || m.sender === 'agent') // Filter out system messages
+  const filtered = messages
+    .filter(m => (m.sender === 'user' || m.sender === 'agent') && m.text?.trim()) // Filter out system messages and empty texts
     .map(m => ({
-      role: m.sender === 'user' ? 'user' : 'model',
-      parts: [{ text: m.text }] // Note: We simplify attachments restoration for history to text context mostly, preserving logic
+      role: m.sender === 'user' ? 'user' as const : 'model' as const,
+      parts: [{ text: m.text }]
     }));
+
+  // Gemini API requires history to start with a 'user' message and alternate roles.
+  // Trim any leading 'model' messages (e.g. the instant welcome added by the UI).
+  while (filtered.length > 0 && filtered[0].role === 'model') {
+    filtered.shift();
+  }
+
+  // Ensure alternating roles by deduplicating consecutive same-role messages
+  const result: Content[] = [];
+  for (const entry of filtered) {
+    if (result.length > 0 && result[result.length - 1].role === entry.role) {
+      // Merge consecutive same-role messages
+      result[result.length - 1].parts.push(...entry.parts);
+    } else {
+      result.push({ ...entry, parts: [...entry.parts] });
+    }
+  }
+
+  return result;
 };
 
 // Update to use the latest gemini-3-flash-preview model for chat

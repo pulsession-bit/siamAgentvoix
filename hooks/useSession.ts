@@ -47,10 +47,10 @@ Je suis votre assistant expert en visas pour la Thaïlande. Mon rôle est de :
 2. Vérifier votre dossier (Audit).
 3. Maximiser vos chances d'approbation.
 
-Pour commencer, dites-moi :
-- Quelle est votre **nationalité** ?
-- Quel est le **but de votre séjour** (tourisme, travail, retraite...) ?
-- Combien de temps comptez-vous rester ?`;
+Pour commencer et créer votre dossier, merci de m'indiquer :
+- Vos **Prénom, Nom et Email** (pour vous recontacter en cas de besoin).
+- Votre **nationalité**.
+- Le **but de votre séjour** (tourisme, travail, retraite...) et la durée prévue.`;
 
 export function useSession({
   messages,

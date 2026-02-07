@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { ChatMessage, FileAttachment, AuditResult, AgentAction } from '../types';
 import { sendMessageToAgent, generateChatSummary, updateChatSessionHistoryWithTranscript } from '../services/geminiService';
 import type { ChatSummary } from '../types';
@@ -18,6 +18,8 @@ interface UseChatReturn {
 export function useChat(): UseChatReturn {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isTyping, setIsTyping] = useState(false);
+  const messagesRef = useRef<ChatMessage[]>(messages);
+  messagesRef.current = messages;
 
   const addMessage = useCallback((
     text: string,
@@ -41,8 +43,9 @@ export function useChat(): UseChatReturn {
     setIsTyping(true);
 
     try {
-      // Pass current history to rebuild session context
-      const response = await sendMessageToAgent(text, files, messages);
+      // Use ref to always get the latest messages, avoiding stale closure
+      const currentMessages = messagesRef.current;
+      const response = await sendMessageToAgent(text, files, currentMessages);
       addMessage(response.text, 'agent');
 
       return {
@@ -55,7 +58,7 @@ export function useChat(): UseChatReturn {
     } finally {
       setIsTyping(false);
     }
-  }, [addMessage, messages]);
+  }, [addMessage]);
 
   const appendTranscript = useCallback((transcript: string) => {
     addMessage(`📄 **RÉSUMÉ DE L'APPEL**\n\n${transcript}`, 'system');
