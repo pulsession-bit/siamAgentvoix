@@ -1,5 +1,6 @@
 import React, { useState, Suspense, lazy } from 'react';
 import { ShieldCheck, FileText, CreditCard, Phone, Menu, X, Trash2, Loader2, AlertCircle, LogOut } from 'lucide-react';
+import { Analytics } from "@vercel/analytics/react"
 import Chat from './components/Chat';
 import InputArea from './components/InputArea';
 import VisaSelect from './components/VisaSelect';
@@ -407,6 +408,7 @@ function App() {
           )}
         </Suspense>
       </div>
+      <Analytics />
     </div>
   );
 }

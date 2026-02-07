@@ -157,9 +157,13 @@ export function useSession({
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(sessionData));
 
-    // Cloud persistence (only if user is authenticated)
+    // Cloud persistence (debounced to prevent UI freeze and excessive writes)
     if (userEmail) {
-      saveSessionToFirestore(userEmail, sessionData);
+      const timer = setTimeout(() => {
+        saveSessionToFirestore(userEmail, sessionData);
+      }, 2000); // Wait 2s of inactivity
+
+      return () => clearTimeout(timer);
     }
   }, [sessionId, messages, step, visaType, auditResult, chatSummary, userEmail, isSessionLoaded]);
 

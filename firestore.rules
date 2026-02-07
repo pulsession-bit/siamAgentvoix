@@ -1,0 +1,40 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // --- Helper Functions ---
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // --- Leads (Users Identities) ---
+    // Users can read/write their own lead document (email based ID)
+    match /leads/{email} {
+      allow read, write: if true; // TEMPORARY: Allow all for dev, tighten for prod
+      // allow read, write: if isAuthenticated() && (request.auth.token.email == email || request.auth.token.email_verified);
+    }
+
+    // --- Audit Sessions (Legacy) ---
+    match /audit_sessions/{sessionId} {
+      allow read, write: if true; // TEMPORARY: Allow all for dev
+      // allow read, write: if isAuthenticated();
+    }
+
+    // --- Cases (New CRM) ---
+    match /cases/{caseId} {
+      allow read, write: if true; // TEMPORARY: Allow all for dev
+      // allow create: if isAuthenticated();
+      // allow read, update: if isAuthenticated() && (resource.data.lead_id == request.auth.token.email || resource.data.lead_id == request.auth.uid);
+      
+      // --- Events (Sub-collection) ---
+      match /events/{eventId} {
+        allow read, write: if true; // TEMPORARY
+      }
+    }
+  }
+}

@@ -20,7 +20,14 @@ import {
     AuditPayload
 } from './ingressAdapter';
 
-const sanitize = (obj: any) => JSON.parse(JSON.stringify(obj));
+const sanitize = (obj: any) => {
+    try {
+        return JSON.parse(JSON.stringify(obj));
+    } catch (e) {
+        console.error("Sanitize error (circular ref?):", e);
+        return {};
+    }
+};
 
 // ============================================================================
 // CASE RESOLUTION LOGIC (SCHEMA.md Section 3)
