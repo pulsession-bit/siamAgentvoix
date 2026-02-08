@@ -14,7 +14,7 @@ const VoiceUpsellModal = lazy(() => import('./components/VoiceUpsellModal'));
 import { AppStep, FileAttachment } from './types';
 import { translations, Language } from './locales/translations';
 import { useAuth, useChat, useSummary, useAudit, useSession } from './hooks';
-import { saveSessionToFirestore, sendTestEmail, sendAuditEmail } from './services/dbService';
+import { saveSessionToFirestore, sendAuditEmail } from './services/dbService';
 import { setCurrentUserEmail, setCurrentLanguage } from './services/geminiService';
 import { AUDIT_SESSION_KEY } from './contexts/AuthContext';
 
@@ -291,22 +291,6 @@ function App() {
             <Trash2 size={14} /> Réinitialiser l'audit
           </button>
 
-          <button
-            onClick={async () => {
-              const email = prompt("Email de réception ?");
-              if (email) {
-                try {
-                  await sendTestEmail(email);
-                  alert("Email ajouté à la file d'attente (collection 'mail').");
-                } catch (e: any) {
-                  alert("Erreur: " + e.message);
-                }
-              }
-            }}
-            className="w-full py-2 text-slate-400 text-[10px] flex items-center justify-center gap-2 hover:text-brand-amber transition-colors mt-2 opacity-50 hover:opacity-100"
-          >
-            <Mail size={12} /> Test Email
-          </button>
         </div>
 
         <div className="mt-4 text-center">

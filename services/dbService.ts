@@ -348,25 +348,7 @@ export const getCaseEvents = async (case_id: string): Promise<IngressEvent[]> =>
     }
 };
 
-export const sendTestEmail = async (to: string) => {
-    try {
-        console.log(`Sending test email to ${to}...`);
-        const mailRef = collection(db, "mail");
-        await addDoc(mailRef, {
-            to: [to],
-            message: {
-                subject: "Test Email - Siam Visa Pro",
-                text: "Ceci est un test de l'extension Firestore Email.",
-                html: "<p>Ceci est un test de l'extension Firestore Email.</p>",
-            },
-            timestamp: Timestamp.now()
-        });
-        console.log("Test email sent to queue.");
-    } catch (e: any) {
-        console.error("Error sending test email:", e);
-        throw e;
-    }
-};
+
 
 export const sendAuditEmail = async (
     to: string,
