@@ -51,8 +51,12 @@ export class LiveAgent {
     onStatusChange: (status: string) => void,
     onTranscriptUpdate?: (update: TranscriptUpdate) => void
   ) {
-    if (this.isConnected) return;
+    if (this.isConnected) {
+      console.log("[LiveAgent] Already connected, skipping");
+      return;
+    }
 
+    console.log("[LiveAgent] Starting connect flow...");
     onStatusChange('connecting');
     this.onTranscriptUpdate = onTranscriptUpdate || null;
 
@@ -62,9 +66,11 @@ export class LiveAgent {
     this.currentOutputTranscription = '';
 
     // 1. Setup Audio Contexts
+    console.log("[LiveAgent] Step 1: Setting up audio contexts...");
     this.inputAudioContext = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
     this.outputAudioContext = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
-    this.nextStartTime = this.outputAudioContext.currentTime; // Initialize cursor
+    this.nextStartTime = this.outputAudioContext.currentTime;
+    console.log("[LiveAgent] Audio contexts created. Input state:", this.inputAudioContext.state, "Output state:", this.outputAudioContext.state);
 
     // Setup Analyzer for Agent Voice Visualization
     this.analyser = this.outputAudioContext.createAnalyser();
@@ -73,54 +79,60 @@ export class LiveAgent {
     this.analyser.connect(this.outputAudioContext.destination);
 
     // 2. Get User Media
+    console.log("[LiveAgent] Step 2: Requesting microphone access...");
     try {
       this.mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.log("[LiveAgent] Mic access granted. Tracks:", this.mediaStream.getTracks().map(t => `${t.kind}:${t.readyState}`));
     } catch (e) {
-      console.error("Mic access denied", e);
+      console.error("[LiveAgent] Mic access denied:", e);
       onStatusChange('error_mic');
       return;
     }
 
     // 3. Connect to Gemini Live
+    const model = 'gemini-2.5-flash-native-audio-preview-12-2025';
+    console.log("[LiveAgent] Step 3: Connecting to Gemini Live API with model:", model);
     try {
       this.sessionPromise = this.ai.live.connect({
-        // Live API requires native audio model (gemini-2.0-flash-exp only supports text)
-        model: 'gemini-2.5-flash-native-audio-preview-12-2025',
+        model,
         config: {
-          // Must provide an array with a single Modality.AUDIO element
           responseModalities: [Modality.AUDIO],
           speechConfig: {
             voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } },
           },
-          // Enable transcription
           inputAudioTranscription: {},
           outputAudioTranscription: {},
           systemInstruction: SYSTEM_PROMPT + "\n\nCONTEXTE: Ceci est un APPEL VOCAL en direct. Sois concis, direct et empathique. Pas de listes à puces. Parle comme un humain au téléphone.",
         },
         callbacks: {
           onopen: () => {
-            console.log("Live Session Opened");
+            console.log("[LiveAgent] >>> SESSION OPENED - WebSocket connected");
             onStatusChange('connected');
             this.isConnected = true;
             this.startAudioInput();
           },
           onmessage: async (message: LiveServerMessage) => {
+            console.log("[LiveAgent] Message received:", JSON.stringify(message).substring(0, 200));
             this.handleServerMessage(message);
           },
-          onclose: () => {
-            console.log("Live Session Closed");
+          onclose: (e: any) => {
+            console.log("[LiveAgent] >>> SESSION CLOSED", e ? JSON.stringify(e) : "(no details)");
             onStatusChange('disconnected');
             this.disconnect();
           },
-          onerror: (e) => {
-            console.error("Live Session Error", e);
+          onerror: (e: any) => {
+            console.error("[LiveAgent] >>> SESSION ERROR:", e);
+            console.error("[LiveAgent] Error details:", JSON.stringify(e, Object.getOwnPropertyNames(e || {})));
             onStatusChange('error');
             this.disconnect();
           }
         }
       });
-    } catch (err) {
-      console.error("Failed to connect to Live API", err);
+      console.log("[LiveAgent] live.connect() called, waiting for onopen...");
+    } catch (err: any) {
+      console.error("[LiveAgent] Failed to connect:", err);
+      console.error("[LiveAgent] Error message:", err?.message);
+      console.error("[LiveAgent] Error stack:", err?.stack);
       onStatusChange('error');
     }
   }
