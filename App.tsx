@@ -193,8 +193,8 @@ function App() {
               <ShieldCheck size={24} />
             </div>
             <div>
-              <span className="font-bold text-white text-lg block leading-none">Siam Visa Pro</span>
-              <span className="text-[10px] text-brand-amber font-bold uppercase tracking-widest mt-1 block">Audit AI Agent</span>
+              <a href="https://www.siamvisapro.com/" target="_blank" rel="noopener noreferrer" className="font-bold text-white text-lg block leading-none hover:text-brand-amber transition-colors">Siam Visa Pro</a>
+              <a href="https://www.siamvisapro.com/" target="_blank" rel="noopener noreferrer" className="text-[10px] text-brand-amber font-bold uppercase tracking-widest mt-1 block hover:text-brand-yellow transition-colors">Audit AI Agent</a>
               <div className="flex gap-2 mt-2">
                 <button onClick={() => setLanguage('fr')} className={`text-[10px] px-2 py-0.5 rounded border transition-colors ${language === 'fr' ? 'bg-brand-amber text-brand-navy border-brand-amber' : 'text-slate-500 border-slate-700 hover:border-slate-500'}`}>FR</button>
                 <button onClick={() => setLanguage('en')} className={`text-[10px] px-2 py-0.5 rounded border transition-colors ${language === 'en' ? 'bg-brand-amber text-brand-navy border-brand-amber' : 'text-slate-500 border-slate-700 hover:border-slate-500'}`}>EN</button>
