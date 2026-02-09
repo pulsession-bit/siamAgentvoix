@@ -44,56 +44,26 @@ interface UseSessionReturn {
 
 function getWelcomeMessage(email: string | null, lang: Language = 'fr'): string {
   if (lang === 'en') {
-    const base = `Hello and welcome to **Siam Visa Pro**.
-
-I'm your expert assistant for Thailand visas. My role is to:
-1. Help you choose the right visa.
-2. Review your application (Audit).
-3. Maximize your chances of approval.`;
-
     if (email) {
-      return `${base}
+      return `Hello! I'm your **Siam Visa Pro** assistant, specialized in Thailand visas.
 
-I have your email: **${email}**.
-
-To get started, please provide:
-- Your **First and Last Name**.
-- Your **nationality**.
-- The **purpose of your stay** (tourism, work, retirement...) and expected duration.`;
+What is your project in Thailand? (tourism, work, retirement, studies...)`;
     }
 
-    return `${base}
+    return `Hello! I'm your **Siam Visa Pro** assistant, specialized in Thailand visas.
 
-To get started and create your file, please provide:
-- Your **First Name, Last Name and Email** (so we can follow up if needed).
-- Your **nationality**.
-- The **purpose of your stay** (tourism, work, retirement...) and expected duration.`;
+What is your project in Thailand? (tourism, work, retirement, studies...)`;
   }
-
-  const base = `Bonjour et bienvenue sur **Siam Visa Pro**.
-
-Je suis votre assistant expert en visas pour la Thaïlande. Mon rôle est de :
-1. Vous aider à choisir le bon visa.
-2. Vérifier votre dossier (Audit).
-3. Maximiser vos chances d'approbation.`;
 
   if (email) {
-    return `${base}
+    return `Bonjour ! Je suis votre assistant **Siam Visa Pro**, spécialisé en visas pour la Thaïlande.
 
-J'ai bien votre email : **${email}**.
-
-Pour commencer, merci de m'indiquer :
-- Vos **Prénom et Nom**.
-- Votre **nationalité**.
-- Le **but de votre séjour** (tourisme, travail, retraite...) et la durée prévue.`;
+Quel est votre projet en Thaïlande ? (tourisme, travail, retraite, études...)`;
   }
 
-  return `${base}
+  return `Bonjour ! Je suis votre assistant **Siam Visa Pro**, spécialisé en visas pour la Thaïlande.
 
-Pour commencer et créer votre dossier, merci de m'indiquer :
-- Vos **Prénom, Nom et Email** (pour vous recontacter en cas de besoin).
-- Votre **nationalité**.
-- Le **but de votre séjour** (tourisme, travail, retraite...) et la durée prévue.`;
+Quel est votre projet en Thaïlande ? (tourisme, travail, retraite, études...)`;
 }
 
 export function useSession({
