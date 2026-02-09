@@ -1,9 +1,9 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
-import { ShieldCheck, FileText, CreditCard, Phone, Menu, X, Trash2, Loader2, AlertCircle, LogOut, Mail } from 'lucide-react';
+import { ShieldCheck, FileText, CreditCard, Phone, Menu, X, Trash2, Loader2, AlertCircle, LogOut } from 'lucide-react';
 import { Analytics } from "@vercel/analytics/react"
 import Chat from './components/Chat';
 import InputArea from './components/InputArea';
-import VisaSelect from './components/VisaSelect';
+import QualificationStep from './components/QualificationStep';
 import AuditScore from './components/AuditScore';
 
 // Lazy Load Heavy Modals
@@ -38,7 +38,6 @@ function App() {
     } catch { }
     return '';
   });
-  const [emailError, setEmailError] = useState('');
 
   // Custom Hooks
   const { userEmail, login, logout } = useAuth();
@@ -82,18 +81,6 @@ function App() {
     userEmail: effectiveEmail,
     addMessage,
   });
-
-  // Email helpers
-  const isValidEmail = (email: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-  const handleEmailSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!isValidEmail(capturedEmail)) {
-      setEmailError(t.email_error);
-      return;
-    }
-    setEmailError('');
-  };
 
   // Handlers
   const handleVisaSelect = (type: typeof visaType) => {
@@ -358,58 +345,14 @@ function App() {
         <main className="flex-1 flex flex-col overflow-hidden relative">
           {/* Qualification Overlay */}
           {step === AppStep.QUALIFICATION && messages.length < 3 && (
-            <div className="absolute inset-0 z-50 bg-brand-navy flex flex-col items-center justify-start md:justify-center p-6 pt-32 md:pt-6 overflow-y-auto">
-              <div className="text-center mb-8 max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-5 duration-700">
-                <h1 className="text-3xl md:text-5xl font-black text-white mb-4 drop-shadow-sm tracking-tight leading-tight">
-                  {t.audit_title}
-                </h1>
-                <p className="text-lg text-white/80 font-medium">
-                  {t.audit_subtitle}
-                </p>
-              </div>
-
-              {/* Email capture - only shown if not logged in via Google */}
-              {!userEmail && (
-                <div className="w-full max-w-md mx-auto mb-8 animate-in fade-in slide-in-from-bottom-3 duration-500">
-                  <form onSubmit={handleEmailSubmit} className="flex flex-col gap-2">
-                    <label className="text-sm text-white/70 font-medium text-center">
-                      {t.email_label}
-                    </label>
-                    <div className="flex gap-2">
-                      <div className="relative flex-1">
-                        <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                        <input
-                          type="email"
-                          value={capturedEmail}
-                          onChange={(e) => {
-                            setCapturedEmail(e.target.value);
-                            if (emailError) setEmailError('');
-                          }}
-                          placeholder={t.email_placeholder}
-                          className="w-full bg-white text-brand-navy placeholder-slate-400 font-medium border-0 rounded-xl pl-10 pr-4 py-3 focus:ring-2 focus:ring-brand-amber focus:outline-none transition-all text-base"
-                          autoComplete="email"
-                        />
-                      </div>
-                      <button
-                        type="submit"
-                        disabled={!capturedEmail.trim()}
-                        className="bg-brand-amber text-brand-navy px-5 py-3 rounded-xl font-bold text-sm hover:bg-brand-yellow disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md"
-                      >
-                        OK
-                      </button>
-                    </div>
-                    {emailError && (
-                      <p className="text-red-400 text-xs text-center mt-1">{emailError}</p>
-                    )}
-                    {isValidEmail(capturedEmail) && !emailError && (
-                      <p className="text-green-400 text-xs text-center mt-1">{t.email_confirmed}</p>
-                    )}
-                  </form>
-                </div>
-              )}
-
-              <VisaSelect selected={visaType} onSelect={handleVisaSelect} disabled={!effectiveEmail} lang={language} />
-            </div>
+            <QualificationStep
+              lang={language}
+              onVisaSelect={handleVisaSelect}
+              visaType={visaType}
+              capturedEmail={capturedEmail}
+              setCapturedEmail={setCapturedEmail}
+              userEmail={userEmail}
+            />
           )}
 
           {/* Payment Overlay */}
