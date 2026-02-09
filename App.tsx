@@ -217,8 +217,8 @@ function App() {
               </div>
 
               <div className="flex-1 text-left min-w-0">
-                <div className="text-[9px] text-brand-amber font-bold uppercase tracking-wider mb-0.5">Assistance Live</div>
-                <div className="text-white font-bold text-sm truncate">Parler à un expert</div>
+                <div className="text-[9px] text-brand-amber font-bold uppercase tracking-wider mb-0.5">{t.cta_live_support}</div>
+                <div className="text-white font-bold text-sm truncate">{t.cta_expert}</div>
               </div>
 
               <div className="bg-brand-amber text-brand-navy p-2 rounded-full animate-pulse shadow-sm">
@@ -230,9 +230,9 @@ function App() {
 
         {/* Navigation */}
         <nav className="space-y-6 flex-1">
-          <StepItem active={step === AppStep.QUALIFICATION} completed={step !== AppStep.QUALIFICATION} label="Qualification" desc="Sélection du type de visa" icon={<FileText size={18} />} />
-          <StepItem active={step === AppStep.AUDIT} completed={step === AppStep.PAYMENT} label="Audit IA" desc="Vérification documentaire" icon={<ShieldCheck size={18} />} />
-          <StepItem active={step === AppStep.PAYMENT} completed={false} label="Validation" desc="Paiement & Dépôt" icon={<CreditCard size={18} />} />
+          <StepItem active={step === AppStep.QUALIFICATION} completed={step !== AppStep.QUALIFICATION} label={t.nav_qualification} desc={t.nav_qualification_desc} icon={<FileText size={18} />} />
+          <StepItem active={step === AppStep.AUDIT} completed={step === AppStep.PAYMENT} label={t.nav_audit} desc={t.nav_audit_desc} icon={<ShieldCheck size={18} />} />
+          <StepItem active={step === AppStep.PAYMENT} completed={false} label={t.nav_payment} desc={t.nav_payment_desc} icon={<CreditCard size={18} />} />
         </nav>
 
         {/* Footer */}
@@ -246,7 +246,7 @@ function App() {
             `}
           >
             {isGeneratingSummary ? <Loader2 size={14} className="animate-spin" /> : <FileText size={16} />}
-            {isGeneratingSummary ? 'Génération...' : "Synthèse de l'Audit"}
+            {isGeneratingSummary ? t.generating_summary : t.summary_title}
           </button>
 
           {!userEmail ? (
@@ -255,7 +255,7 @@ function App() {
               className="w-full flex items-center justify-center gap-2 bg-white text-brand-navy py-3 rounded-xl font-bold text-xs shadow-md hover:bg-slate-100 transition-colors"
             >
               <img src="https://www.google.com/favicon.ico" alt="G" className="w-3 h-3" />
-              Sauvegarder mon dossier
+              {t.save_file}
             </button>
           ) : (
             <div className="w-full space-y-2">
@@ -265,7 +265,7 @@ function App() {
                 className="w-full flex items-center justify-center gap-2 bg-slate-800 text-slate-300 py-3 rounded-xl font-bold text-xs hover:bg-red-900/20 hover:text-red-400 transition-colors"
               >
                 <LogOut size={14} />
-                Se déconnecter
+                {t.logout}
               </button>
             </div>
           )}
@@ -275,7 +275,7 @@ function App() {
             onClick={clearSession}
             className="w-full py-3 text-slate-500 text-xs flex items-center justify-center gap-2 hover:text-red-400 transition-colors"
           >
-            <Trash2 size={14} /> Réinitialiser l'audit
+            <Trash2 size={14} /> {t.reset_audit}
           </button>
 
         </div>
@@ -300,7 +300,7 @@ function App() {
         ) : (
           <div className="flex flex-col items-center gap-4">
             <Loader2 className="w-10 h-10 animate-spin text-brand-amber" />
-            <p className="text-slate-400 text-sm animate-pulse tracking-widest uppercase">Initialisation de l'audit...</p>
+            <p className="text-slate-400 text-sm animate-pulse tracking-widest uppercase">{t.loading_app}</p>
           </div>
         )}
       </div>
@@ -321,7 +321,7 @@ function App() {
             <span className="text-[9px] text-brand-amber font-black uppercase tracking-[0.2em] mb-0.5">Siam Visa Pro</span>
             <div className="flex items-center gap-1.5">
               <span className="text-white font-bold text-xs">
-                {step === AppStep.QUALIFICATION ? 'Qualification' : step === AppStep.AUDIT ? 'Audit IA' : 'Validation'}
+                {step === AppStep.QUALIFICATION ? t.nav_qualification : step === AppStep.AUDIT ? t.nav_audit : t.nav_payment}
               </span>
               <div className="flex gap-0.5">
                 <div className={`w-1 h-1 rounded-full ${step === AppStep.QUALIFICATION ? 'bg-brand-amber' : 'bg-green-500'}`} />

@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Send, Mic, MicOff } from 'lucide-react';
 import { FileAttachment } from '../types';
-import { Language } from '../locales/translations';
+import { translations, Language } from '../locales/translations';
 
 interface InputAreaProps {
   onSendMessage: (text: string, files: FileAttachment[]) => void;
@@ -10,6 +10,7 @@ interface InputAreaProps {
 }
 
 const InputArea: React.FC<InputAreaProps> = ({ onSendMessage, disabled, lang }) => {
+  const t = translations[lang];
   const [text, setText] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [isSpeechSupported, setIsSpeechSupported] = useState(false);
@@ -45,7 +46,7 @@ const InputArea: React.FC<InputAreaProps> = ({ onSendMessage, disabled, lang }) 
         console.error("Speech recognition error", event.error);
         setIsListening(false);
         if (event.error === 'not-allowed') {
-          alert("Accès au microphone refusé. Veuillez vérifier les permissions de votre navigateur.");
+          alert(t.mic_denied);
         } else if (event.error === 'no-speech') {
           // No speech detected, just stop silently
         } else {
@@ -103,7 +104,7 @@ const InputArea: React.FC<InputAreaProps> = ({ onSendMessage, disabled, lang }) 
                 ? 'bg-red-500 text-white ring-2 ring-red-400 ring-offset-2 ring-offset-brand-navy animate-pulse'
                 : 'text-brand-light hover:text-white hover:bg-brand-dark'}
              `}
-            title={isListening ? "Arrêter d'écouter" : "Dicter un message"}
+            title={isListening ? t.mic_stop : t.mic_start}
           >
             {isListening ? <MicOff size={20} /> : <Mic size={20} />}
           </button>
@@ -113,7 +114,7 @@ const InputArea: React.FC<InputAreaProps> = ({ onSendMessage, disabled, lang }) 
           type="text"
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder={isListening ? "Écoute en cours..." : "Décrivez votre situation..."}
+          placeholder={isListening ? t.input_listening : t.input_placeholder}
           className={`
             flex-1 
             bg-white 

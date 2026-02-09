@@ -16,6 +16,26 @@ export const translations = {
         reset_confirm: "Voulez-vous vraiment effacer tout l'historique et recommencer ?",
         logout: "Se déconnecter",
         login_btn: "Connexion Google",
+        save_file: "Sauvegarder mon dossier",
+
+        // Navigation Steps
+        nav_qualification: "Qualification",
+        nav_qualification_desc: "Sélection du type de visa",
+        nav_audit: "Audit IA",
+        nav_audit_desc: "Vérification documentaire",
+        nav_payment: "Validation",
+        nav_payment_desc: "Paiement & Dépôt",
+
+        // Sidebar CTA
+        cta_live_support: "Assistance Live",
+        cta_expert: "Parler à un expert",
+
+        // Input Area
+        input_placeholder: "Décrivez votre situation...",
+        input_listening: "Écoute en cours...",
+        mic_start: "Dicter un message",
+        mic_stop: "Arrêter d'écouter",
+        mic_denied: "Accès au microphone refusé. Veuillez vérifier les permissions de votre navigateur.",
 
         // Welcome
         welcome_msg: "Bonjour et bienvenue sur **Siam Visa Pro**.\n\nJe suis votre assistant expert en visas pour la Thaïlande. Mon rôle est de :\n1. Vous aider à choisir le bon visa.\n2. Vérifier votre dossier (Audit).\n3. Maximiser vos chances d'approbation.\n\nPour commencer, dites-moi :\n- Quelle est votre **nationalité** ?\n- Quel est le **but de votre séjour** (tourisme, travail, retraite...) ?\n- Combien de temps comptez-vous rester ?",
@@ -110,6 +130,26 @@ export const translations = {
         reset_confirm: "Do you really want to clear history and restart?",
         logout: "Logout",
         login_btn: "Google Login",
+        save_file: "Save my file",
+
+        // Navigation Steps
+        nav_qualification: "Qualification",
+        nav_qualification_desc: "Visa Type Selection",
+        nav_audit: "AI Audit",
+        nav_audit_desc: "Document Verification",
+        nav_payment: "Validation",
+        nav_payment_desc: "Payment & Submission",
+
+        // Sidebar CTA
+        cta_live_support: "Live Support",
+        cta_expert: "Talk to an expert",
+
+        // Input Area
+        input_placeholder: "Describe your situation...",
+        input_listening: "Listening...",
+        mic_start: "Dictate a message",
+        mic_stop: "Stop listening",
+        mic_denied: "Microphone access denied. Please check your browser permissions.",
 
         // Welcome
         welcome_msg: "Hello and welcome to **Siam Visa Pro**.\n\nI am your expert visa assistant for Thailand. My role is to:\n1. Help you choose the right visa.\n2. Verify your application (Audit).\n3. Maximize your chances of approval.\n\nTo start, tell me:\n- What is your **nationality**?\n- What is the **purpose of your stay** (tourism, work, retirement...)?\n- How long do you plan to stay?",
