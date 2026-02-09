@@ -73,7 +73,7 @@ export const startAuditSession = async (sessionId: string | null = null, skipWel
 
   // Initialize chat with system prompt
   chatSession = client.chats.create({
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-2.0-flash-exp',
     config: {
       systemInstruction: getSystemPrompt(currentUserEmail, currentLanguage),
       temperature: 0.2, // Low temperature for consistent auditing
@@ -108,7 +108,7 @@ export const resumeAuditSession = async (existingMessages: ChatMessage[], sessio
 
   // Re-initialize chat with previous history
   chatSession = client.chats.create({
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-2.0-flash-exp',
     config: {
       systemInstruction: getSystemPrompt(currentUserEmail, currentLanguage),
       temperature: 0.2,
@@ -168,7 +168,7 @@ export const sendMessageToAgent = async (
 
   try {
     chatSession = client.chats.create({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.0-flash-exp',
       config: {
         systemInstruction: getSystemPrompt(currentUserEmail, currentLanguage),
         temperature: 0.2, // Low temperature for consistent auditing

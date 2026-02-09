@@ -111,8 +111,8 @@ export class LiveAgent {
       }
 
       this.sessionPromise = this.ai.live.connect({
-        // Updated to match Chat model for consistency
-        model: 'gemini-3-flash-preview',
+        // Updated to matching stable Multimodal Live model
+        model: 'gemini-2.0-flash-exp',
         config: {
           // Must provide an array with a single Modality.AUDIO element
           responseModalities: [Modality.AUDIO],
