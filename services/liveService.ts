@@ -37,8 +37,9 @@ export class LiveAgent {
   private onTranscriptUpdate: ((update: TranscriptUpdate) => void) | null = null;
 
   constructor() {
-    const apiKey = process.env.API_KEY || import.meta.env.VITE_GEMINI_API_KEY;
-    console.log("LiveAgent Constructor - API Key Check:", apiKey ? "Present" : "Missing");
+    // Use dedicated Live API key (no referer restriction) with fallback to general key
+    const apiKey = import.meta.env.VITE_GEMINI_LIVE_API_KEY || import.meta.env.VITE_GEMINI_API_KEY;
+    console.log("[LiveAgent] API Key source:", import.meta.env.VITE_GEMINI_LIVE_API_KEY ? "LIVE_KEY" : "GENERAL_KEY");
 
     if (!apiKey) {
       console.error("GEMINI_API_KEY is missing from environment variables");
