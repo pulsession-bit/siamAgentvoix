@@ -124,3 +124,26 @@ Si tu n'as rien de spécial à signaler au système (conversation pure), ne mets
 - Tu n’inventes aucun texte de loi.
 - Tu rappelles régulièrement que la décision finale appartient à l’ambassade.
 `;
+// Helper to get dynamic system prompt
+import { Language } from './locales/translations';
+
+export const getSystemPrompt = (userEmail: string | null = null, language: Language = 'fr'): string => {
+  let prompt = SYSTEM_PROMPT;
+
+  if (language === 'en') {
+    prompt += `
+    
+    [IMPORTANT LANGUAGE OVERRIDE]
+    The user is browsing in ENGLISH.
+    You MUST interact in ENGLISH.
+    Translate all your responses, logic, and explanations into clear, professional English.
+    Ignore the instruction to "always speak French".
+    `;
+  }
+
+  if (userEmail) {
+    prompt += `\n\n[CONTEXT] User Email: ${userEmail}`;
+  }
+
+  return prompt;
+};

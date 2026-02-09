@@ -24,11 +24,12 @@ export const setCurrentLanguage = (lang: Language) => {
 const getClient = () => {
   if (!aiClient) {
     // API_KEY check is now also performed in App.tsx for more visible error handling
-    if (!process.env.API_KEY) {
+    const apiKey = process.env.API_KEY || import.meta.env.VITE_GEMINI_API_KEY;
+    if (!apiKey) {
       console.error("API_KEY is missing in getClient. This should have been caught earlier.");
       throw new Error("API Key missing");
     }
-    aiClient = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    aiClient = new GoogleGenAI({ apiKey });
   }
   return aiClient;
 };

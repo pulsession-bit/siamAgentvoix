@@ -31,9 +31,10 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose }) => {
     }
 
     return () => {
-      // Cleanup on unmount
+      // Cleanup on unmount (must clear ref for React StrictMode double-invoke)
       if (liveAgentRef.current) {
         liveAgentRef.current.disconnect();
+        liveAgentRef.current = null;
       }
     };
   }, []);
@@ -60,22 +61,30 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose }) => {
   const startCall = async () => {
     if (liveAgentRef.current) return;
 
-    liveAgentRef.current = new LiveAgent();
-    // Use the simplified connect signature (2 args)
-    await liveAgentRef.current.connect(
-      (newStatus) => {
-        // Map service status to UI status
-        if (newStatus === 'connected') setStatus('connected');
-        else if (newStatus === 'connecting') setStatus('connecting');
-        else if (newStatus === 'error' || newStatus === 'error_mic') setStatus('error');
-        // Fix: Don't close modal on disconnect, just reset to idle so user sees it ended
-        else if (newStatus === 'disconnected') setStatus('idle');
-      },
-      // Real-time Transcript Callback
-      (update) => {
-        setLiveTranscript(update);
-      }
-    );
+    try {
+      console.log("Attempting to initialize LiveAgent...");
+      liveAgentRef.current = new LiveAgent();
+
+      // Use the simplified connect signature (2 args)
+      await liveAgentRef.current.connect(
+        (newStatus) => {
+          console.log("Connection status changed:", newStatus);
+          // Map service status to UI status
+          if (newStatus === 'connected') setStatus('connected');
+          else if (newStatus === 'connecting') setStatus('connecting');
+          else if (newStatus === 'error' || newStatus === 'error_mic') setStatus('error');
+          // Fix: Don't close modal on disconnect, just reset to idle so user sees it ended
+          else if (newStatus === 'disconnected') setStatus('idle');
+        },
+        // Real-time Transcript Callback
+        (update) => {
+          setLiveTranscript(update);
+        }
+      );
+    } catch (e) {
+      console.error("Failed to start call:", e);
+      setStatus('error');
+    }
   };
 
   const endCall = () => {

@@ -37,10 +37,14 @@ export class LiveAgent {
   private onTranscriptUpdate: ((update: TranscriptUpdate) => void) | null = null;
 
   constructor() {
-    if (!process.env.API_KEY) {
+    const apiKey = process.env.API_KEY || import.meta.env.VITE_GEMINI_API_KEY;
+    console.log("LiveAgent Constructor - API Key Check:", apiKey ? "Present" : "Missing");
+
+    if (!apiKey) {
+      console.error("GEMINI_API_KEY is missing from environment variables");
       throw new Error("API Key missing");
     }
-    this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    this.ai = new GoogleGenAI({ apiKey });
   }
 
   async connect(
