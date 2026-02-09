@@ -73,6 +73,27 @@ export const translations = {
         // Summary
         summary_title: "Synthèse de l'Audit",
         generating_summary: "Génération de votre synthèse officielle...",
+        summary_subtitle: "Analyse détaillée du profil et recommandations",
+        val_targeted_visa: "Visa Ciblé",
+        val_visa_score: "Visa Score",
+        val_status_solid: "Dossier Solide",
+        val_status_risky: "Prudence Requise",
+        val_status_high_risk: "Risque Élevé",
+        val_synthesis: "Synthèse",
+        val_strengths: "Points Forts",
+        val_weaknesses: "Points d'Attention",
+        val_action_plan: "Plan d'Action Recommandé",
+        val_docs_required: "Documents Clés à Préparer",
+        btn_hide_summary: "Masquer la synthèse",
+
+        // Audit Score
+        audit_score_confidence: "Confiance",
+        audit_status_valid: "Dossier Conforme",
+        audit_status_invalid: "Dossier Incomplet",
+        audit_status_pending: "Analyse en cours",
+        audit_corrections_required: "Corrections requises :",
+        audit_missing_docs: "Documents manquants :",
+        audit_success_msg: "Tous les feux sont au vert. Vous pouvez procéder au paiement sécurisé pour finaliser votre demande.",
     },
     en: {
         // General
@@ -144,5 +165,26 @@ export const translations = {
         // Summary
         summary_title: "Audit Summary",
         generating_summary: "Generating your official summary...",
+        summary_subtitle: "Detailed profile analysis and recommendations",
+        val_targeted_visa: "Targeted Visa",
+        val_visa_score: "Visa Score",
+        val_status_solid: "Strong Application",
+        val_status_risky: "Caution Required",
+        val_status_high_risk: "High Risk",
+        val_synthesis: "Summary",
+        val_strengths: "Strengths",
+        val_weaknesses: "Attention Points",
+        val_action_plan: "Recommended Action Plan",
+        val_docs_required: "Key Documents to Prepare",
+        btn_hide_summary: "Hide Summary",
+
+        // Audit Score
+        audit_score_confidence: "Confidence",
+        audit_status_valid: "Valid Application",
+        audit_status_invalid: "Incomplete Application",
+        audit_status_pending: "Analysis in Progress",
+        audit_corrections_required: "Corrections required:",
+        audit_missing_docs: "Missing documents:",
+        audit_success_msg: "All lights are green. You can proceed to secure payment to finalize your application.",
     }
 };

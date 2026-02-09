@@ -391,7 +391,7 @@ function App() {
             {auditResult && step === AppStep.AUDIT && (
               <div className="p-4 bg-white border-b border-slate-200 flex-none overflow-y-auto max-h-[35%] shadow-sm">
                 <div className="max-w-3xl mx-auto">
-                  <AuditScore result={auditResult} />
+                  <AuditScore result={auditResult} lang={language} />
                 </div>
               </div>
             )}
@@ -411,7 +411,7 @@ function App() {
           {chatSummary && (
             <div className="absolute inset-0 z-40 bg-brand-light/95 backdrop-blur-md p-4 overflow-y-auto animate-in fade-in duration-300">
               <div className="max-w-5xl mx-auto">
-                <SummaryView summary={chatSummary} onClose={() => setChatSummary(null)} />
+                <SummaryView summary={chatSummary} onClose={() => setChatSummary(null)} lang={language} />
               </div>
             </div>
           )}

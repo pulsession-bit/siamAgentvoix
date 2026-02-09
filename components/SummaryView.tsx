@@ -3,12 +3,16 @@ import { ChatSummary } from '../types';
 import { CheckCircle2, AlertTriangle, FileText, Calendar, TrendingUp } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'; // Simple chart for score
 
+import { translations, Language } from '../locales/translations';
+
 interface SummaryProps {
     summary: ChatSummary;
     onClose?: () => void;
+    lang: Language;
 }
 
-const SummaryView: React.FC<SummaryProps> = ({ summary, onClose }) => {
+const SummaryView: React.FC<SummaryProps> = ({ summary, onClose, lang }) => {
+    const t = translations[lang];
     const scoreData = [
         { name: 'Score', value: summary.visa_score },
         { name: 'Remaining', value: 100 - summary.visa_score },
@@ -22,11 +26,11 @@ const SummaryView: React.FC<SummaryProps> = ({ summary, onClose }) => {
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-slate-100 pb-6">
                 <div>
-                    <h2 className="text-2xl font-bold text-brand-navy">Synthèse de votre Audit</h2>
-                    <p className="text-slate-500 mt-1">Analyse détaillée du profil et recommandations</p>
+                    <h2 className="text-2xl font-bold text-brand-navy">{t.summary_title}</h2>
+                    <p className="text-slate-500 mt-1">{t.summary_subtitle}</p>
                 </div>
                 <div className="mt-4 md:mt-0 px-4 py-2 bg-brand-light rounded-lg">
-                    <span className="text-xs text-slate-500 uppercase font-bold tracking-wider">Visa Ciblé</span>
+                    <span className="text-xs text-slate-500 uppercase font-bold tracking-wider">{t.val_targeted_visa}</span>
                     <div className="text-lg font-bold text-brand-blue">{summary.visa_type}</div>
                 </div>
             </div>
@@ -37,7 +41,7 @@ const SummaryView: React.FC<SummaryProps> = ({ summary, onClose }) => {
                 <div className="md:col-span-1 space-y-6">
                     {/* Score Card */}
                     <div className="bg-brand-navy p-6 rounded-2xl text-center text-white relative overflow-hidden">
-                        <h3 className="text-sm font-medium uppercase tracking-widest opacity-80 mb-4">Visa Score</h3>
+                        <h3 className="text-sm font-medium uppercase tracking-widest opacity-80 mb-4">{t.val_visa_score}</h3>
                         <div className="h-32 w-full relative flex items-center justify-center">
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
@@ -63,14 +67,14 @@ const SummaryView: React.FC<SummaryProps> = ({ summary, onClose }) => {
                             </div>
                         </div>
                         <div className="mt-2 text-xs opacity-70 px-2 text-center">
-                            {summary.visa_score > 75 ? "Dossier Solide" : summary.visa_score > 50 ? "Prudence Requise" : "Risque Élevé"}
+                            {summary.visa_score > 75 ? t.val_status_solid : summary.visa_score > 50 ? t.val_status_risky : t.val_status_high_risk}
                         </div>
                     </div>
 
                     {/* Narrative Summary */}
                     <div className="bg-slate-50 p-5 rounded-xl border border-slate-100">
                         <h3 className="font-bold text-brand-navy mb-2 text-sm flex items-center gap-2">
-                            <FileText size={16} /> Synthèse
+                            <FileText size={16} /> {t.val_synthesis}
                         </h3>
                         <p className="text-sm text-slate-600 leading-relaxed text-justify">
                             {summary.executive_summary}
@@ -85,7 +89,7 @@ const SummaryView: React.FC<SummaryProps> = ({ summary, onClose }) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <h3 className="font-bold text-green-700 mb-3 flex items-center gap-2 text-sm uppercase">
-                                <TrendingUp size={18} /> Points Forts
+                                <TrendingUp size={18} /> {t.val_strengths}
                             </h3>
                             <ul className="space-y-2">
                                 {summary.strengths.map((point, i) => (
@@ -98,7 +102,7 @@ const SummaryView: React.FC<SummaryProps> = ({ summary, onClose }) => {
                         </div>
                         <div>
                             <h3 className="font-bold text-red-600 mb-3 flex items-center gap-2 text-sm uppercase">
-                                <AlertTriangle size={18} /> Points d'Attention
+                                <AlertTriangle size={18} /> {t.val_weaknesses}
                             </h3>
                             <ul className="space-y-2">
                                 {summary.weaknesses.map((point, i) => (
@@ -115,7 +119,7 @@ const SummaryView: React.FC<SummaryProps> = ({ summary, onClose }) => {
                     <div>
                         <h3 className="font-bold text-brand-navy mb-4 flex items-center gap-2 border-l-4 border-brand-amber pl-3">
                             <Calendar size={20} className="text-brand-amber" />
-                            Plan d'Action Recommandé
+                            {t.val_action_plan}
                         </h3>
                         <div className="space-y-4">
                             {summary.action_plan.map((step, i) => (
@@ -143,7 +147,7 @@ const SummaryView: React.FC<SummaryProps> = ({ summary, onClose }) => {
                     {/* Docs Required */}
                     {summary.required_documents.length > 0 && (
                         <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-100">
-                            <h4 className="font-bold text-blue-800 text-xs uppercase mb-3 text-center">Documents Clés à Préparer</h4>
+                            <h4 className="font-bold text-blue-800 text-xs uppercase mb-3 text-center">{t.val_docs_required}</h4>
                             <div className="flex flex-wrap justify-center gap-2">
                                 {summary.required_documents.map((doc, i) => (
                                     <span key={i} className="px-3 py-1 bg-white text-blue-700 text-xs font-medium rounded-full shadow-sm border border-blue-100">
@@ -160,7 +164,7 @@ const SummaryView: React.FC<SummaryProps> = ({ summary, onClose }) => {
             {onClose && (
                 <div className="mt-8 text-center pt-6 border-t border-slate-100">
                     <button onClick={onClose} className="text-slate-400 hover:text-brand-navy text-sm font-medium transition-colors">
-                        Masquer la synthèse
+                        {t.btn_hide_summary}
                     </button>
                 </div>
             )}

@@ -4,11 +4,15 @@ import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer } from '
 import { AlertCircle, CheckCircle, XCircle } from 'lucide-react';
 import { AuditResult } from '../types';
 
+import { translations, Language } from '../locales/translations';
+
 interface AuditScoreProps {
   result: AuditResult;
+  lang: Language;
 }
 
-const AuditScore: React.FC<AuditScoreProps> = ({ result }) => {
+const AuditScore: React.FC<AuditScoreProps> = ({ result, lang }) => {
+  const t = translations[lang];
   const score = result.confidence_score || 0;
 
   // Use brand colors for chart: Green for high score, Amber for mid, Red for low
@@ -47,7 +51,7 @@ const AuditScore: React.FC<AuditScoreProps> = ({ result }) => {
           </ResponsiveContainer>
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
             <span className="text-2xl md:text-3xl font-bold text-brand-navy">{score}%</span>
-            <span className="text-[10px] md:text-xs text-slate-500 uppercase tracking-wide">Confiance</span>
+            <span className="text-[10px] md:text-xs text-slate-500 uppercase tracking-wide">{t.audit_score_confidence}</span>
           </div>
         </div>
 
@@ -59,15 +63,15 @@ const AuditScore: React.FC<AuditScoreProps> = ({ result }) => {
             {result.audit_status === 'PENDING' && <AlertCircle className="text-brand-amber w-6 h-6" />}
 
             <h3 className="text-xl font-bold text-brand-navy">
-              {result.audit_status === 'VALID' ? 'Dossier Conforme' :
-                result.audit_status === 'INVALID' ? 'Dossier Incomplet' : 'Analyse en cours'}
+              {result.audit_status === 'VALID' ? t.audit_status_valid :
+                result.audit_status === 'INVALID' ? t.audit_status_invalid : t.audit_status_pending}
             </h3>
           </div>
 
           <div className="space-y-4">
             {result.issues.length > 0 && (
               <div className="bg-red-50 border border-red-100 rounded-lg p-3">
-                <h4 className="text-sm font-semibold text-red-800 mb-2">Corrections requises :</h4>
+                <h4 className="text-sm font-semibold text-red-800 mb-2">{t.audit_corrections_required}</h4>
                 <ul className="list-disc list-inside text-sm text-red-700 space-y-1">
                   {result.issues.map((issue, idx) => (
                     <li key={idx}>{issue}</li>
@@ -78,7 +82,7 @@ const AuditScore: React.FC<AuditScoreProps> = ({ result }) => {
 
             {result.missing_docs.length > 0 && (
               <div className="bg-orange-50 border border-orange-100 rounded-lg p-3">
-                <h4 className="text-sm font-semibold text-orange-800 mb-2">Documents manquants :</h4>
+                <h4 className="text-sm font-semibold text-orange-800 mb-2">{t.audit_missing_docs}</h4>
                 <ul className="list-disc list-inside text-sm text-orange-700 space-y-1">
                   {result.missing_docs.map((doc, idx) => (
                     <li key={idx}>{doc}</li>
@@ -90,7 +94,7 @@ const AuditScore: React.FC<AuditScoreProps> = ({ result }) => {
             {result.audit_status === 'VALID' && (
               <div className="bg-green-50 border border-green-100 rounded-lg p-3">
                 <p className="text-sm text-green-800">
-                  Tous les feux sont au vert. Vous pouvez procéder au paiement sécurisé pour finaliser votre demande.
+                  {t.audit_success_msg}
                 </p>
               </div>
             )}
