@@ -14,7 +14,8 @@ interface CallModalProps {
   lang?: Language;
 }
 
-const CallModal: React.FC<CallModalProps> = ({ payload, onClose }) => {
+const CallModal: React.FC<CallModalProps> = ({ payload, onClose, lang = 'fr' }) => {
+  const en = lang === 'en';
   const [status, setStatus] = useState<'idle' | 'connecting' | 'connected' | 'error'>('idle');
   const [isMuted, setIsMuted] = useState(false);
   const [visualizerWidth, setVisualizerWidth] = useState(5); // Start small
@@ -105,7 +106,7 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose }) => {
         <div className="absolute inset-0 z-0">
           <img
             src="https://img.antiquiscore.com/global/Natt.webp"
-            alt="Secrétaire Siam Visa"
+            alt={en ? "Siam Visa Secretary" : "Secrétaire Siam Visa"}
             className="w-full h-full object-cover grayscale-[10%]"
           />
           {/* Gradient overlay for readability across the whole card */}
@@ -118,7 +119,7 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose }) => {
             <h2 className="text-xl font-bold text-brand-navy flex items-center gap-2">
               Siam Visa
               <span className="text-brand-navy/40 font-light mx-1">|</span>
-              <span className="font-medium text-lg">Canal Sécurisé</span>
+              <span className="font-medium text-lg">{en ? 'Secure Channel' : 'Canal Sécurisé'}</span>
               {status === 'connected' && (
                 <span className="flex items-center gap-1 ml-2 text-green-600">
                   <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
@@ -149,14 +150,14 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose }) => {
                 <Phone size={40} />
               </div>
               <div className="bg-white/40 backdrop-blur-sm p-4 rounded-xl">
-                <h3 className="text-lg font-bold text-brand-navy">Prêt à discuter ?</h3>
+                <h3 className="text-lg font-bold text-brand-navy">{en ? 'Ready to talk?' : 'Prêt à discuter ?'}</h3>
                 <p className="text-slate-800 text-sm mt-2 font-medium">
-                  {payload.notes || "Nous allons clarifier votre dossier ensemble."}
+                  {payload.notes || (en ? "Let's review your file together." : "Nous allons clarifier votre dossier ensemble.")}
                 </p>
               </div>
 
               <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 text-left border border-slate-200 shadow-sm">
-                <p className="text-xs text-slate-500 uppercase font-bold mb-1">Sujet de l'appel</p>
+                <p className="text-xs text-slate-500 uppercase font-bold mb-1">{en ? 'Call subject' : "Sujet de l'appel"}</p>
                 <div className="flex gap-2 flex-wrap">
                   <span className="px-2 py-1 bg-white border rounded text-xs text-slate-700 font-medium shadow-sm">{payload.visaType}</span>
                   <span className="px-2 py-1 bg-white border rounded text-xs text-slate-700 font-medium shadow-sm">{payload.reason}</span>
@@ -168,7 +169,7 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose }) => {
                 className="w-full bg-brand-amber hover:bg-brand-yellow text-brand-navy font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3"
               >
                 <Phone size={24} />
-                <span>Lancer l'appel</span>
+                <span>{en ? 'Start call' : "Lancer l'appel"}</span>
               </button>
             </div>
           )}
@@ -183,8 +184,8 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose }) => {
                 </div>
               </div>
               <div className="bg-white/80 backdrop-blur px-4 py-2 rounded-lg shadow-sm border border-white/50">
-                <p className="text-slate-800 font-bold">Établissement de la connexion...</p>
-                <p className="text-xs text-slate-500 mt-1">Gemini Live API Initializing</p>
+                <p className="text-slate-800 font-bold">{en ? 'Establishing connection...' : 'Établissement de la connexion...'}</p>
+                <p className="text-xs text-slate-500 mt-1">{en ? 'Gemini Live API Initializing' : 'Gemini Live API Initializing'}</p>
               </div>
             </div>
           )}
@@ -217,14 +218,14 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose }) => {
                       : 'bg-brand-navy/90 text-white'}
                    `}>
                     <span className="opacity-50 text-[10px] uppercase block mb-1">
-                      {liveTranscript.role === 'agent' ? 'Expert' : 'Vous'}
+                      {liveTranscript.role === 'agent' ? 'Expert' : (en ? 'You' : 'Vous')}
                     </span>
                     {liveTranscript.text}
                     {!liveTranscript.isFinal && <span className="animate-pulse">|</span>}
                   </div>
                 ) : (
                   <div className="text-slate-500 text-sm italic opacity-70 bg-white/50 px-4 py-2 rounded-full backdrop-blur-sm">
-                    En attente de parole...
+                    {en ? 'Waiting for speech...' : 'En attente de parole...'}
                   </div>
                 )}
               </div>
@@ -254,16 +255,16 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose }) => {
                 <X size={40} />
               </div>
               <div className="bg-white/90 p-4 rounded-xl shadow-sm border border-red-100">
-                <h3 className="text-lg font-bold text-slate-800">Échec de la connexion</h3>
+                <h3 className="text-lg font-bold text-slate-800">{en ? 'Connection failed' : 'Échec de la connexion'}</h3>
                 <p className="text-slate-500 text-sm mt-1">
-                  Impossible d'établir la liaison avec l'agent vocal. Vérifiez votre micro ou réessayez plus tard.
+                  {en ? 'Unable to connect to the voice agent. Check your microphone or try again later.' : "Impossible d'établir la liaison avec l'agent vocal. Vérifiez votre micro ou réessayez plus tard."}
                 </p>
               </div>
               <button
                 onClick={() => onClose(null)}
                 className="mt-4 px-6 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg font-medium transition-colors shadow-sm"
               >
-                Fermer
+                {en ? 'Close' : 'Fermer'}
               </button>
             </div>
           )}
