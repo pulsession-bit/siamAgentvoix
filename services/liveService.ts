@@ -172,6 +172,9 @@ export class LiveAgent {
 
   private async handleServerMessage(message: LiveServerMessage) {
     const serverContent = message.serverContent;
+    if (serverContent) {
+      // Log meaningful events
+    }
 
     // 1. Handle Transcription (Optimized for Low Latency)
     if (serverContent?.outputTranscription) {
