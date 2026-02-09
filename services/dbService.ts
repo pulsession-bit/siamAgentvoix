@@ -360,6 +360,7 @@ export const sendAuditEmail = async (
         const mailRef = collection(db, "mail");
         const score = summary.visa_score || audit?.confidence_score || 0;
         const visa = summary.visa_type || audit?.visa_type || 'Visa';
+        const auditDate = new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
         const htmlContent = `
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #334155;">
@@ -367,10 +368,21 @@ export const sendAuditEmail = async (
               <h1 style="color: #fff; margin: 0; font-size: 24px;">Siam Visa Pro</h1>
               <p style="color: #fbbf24; margin: 8px 0 0; font-weight: bold;">Rapport d'Audit Officiel</p>
             </div>
-            
+
             <div style="padding: 24px; background-color: #f8fafc; border: 1px solid #e2e8f0;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0;">
+                <div>
+                  <p style="margin: 0; font-size: 13px; color: #64748b;">Client</p>
+                  <p style="margin: 4px 0 0; font-weight: bold; color: #0f172a;">${to}</p>
+                </div>
+                <div style="text-align: right;">
+                  <p style="margin: 0; font-size: 13px; color: #64748b;">Date de l'audit</p>
+                  <p style="margin: 4px 0 0; font-weight: bold; color: #0f172a;">${auditDate}</p>
+                </div>
+              </div>
+
               <h2 style="color: #0f172a; margin-top: 0;">Résultat de votre analyse</h2>
-              
+
               <div style="display: flex; align-items: center; gap: 16px; background: #fff; padding: 16px; border-radius: 8px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
                 <div style="width: 64px; height: 64px; border-radius: 50%; background: ${score >= 70 ? '#effdf5' : score >= 50 ? '#fffbeb' : '#fef2f2'}; color: ${score >= 70 ? '#15803d' : score >= 50 ? '#b45309' : '#b91c1c'}; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; border: 2px solid currentColor;">
                   ${score}%
