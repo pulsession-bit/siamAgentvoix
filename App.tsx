@@ -79,6 +79,7 @@ function App() {
     auditResult, setAuditResult,
     chatSummary,
     userEmail: effectiveEmail,
+    language,
     addMessage,
   });
 

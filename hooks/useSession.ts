@@ -3,6 +3,7 @@ import { ChatMessage, AppStep, VisaType, AuditResult, ChatSummary } from '../typ
 import { startAuditSession, resumeAuditSession, isChatSessionActive, setCurrentUserEmail } from '../services/geminiService';
 import { saveSessionToFirestore } from '../services/dbService';
 import { AUDIT_SESSION_KEY } from '../contexts/AuthContext';
+import { Language } from '../locales/translations';
 
 // Use v2 key to align with AuthContext
 const STORAGE_KEY = AUDIT_SESSION_KEY;
@@ -29,6 +30,7 @@ interface UseSessionProps {
   setAuditResult: React.Dispatch<React.SetStateAction<AuditResult | null>>;
   chatSummary: ChatSummary | null;
   userEmail: string | null; // Read-only, managed by AuthContext
+  language: Language;
   addMessage: (text: string, sender: 'user' | 'agent' | 'system') => void;
 }
 
@@ -40,7 +42,34 @@ interface UseSessionReturn {
   clearSession: () => void;
 }
 
-function getWelcomeMessage(email: string | null): string {
+function getWelcomeMessage(email: string | null, lang: Language = 'fr'): string {
+  if (lang === 'en') {
+    const base = `Hello and welcome to **Siam Visa Pro**.
+
+I'm your expert assistant for Thailand visas. My role is to:
+1. Help you choose the right visa.
+2. Review your application (Audit).
+3. Maximize your chances of approval.`;
+
+    if (email) {
+      return `${base}
+
+I have your email: **${email}**.
+
+To get started, please provide:
+- Your **First and Last Name**.
+- Your **nationality**.
+- The **purpose of your stay** (tourism, work, retirement...) and expected duration.`;
+    }
+
+    return `${base}
+
+To get started and create your file, please provide:
+- Your **First Name, Last Name and Email** (so we can follow up if needed).
+- Your **nationality**.
+- The **purpose of your stay** (tourism, work, retirement...) and expected duration.`;
+  }
+
   const base = `Bonjour et bienvenue sur **Siam Visa Pro**.
 
 Je suis votre assistant expert en visas pour la Thaïlande. Mon rôle est de :
@@ -78,6 +107,7 @@ export function useSession({
   setAuditResult,
   chatSummary,
   userEmail, // Now read-only from AuthContext
+  language,
   addMessage,
 }: UseSessionProps): UseSessionReturn {
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -97,7 +127,7 @@ export function useSession({
     const initApp = async () => {
       try {
         if (!process.env.API_KEY) {
-          if (mounted) setInitializationError("Erreur: Clé API manquante dans l'environnement.");
+          if (mounted) setInitializationError(language === 'en' ? "Error: API key missing from environment." : "Erreur: Clé API manquante dans l'environnement.");
           return;
         }
 
@@ -136,7 +166,7 @@ export function useSession({
 
           // Show instant welcome message
           if (mounted && messages.length === 0) {
-            addMessage(getWelcomeMessage(userEmail), 'agent');
+            addMessage(getWelcomeMessage(userEmail, language), 'agent');
           }
 
           // Initialize Gemini in background
