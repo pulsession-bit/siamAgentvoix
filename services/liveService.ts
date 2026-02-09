@@ -116,13 +116,18 @@ export class LiveAgent {
             this.handleServerMessage(message);
           },
           onclose: (e: any) => {
-            console.log("[LiveAgent] >>> SESSION CLOSED", e ? JSON.stringify(e) : "(no details)");
+            console.log("[LiveAgent] >>> SESSION CLOSED");
+            console.log("[LiveAgent] Close code:", e?.code, "reason:", e?.reason, "wasClean:", e?.wasClean);
+            console.log("[LiveAgent] Close event type:", typeof e, "keys:", e ? Object.keys(e) : "null");
+            console.log("[LiveAgent] Close event raw:", e);
             onStatusChange('disconnected');
             this.disconnect();
           },
           onerror: (e: any) => {
-            console.error("[LiveAgent] >>> SESSION ERROR:", e);
-            console.error("[LiveAgent] Error details:", JSON.stringify(e, Object.getOwnPropertyNames(e || {})));
+            console.error("[LiveAgent] >>> SESSION ERROR");
+            console.error("[LiveAgent] Error raw:", e);
+            console.error("[LiveAgent] Error message:", e?.message);
+            console.error("[LiveAgent] Error code:", e?.code, "reason:", e?.reason);
             onStatusChange('error');
             this.disconnect();
           }
@@ -138,24 +143,37 @@ export class LiveAgent {
   }
 
   private startAudioInput() {
-    if (!this.inputAudioContext || !this.mediaStream || !this.sessionPromise) return;
+    console.log("[LiveAgent] startAudioInput called. Contexts:", !!this.inputAudioContext, !!this.mediaStream, !!this.sessionPromise);
+    if (!this.inputAudioContext || !this.mediaStream || !this.sessionPromise) {
+      console.warn("[LiveAgent] startAudioInput aborted - missing dependency");
+      return;
+    }
 
     this.inputSource = this.inputAudioContext.createMediaStreamSource(this.mediaStream);
-    // Use ScriptProcessor for raw PCM access
     this.processor = this.inputAudioContext.createScriptProcessor(4096, 1, 1);
 
+    let audioChunkCount = 0;
     this.processor.onaudioprocess = (e) => {
+      if (!this.isConnected) return;
       const inputData = e.inputBuffer.getChannelData(0);
       const pcmBlob = this.createBlob(inputData);
 
-      // CRITICAL: Always use the session promise to send inputs to avoid race conditions
       this.sessionPromise?.then((session) => {
-        session.sendRealtimeInput({ media: pcmBlob });
+        try {
+          session.sendRealtimeInput({ media: pcmBlob });
+          audioChunkCount++;
+          if (audioChunkCount <= 3) {
+            console.log("[LiveAgent] Audio chunk #" + audioChunkCount + " sent successfully");
+          }
+        } catch (sendErr) {
+          console.error("[LiveAgent] Error sending audio chunk:", sendErr);
+        }
       });
     };
 
     this.inputSource.connect(this.processor);
     this.processor.connect(this.inputAudioContext.destination);
+    console.log("[LiveAgent] Audio input pipeline connected");
   }
 
   private async handleServerMessage(message: LiveServerMessage) {
