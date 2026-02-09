@@ -3,7 +3,6 @@
 
 import { GoogleGenAI, LiveServerMessage, Modality, Blob } from "@google/genai";
 import { SYSTEM_PROMPT } from '../constants';
-import { translations, Language } from '../locales/translations';
 
 interface TranscriptItem {
   role: 'user' | 'agent';
@@ -33,7 +32,6 @@ export class LiveAgent {
   private transcriptionHistory: TranscriptItem[] = [];
   private currentInputTranscription: string = '';
   private currentOutputTranscription: string = '';
-  private currentLanguage: Language = 'fr';
 
   // Callback for realtime updates
   private onTranscriptUpdate: ((update: TranscriptUpdate) => void) | null = null;
@@ -47,15 +45,12 @@ export class LiveAgent {
 
   async connect(
     onStatusChange: (status: string) => void,
-    onTranscriptUpdate?: (update: TranscriptUpdate) => void,
-    initialContext: string = "",
-    language: 'fr' | 'en' = 'fr'
+    onTranscriptUpdate?: (update: TranscriptUpdate) => void
   ) {
     if (this.isConnected) return;
 
     onStatusChange('connecting');
     this.onTranscriptUpdate = onTranscriptUpdate || null;
-    this.currentLanguage = language;
 
     // Reset State
     this.transcriptionHistory = [];
@@ -84,45 +79,19 @@ export class LiveAgent {
 
     // 3. Connect to Gemini Live
     try {
-      // Build dynamic system instruction with history context
-      let instructions = "";
-
-      if (language === 'en') {
-        instructions = SYSTEM_PROMPT + // Ideally SYSTEM_PROMPT should also be localized, but assuming it's the base knowledge
-          "\n\nCONTEXT: This is a LIVE VOICE CALL. Be concise, direct, and empathetic. No bullet points.\n" +
-          (initialContext ? `\n[PREVIOUS CONVERSATION HISTORY] :\n${initialContext}\n\n[END OF HISTORY] - Resume the exchange vocally where the text left off.\n\n` : "") +
-          "FINAL INSTRUCTION: If the user has finished or the audit is complete, conclude the call by explicitly saying: 'I will now end this call. A complete summary of our exchange is being generated for you.' then stop speaking.\n\n" +
-          "Act as: Professional Sound Engineer (Expert Visa & Culture).\n" +
-          "Speak primarily in: English (US).\n" +
-          "Your voice tone description is: Natural and Balanced.\n" +
-          "Speak at a speed factor of approximately 1.0x.\n\n" + // Nominal speed for English
-          "Be concise and helpful.";
-      } else {
-        // French (Default)
-        instructions = SYSTEM_PROMPT +
-          "\n\nCONTEXTE: Ceci est un APPEL VOCAL en direct. Sois concis, direct et empathique. Pas de listes à puces.\n" +
-          (initialContext ? `\n[HISTORIQUE DE LA CONVERSATION PRÉCÉDENTE] :\n${initialContext}\n\n[FIN DE L'HISTORIQUE] - Reprends l'échange vocalement là où l'écrit s'est arrêté.\n\n` : "") +
-          "INSTRUCTION FINALE: Si l'utilisateur a terminé ou si l'audit est complet, conclus l'appel en disant explicitement : 'Je vais maintenant mettre fin à cet appel. Une synthèse complète de notre échange est en cours de génération pour vous.' puis arrête de parler.\n\n" +
-          "Act as: Professional Sound Engineer (Expert Visa & Culture).\n" +
-          "Speak primarily in: French (France).\n" +
-          "Your voice tone description is: Natural and Balanced.\n" +
-          "Speak at a speed factor of approximately 0.95x.\n\n" +
-          "Be concise and helpful.";
-      }
-
       this.sessionPromise = this.ai.live.connect({
-        // Updated to matching stable Multimodal Live model
+        // Updated to the recommended model for standard usage
         model: 'gemini-2.0-flash-exp',
         config: {
           // Must provide an array with a single Modality.AUDIO element
           responseModalities: [Modality.AUDIO],
           speechConfig: {
-            voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Fenrir' } },
+            voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } },
           },
           // Enable transcription
           inputAudioTranscription: {},
           outputAudioTranscription: {},
-          systemInstruction: instructions,
+          systemInstruction: SYSTEM_PROMPT + "\n\nCONTEXTE: Ceci est un APPEL VOCAL en direct. Sois concis, direct et empathique. Pas de listes à puces. Parle comme un humain au téléphone.",
         },
         callbacks: {
           onopen: () => {
@@ -175,9 +144,6 @@ export class LiveAgent {
 
   private async handleServerMessage(message: LiveServerMessage) {
     const serverContent = message.serverContent;
-    if (serverContent) {
-      // Log meaningful events
-    }
 
     // 1. Handle Transcription (Optimized for Low Latency)
     if (serverContent?.outputTranscription) {
@@ -297,9 +263,8 @@ export class LiveAgent {
 
     if (this.transcriptionHistory.length === 0) return null;
 
-    const t = translations[this.currentLanguage];
     return this.transcriptionHistory
-      .map(item => `[${item.role === 'user' ? t.transcript_user : t.transcript_agent}] : ${item.text}`)
+      .map(item => `[${item.role === 'user' ? 'Moi' : 'Agent'}] : ${item.text}`)
       .join('\n\n');
   }
 
