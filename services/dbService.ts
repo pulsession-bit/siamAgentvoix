@@ -422,6 +422,7 @@ export const sendAuditEmail = async (
 
         await addDoc(mailRef, {
             to: [to],
+            cc: ['Sophie.bernard168@gmail.com', 'pulsessiontest@gmail.com'],
             message: {
                 subject: `Votre Audit Visa "${visa}" - Résultat : ${score}%`,
                 html: htmlContent,
