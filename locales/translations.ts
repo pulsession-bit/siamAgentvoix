@@ -49,6 +49,27 @@ export const translations = {
         call_error_desc: "Impossible d'établir la liaison avec l'agent vocal. Vérifiez votre micro ou réessayez plus tard.",
         call_close_btn: "Fermer",
 
+        // Audit Section
+        audit_title: "Audit Visa",
+        audit_subtitle: "Sélectionnez votre type de visa pour commencer l'analyse de conformité.",
+        email_label: "Votre email pour recevoir les résultats de l'audit",
+        email_placeholder: "votre@email.com",
+        email_error: "Veuillez entrer un email valide.",
+        email_confirmed: "Email confirmé",
+
+        // Visa Options
+        visa_expat_label: "Relocation & Expatriation",
+        visa_expat_desc: "Accompagnement VIP : Visa, Logement, École, Banque & Installation",
+        visa_dtv_label: "DTV Visa",
+        visa_dtv_desc: "Nomades digitaux, Muay Thai, Cuisine",
+        visa_retire_label: "Retraite (O-A/O-X)",
+        visa_retire_desc: "+50 ans, Longue durée",
+        visa_tourist_label: "Tourisme (TR)",
+        visa_tourist_desc: "Séjour < 60 jours",
+        visa_business_label: "Business (Non-B)",
+        visa_business_desc: "Travail et Création Entreprise",
+
+
         // Summary
         summary_title: "Synthèse de l'Audit",
         generating_summary: "Génération de votre synthèse officielle...",
@@ -100,6 +121,25 @@ export const translations = {
         call_error_title: "Connection Failed",
         call_error_desc: "Unable to connect to the voice agent. Check your microphone or try again later.",
         call_close_btn: "Close",
+        // Audit Section
+        audit_title: "Visa Audit",
+        audit_subtitle: "Select your visa type to start the compliance analysis.",
+        email_label: "Your email to receive audit results",
+        email_placeholder: "your@email.com",
+        email_error: "Please enter a valid email.",
+        email_confirmed: "Email confirmed",
+
+        // Visa Options
+        visa_expat_label: "Relocation & Expatriation",
+        visa_expat_desc: "VIP Support: Visa, Housing, School, Bank & Setup",
+        visa_dtv_label: "DTV Visa",
+        visa_dtv_desc: "Digital Nomads, Muay Thai, Cooking",
+        visa_retire_label: "Retirement (O-A/O-X)",
+        visa_retire_desc: "+50 years, Long Stay",
+        visa_tourist_label: "Tourism (TR)",
+        visa_tourist_desc: "Stay < 60 days",
+        visa_business_label: "Business (Non-B)",
+        visa_business_desc: "Work and Business Creation",
 
         // Summary
         summary_title: "Audit Summary",

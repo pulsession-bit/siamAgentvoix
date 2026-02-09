@@ -1,48 +1,52 @@
 import React from 'react';
 import { VisaType } from '../types';
 import { Briefcase, Plane, Sun, Users, Home } from 'lucide-react';
+import { translations, Language } from '../locales/translations';
 
 interface VisaSelectProps {
   onSelect: (type: VisaType) => void;
   selected: VisaType;
   disabled?: boolean;
+  lang: Language;
 }
 
-const VisaSelect: React.FC<VisaSelectProps> = ({ onSelect, selected, disabled = false }) => {
+const VisaSelect: React.FC<VisaSelectProps> = ({ onSelect, selected, disabled = false, lang }) => {
+  const t = translations[lang];
+
   const options: { type: VisaType; label: string; icon: React.ReactNode; desc: string; color: string }[] = [
     {
       type: 'Expatriation',
-      label: 'Relocation & Expatriation',
+      label: t.visa_expat_label,
       icon: <Home className="w-6 h-6" />,
-      desc: 'Accompagnement VIP : Visa, Logement, École, Banque & Installation',
+      desc: t.visa_expat_desc,
       color: 'bg-indigo-50 text-indigo-600'
     },
     {
       type: 'DTV',
-      label: 'DTV Visa',
+      label: t.visa_dtv_label,
       icon: <Briefcase className="w-6 h-6" />,
-      desc: 'Nomades digitaux, Muay Thai, Cuisine',
+      desc: t.visa_dtv_desc,
       color: 'bg-blue-50 text-blue-600'
     },
     {
       type: 'Retirement',
-      label: 'Retraite (O-A/O-X)',
+      label: t.visa_retire_label,
       icon: <Users className="w-6 h-6" />,
-      desc: '+50 ans, Longue durée',
+      desc: t.visa_retire_desc,
       color: 'bg-green-50 text-green-600'
     },
     {
       type: 'Tourism',
-      label: 'Tourisme (TR)',
+      label: t.visa_tourist_label,
       icon: <Plane className="w-6 h-6" />,
-      desc: 'Séjour < 60 jours',
+      desc: t.visa_tourist_desc,
       color: 'bg-sky-50 text-sky-600'
     },
     {
       type: 'Business',
-      label: 'Business (Non-B)',
+      label: t.visa_business_label,
       icon: <Sun className="w-6 h-6" />,
-      desc: 'Travail et Création Entreprise',
+      desc: t.visa_business_desc,
       color: 'bg-amber-50 text-amber-600'
     },
   ];

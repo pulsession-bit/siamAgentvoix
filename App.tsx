@@ -89,7 +89,7 @@ function App() {
   const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isValidEmail(capturedEmail)) {
-      setEmailError('Veuillez entrer un email valide.');
+      setEmailError(t.email_error);
       return;
     }
     setEmailError('');
@@ -361,10 +361,10 @@ function App() {
             <div className="absolute inset-0 z-50 bg-brand-navy flex flex-col items-center justify-start md:justify-center p-6 pt-32 md:pt-6 overflow-y-auto">
               <div className="text-center mb-8 max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-5 duration-700">
                 <h1 className="text-3xl md:text-5xl font-black text-white mb-4 drop-shadow-sm tracking-tight leading-tight">
-                  Audit Visa
+                  {t.audit_title}
                 </h1>
                 <p className="text-lg text-white/80 font-medium">
-                  Sélectionnez votre type de visa pour commencer l'analyse de conformité.
+                  {t.audit_subtitle}
                 </p>
               </div>
 
@@ -373,7 +373,7 @@ function App() {
                 <div className="w-full max-w-md mx-auto mb-8 animate-in fade-in slide-in-from-bottom-3 duration-500">
                   <form onSubmit={handleEmailSubmit} className="flex flex-col gap-2">
                     <label className="text-sm text-white/70 font-medium text-center">
-                      Votre email pour recevoir les résultats de l'audit
+                      {t.email_label}
                     </label>
                     <div className="flex gap-2">
                       <div className="relative flex-1">
@@ -385,7 +385,7 @@ function App() {
                             setCapturedEmail(e.target.value);
                             if (emailError) setEmailError('');
                           }}
-                          placeholder="votre@email.com"
+                          placeholder={t.email_placeholder}
                           className="w-full bg-white text-brand-navy placeholder-slate-400 font-medium border-0 rounded-xl pl-10 pr-4 py-3 focus:ring-2 focus:ring-brand-amber focus:outline-none transition-all text-base"
                           autoComplete="email"
                         />
@@ -402,13 +402,13 @@ function App() {
                       <p className="text-red-400 text-xs text-center mt-1">{emailError}</p>
                     )}
                     {isValidEmail(capturedEmail) && !emailError && (
-                      <p className="text-green-400 text-xs text-center mt-1">Email confirm&eacute;</p>
+                      <p className="text-green-400 text-xs text-center mt-1">{t.email_confirmed}</p>
                     )}
                   </form>
                 </div>
               )}
 
-              <VisaSelect selected={visaType} onSelect={handleVisaSelect} disabled={!effectiveEmail} />
+              <VisaSelect selected={visaType} onSelect={handleVisaSelect} disabled={!effectiveEmail} lang={language} />
             </div>
           )}
 
