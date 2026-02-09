@@ -4,7 +4,7 @@
 import { GoogleGenAI, GenerateContentResponse, Chat, Content } from "@google/genai";
 import { getSystemPrompt } from '../constants';
 import { AuditResult, FileAttachment, AgentAction, ChatMessage } from '../types';
-import { Language } from '../locales/translations';
+import { translations, Language } from '../locales/translations';
 
 let aiClient: GoogleGenAI | null = null;
 // Use Chat type instead of ChatSession as per @google/genai guidelines
@@ -119,7 +119,7 @@ export const resumeAuditSession = async (existingMessages: ChatMessage[], sessio
   if (sessionId) {
     console.log(`Resuming Gemini session for Session ID: ${sessionId}`);
   }
-  console.log("Session Gemini restaurée avec succès.");
+  console.log("Gemini session restored successfully.");
 };
 
 /**
@@ -243,7 +243,7 @@ export const sendMessageToAgent = async (
   } catch (error) {
     console.error("Gemini Error:", error);
     return {
-      text: "Une erreur technique est survenue lors de l'analyse. Veuillez réessayer. (Réinitialisation session)",
+      text: translations[currentLanguage].analysis_error,
       auditResult: null,
       action: null
     };

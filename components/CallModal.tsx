@@ -264,7 +264,7 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose, chatContext = "
         {/* Footer */}
         <div className="bg-transparent p-3 text-center border-t border-slate-200/50 relative z-10">
           <p className="text-[10px] text-slate-400 uppercase tracking-widest">
-            Powered by Google Gemini Live 2.5
+            Powered by Google Gemini Live 3.0
           </p>
         </div>
 

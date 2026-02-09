@@ -3,6 +3,7 @@
 
 import { GoogleGenAI, LiveServerMessage, Modality, Blob } from "@google/genai";
 import { SYSTEM_PROMPT } from '../constants';
+import { translations, Language } from '../locales/translations';
 
 interface TranscriptItem {
   role: 'user' | 'agent';
@@ -32,6 +33,7 @@ export class LiveAgent {
   private transcriptionHistory: TranscriptItem[] = [];
   private currentInputTranscription: string = '';
   private currentOutputTranscription: string = '';
+  private currentLanguage: Language = 'fr';
 
   // Callback for realtime updates
   private onTranscriptUpdate: ((update: TranscriptUpdate) => void) | null = null;
@@ -53,6 +55,7 @@ export class LiveAgent {
 
     onStatusChange('connecting');
     this.onTranscriptUpdate = onTranscriptUpdate || null;
+    this.currentLanguage = language;
 
     // Reset State
     this.transcriptionHistory = [];
@@ -108,8 +111,8 @@ export class LiveAgent {
       }
 
       this.sessionPromise = this.ai.live.connect({
-        // Updated to the recommended gemini-2.5-flash-native-audio-preview-12-2025 model
-        model: 'gemini-2.0-flash-exp',
+        // Updated to match Chat model for consistency
+        model: 'gemini-3-flash-preview',
         config: {
           // Must provide an array with a single Modality.AUDIO element
           responseModalities: [Modality.AUDIO],
@@ -294,8 +297,9 @@ export class LiveAgent {
 
     if (this.transcriptionHistory.length === 0) return null;
 
+    const t = translations[this.currentLanguage];
     return this.transcriptionHistory
-      .map(item => `[${item.role === 'user' ? 'Moi' : 'Agent'}] : ${item.text}`)
+      .map(item => `[${item.role === 'user' ? t.transcript_user : t.transcript_agent}] : ${item.text}`)
       .join('\n\n');
   }
 

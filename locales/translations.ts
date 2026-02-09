@@ -5,6 +5,11 @@ export const translations = {
         // General
         loading_app: "Chargement de l'expert...",
         loading_error: "Erreur d'initialisation",
+        analysis_error: "Une erreur technique est survenue lors de l'analyse. Veuillez réessayer. (Réinitialisation session)",
+
+        // Live Transcript
+        transcript_user: "Moi",
+        transcript_agent: "Agent",
 
         // Sidebar
         reset_audit: "Réinitialiser l'audit",
@@ -52,6 +57,11 @@ export const translations = {
         // General
         loading_app: "Loading expert...",
         loading_error: "Initialization Error",
+        analysis_error: "A technical error occurred during analysis. Please try again. (Session Reset)",
+
+        // Live Transcript
+        transcript_user: "Me",
+        transcript_agent: "Agent",
 
         // Sidebar
         reset_audit: "Reset Audit",
