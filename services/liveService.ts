@@ -99,7 +99,7 @@ export class LiveAgent {
         config: {
           responseModalities: [Modality.AUDIO],
           speechConfig: {
-            voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } },
+            voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Puck' } },
           },
           inputAudioTranscription: {},
           outputAudioTranscription: {},
