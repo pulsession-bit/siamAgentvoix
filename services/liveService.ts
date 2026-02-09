@@ -84,8 +84,8 @@ export class LiveAgent {
     // 3. Connect to Gemini Live
     try {
       this.sessionPromise = this.ai.live.connect({
-        // Updated to the recommended model for standard usage
-        model: 'gemini-2.0-flash-exp',
+        // Live API requires native audio model (gemini-2.0-flash-exp only supports text)
+        model: 'gemini-2.5-flash-native-audio-preview-12-2025',
         config: {
           // Must provide an array with a single Modality.AUDIO element
           responseModalities: [Modality.AUDIO],
