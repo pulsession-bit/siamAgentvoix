@@ -307,15 +307,60 @@ export const getSessionFromFirestore = async (email: string) => {
 export const getCasesByLead = async (email: string): Promise<CaseData[]> => {
     if (!email) return [];
     try {
-        const safeEmail = email.toLowerCase();
-        const q = query(
-            collection(db, "cases"),
-            where("lead_id", "==", safeEmail),
-            orderBy("last_event_at", "desc"),
-            limit(10)
-        );
-        const snapshot = await getDocs(q);
-        return snapshot.docs.map(d => ({ case_id: d.id, ...d.data() } as CaseData));
+        const safeEmail = email.toLowerCase().trim();
+        const casesRef = collection(db, "cases");
+
+        // Strategy: Try the optimized query (requires index), fallback to simple query if it fails
+        let caseResults: CaseData[] = [];
+        try {
+            const q = query(
+                casesRef,
+                where("lead_id", "==", safeEmail),
+                orderBy("last_event_at", "desc"),
+                limit(20)
+            );
+            const snapshot = await getDocs(q);
+            caseResults = snapshot.docs.map(d => ({ case_id: d.id, ...d.data() } as CaseData));
+        } catch (indexError: any) {
+            console.warn("[getCasesByLead] Compound query failed, falling back to simple query:", indexError.message);
+            const simpleQ = query(casesRef, where("lead_id", "==", safeEmail), limit(50));
+            const snapshot = await getDocs(simpleQ);
+            caseResults = snapshot.docs.map(d => ({ case_id: d.id, ...d.data() } as CaseData));
+        }
+
+        // 2. Fetch from LEGACY audit_sessions (for backward compatibility)
+        const legacyRef = collection(db, "audit_sessions");
+        const legacyQ = query(legacyRef, where("email", "==", safeEmail), limit(10));
+        const legacySnapshot = await getDocs(legacyQ);
+
+        const legacyResults: CaseData[] = legacySnapshot.docs.map(d => {
+            const data = d.data();
+            return {
+                case_id: d.id,
+                lead_id: data.email,
+                intent: data.visa_type || 'Visa',
+                status: data.audit_status || 'LEGACY',
+                confidence_score: data.audit_score || 0,
+                last_event_at: data.updated_at || new Date().toISOString(),
+                created_at: data.updated_at || new Date().toISOString(),
+                owner_uid: null,
+                site_id: 'siamvisapro',
+                next_action_at: null
+            };
+        });
+
+        // 3. MERGE & SORT
+        const merged = [...caseResults, ...legacyResults];
+
+        // Remove duplicates by session_id/case_id if they exist in both (unlikely but safe)
+        const unique = Array.from(new Map(merged.map(item => [item.case_id, item])).values());
+
+        return unique.sort((a, b) => {
+            const dateA = new Date(a.last_event_at || 0).getTime();
+            const dateB = new Date(b.last_event_at || 0).getTime();
+            return dateB - dateA;
+        }).slice(0, 20);
+
     } catch (e) {
         console.error("Error fetching cases:", e);
         return [];

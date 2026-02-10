@@ -371,16 +371,25 @@ function App() {
               </div>
             </div>
           </div>
-          <button
-            onClick={handleManualCallRequest}
-            className="w-10 h-10 rounded-full border-2 border-brand-amber overflow-hidden bg-white shadow-lg relative group"
-          >
-            <img src="https://img.antiquiscore.com/global/Natt.webp" alt="Expert" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-black/10 group-active:bg-brand-amber/30 transition-colors" />
-            <div className="absolute bottom-0 right-0 bg-brand-amber text-brand-navy p-0.5 rounded-full border border-white">
-              <Phone size={10} />
-            </div>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsHistoryOpen(true)}
+              className="w-10 h-10 rounded-full flex items-center justify-center bg-slate-800 text-brand-amber border border-slate-700 shadow-lg active:scale-95 transition-transform"
+              title={t.history_title}
+            >
+              <History size={20} />
+            </button>
+            <button
+              onClick={handleManualCallRequest}
+              className="w-10 h-10 rounded-full border-2 border-brand-amber overflow-hidden bg-white shadow-lg relative group active:scale-95 transition-transform"
+            >
+              <img src="https://img.antiquiscore.com/global/Natt.webp" alt="Expert" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-black/10 group-active:bg-brand-amber/30 transition-colors" />
+              <div className="absolute bottom-0 right-0 bg-brand-amber text-brand-navy p-0.5 rounded-full border border-white">
+                <Phone size={10} />
+              </div>
+            </button>
+          </div>
         </header>
 
         <main className="flex-1 flex flex-col overflow-hidden relative">
