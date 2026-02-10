@@ -12,34 +12,42 @@ service cloud.firestore {
       return request.auth.uid == userId;
     }
 
+    function isEmailOwner(email) {
+      return isAuthenticated() && request.auth.token.email == email;
+    }
+
+    // --- Users (Profiles) ---
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId);
+    }
+
     // --- Leads (Users Identities) ---
     // Users can read/write their own lead document (email based ID)
     match /leads/{email} {
-      allow read, write: if true; // TEMPORARY: Allow all for dev, tighten for prod
-      // allow read, write: if isAuthenticated() && (request.auth.token.email == email || request.auth.token.email_verified);
+      allow read, write: if isEmailOwner(email);
     }
 
     // --- Audit Sessions (Legacy) ---
     match /audit_sessions/{sessionId} {
-      allow read, write: if true; // TEMPORARY: Allow all for dev
-      // allow read, write: if isAuthenticated();
+      allow read, write: if isAuthenticated();
     }
 
     // --- Cases (New CRM) ---
     match /cases/{caseId} {
-      allow read, write: if true; // TEMPORARY: Allow all for dev
-      // allow create: if isAuthenticated();
-      // allow read, update: if isAuthenticated() && (resource.data.lead_id == request.auth.token.email || resource.data.lead_id == request.auth.uid);
+      allow create: if isAuthenticated();
+      allow read, update: if isAuthenticated();
       
       // --- Events (Sub-collection) ---
       match /events/{eventId} {
-        allow read, write: if true; // TEMPORARY
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated();
       }
     }
 
     // --- Mail Trigger (Extension) ---
     match /mail/{mailId} {
-      allow create: if true; // Allow triggering emails for testing
+      allow create: if isAuthenticated();
     }
   }
 }

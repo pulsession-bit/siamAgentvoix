@@ -42,23 +42,11 @@ interface UseSessionReturn {
   clearSession: () => void;
 }
 
-function getWelcomeMessage(email: string | null, lang: Language = 'fr'): string {
+function getWelcomeMessage(lang: Language = 'fr'): string {
   if (lang === 'en') {
-    if (email) {
-      return `Hello! I'm your **Siam Visa Pro** assistant, specialized in Thailand visas.
-
-What is your project in Thailand? (tourism, work, retirement, studies...)`;
-    }
-
     return `Hello! I'm your **Siam Visa Pro** assistant, specialized in Thailand visas.
 
 What is your project in Thailand? (tourism, work, retirement, studies...)`;
-  }
-
-  if (email) {
-    return `Bonjour ! Je suis votre assistant **Siam Visa Pro**, spécialisé en visas pour la Thaïlande.
-
-Quel est votre projet en Thaïlande ? (tourisme, travail, retraite, études...)`;
   }
 
   return `Bonjour ! Je suis votre assistant **Siam Visa Pro**, spécialisé en visas pour la Thaïlande.
@@ -136,7 +124,7 @@ export function useSession({
 
           // Show instant welcome message
           if (mounted && messages.length === 0) {
-            addMessage(getWelcomeMessage(userEmail, language), 'agent');
+            addMessage(getWelcomeMessage(language), 'agent');
           }
 
           // Initialize Gemini in background

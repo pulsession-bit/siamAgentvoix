@@ -238,7 +238,7 @@ export const saveSessionToFirestore = async (email: string, sessionData: any) =>
 
             // Only ingest if we have meaningful audit data
             if (sessionData.auditResult || sessionData.chatSummary) {
-                const ingressEvent = auditSessionToIngress(
+                const ingressEvent = await auditSessionToIngress(
                     { ...auditData, session_id: sessionIdForIngress },
                     {
                         site_id: 'siamvisapro',

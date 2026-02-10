@@ -1,5 +1,5 @@
 import { db } from './firebaseConfig';
-import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, getDoc, serverTimestamp, collection, query, where, getDocs, limit } from 'firebase/firestore';
 import type { UserProfile } from '../contexts/AuthContext';
 
 // Sanitize object to remove undefined values (Firestore doesn't accept them)
@@ -79,17 +79,25 @@ export const getUserFromFirestore = async (uid: string): Promise<UserProfile | n
 
 /**
  * Get user profile from Firestore by email
+ * Performs a Firestore query on the `email` field in the `users` collection.
  */
 export const getUserByEmail = async (email: string): Promise<UserProfile | null> => {
   if (!email) return null;
 
   try {
-    // Note: This requires an index on 'email' field in Firestore
-    // For now, we use UID-based lookup which is more efficient
-    console.warn('getUserByEmail: Use getUserFromFirestore with UID for better performance');
+    const safeEmail = email.toLowerCase().trim();
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, where('email', '==', safeEmail), limit(1));
+    const snapshot = await getDocs(q);
+
+    if (!snapshot.empty) {
+      return snapshot.docs[0].data() as UserProfile;
+    }
+
     return null;
   } catch (error) {
     console.error('Error getting user by email:', error);
     return null;
   }
 };
+

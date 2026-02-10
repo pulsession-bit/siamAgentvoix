@@ -1,9 +1,6 @@
 
 // services/ingressAdapter.ts
-
-// NOTE: crypto is not available in the browser, so we use a simple deterministic hash for event_id.
-// If running in Node.js, you can uncomment the import and use crypto.
-// import crypto from "crypto";
+// Uses browser-native crypto.subtle for SHA-256 event ID hashing
 
 export type IngressEventType =
     | "AUDIT_COMPLETED"
@@ -35,21 +32,20 @@ export interface IngressEvent<T = any> {
     summary?: any;
 }
 
-// Simple deterministic hash for browser compatibility (Fnv1a-like or similar)
-// Replaces crypto.createHash("sha1") to avoid polyfill issues in Vite/Browser
-function sha1(str: string): string {
-    let hash = 0;
-    if (str.length === 0) return hash.toString(16);
-    for (let i = 0; i < str.length; i++) {
-        const char = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convert to 32bit integer
-    }
-    return Math.abs(hash).toString(16).padStart(8, '0');
+// Proper SHA-256 hash using browser-native crypto.subtle API
+// Returns first 16 hex chars for a compact but collision-resistant ID
+async function sha256(str: string): Promise<string> {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(str);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashHex.substring(0, 16); // 16 hex chars = 64 bits — sufficient for event IDs
 }
 
-function makeEventId(source: IngressSource, source_id: string) {
-    return `${source.toLowerCase()}_${sha1(`${source}:${source_id}`)}`;
+async function makeEventId(source: IngressSource, source_id: string) {
+    const hash = await sha256(`${source}:${source_id}`);
+    return `${source.toLowerCase()}_${hash}`;
 }
 
 function lcEmail(v?: string) {
@@ -78,15 +74,13 @@ export interface AuditPayload {
     ready_for_payment: boolean;
 }
 
-export const auditSessionToIngress = (
+export const auditSessionToIngress = async (
     session: LegacyAuditSession,
     opts?: { site_id?: string; source_id?: string; occurred_at?: string }
-): IngressEvent<AuditPayload> => {
+): Promise<IngressEvent<AuditPayload>> => {
     const result = session.ai_data?.audit_result;
 
     const source: IngressSource = "WEB_CHAT";
-    // Fallback to email if session_id is missing is DANGEROUS but handled by caller or opts
-    // But strict requirement: session_id OR opts.source_id
     const source_id = opts?.source_id || session.session_id;
 
     if (!source_id) {
@@ -107,7 +101,7 @@ export const auditSessionToIngress = (
 
     return {
         schema_version: "ingress_event_v1",
-        event_id: makeEventId(source, source_id),
+        event_id: await makeEventId(source, source_id),
         type: "AUDIT_COMPLETED",
         source,
         source_id,
@@ -150,10 +144,10 @@ export interface AppointmentPayload {
     status?: string;
 }
 
-export const appointmentToIngress = (
+export const appointmentToIngress = async (
     webhook: CalendlyWebhook,
     opts?: { site_id?: string }
-): IngressEvent<AppointmentPayload> => {
+): Promise<IngressEvent<AppointmentPayload>> => {
     const source: IngressSource = "CALENDLY";
     const source_id = webhook.payload.uri; // stable
     const occurred_at = webhook.payload.scheduled_event.start_time; // closest “event time”
@@ -166,7 +160,7 @@ export const appointmentToIngress = (
 
     return {
         schema_version: "ingress_event_v1",
-        event_id: makeEventId(source, source_id),
+        event_id: await makeEventId(source, source_id),
         type: "APPOINTMENT_BOOKED",
         source,
         source_id,
@@ -190,9 +184,9 @@ export const appointmentToIngress = (
 
 /* ---------- Unified ---------- */
 
-export function toIngressEvent(input: LegacyAuditSession): IngressEvent<AuditPayload>;
-export function toIngressEvent(input: CalendlyWebhook): IngressEvent<AppointmentPayload>;
-export function toIngressEvent(input: any): IngressEvent<any> {
+export function toIngressEvent(input: LegacyAuditSession): Promise<IngressEvent<AuditPayload>>;
+export function toIngressEvent(input: CalendlyWebhook): Promise<IngressEvent<AppointmentPayload>>;
+export async function toIngressEvent(input: any): Promise<IngressEvent<any>> {
     // Simple heuristic: Calendly payloads have an "event" string field like "invitee.created"
     if (input?.event && input?.payload?.scheduled_event?.start_time && input?.payload?.uri) {
         return appointmentToIngress(input as CalendlyWebhook);

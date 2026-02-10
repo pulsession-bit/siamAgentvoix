@@ -21,6 +21,29 @@ export const setCurrentLanguage = (lang: Language) => {
   currentLanguage = lang;
 };
 
+// --- Simple Rate Limiter ---
+const RATE_LIMIT_MAX = 10; // max requests per window
+const RATE_LIMIT_WINDOW_MS = 60_000; // 60 seconds
+let rateLimitTokens = RATE_LIMIT_MAX;
+let rateLimitLastRefill = Date.now();
+
+function checkRateLimit(): void {
+  const now = Date.now();
+  const elapsed = now - rateLimitLastRefill;
+
+  // Refill tokens based on elapsed time
+  if (elapsed >= RATE_LIMIT_WINDOW_MS) {
+    rateLimitTokens = RATE_LIMIT_MAX;
+    rateLimitLastRefill = now;
+  }
+
+  if (rateLimitTokens <= 0) {
+    throw new Error('Trop de requêtes. Veuillez patienter quelques secondes avant de réessayer.');
+  }
+
+  rateLimitTokens--;
+}
+
 const getClient = () => {
   if (!aiClient) {
     // API_KEY check is now also performed in App.tsx for more visible error handling
@@ -161,6 +184,7 @@ export const sendMessageToAgent = async (
   images: FileAttachment[] = [],
   previousHistory: ChatMessage[] = []
 ): Promise<AgentResponse> => {
+  checkRateLimit();
   const client = getClient();
 
   // Re-initialize chat session with full history for every request
@@ -254,6 +278,7 @@ export const sendMessageToAgent = async (
 // New function to generate a structured summary of the chat
 export const generateChatSummary = async (): Promise<import('../types').ChatSummary | null> => {
   if (!chatSession) return null;
+  checkRateLimit();
 
   try {
     const prompt = currentLanguage === 'en' ? `

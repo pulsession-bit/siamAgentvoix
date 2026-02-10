@@ -19,6 +19,19 @@ export default defineConfig(({ mode }) => {
       alias: {
         '@': path.resolve(__dirname, '.'),
       }
-    }
+    },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'vendor-firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore'],
+            'vendor-genai': ['@google/genai'],
+            'vendor-charts': ['recharts'],
+            'vendor-markdown': ['react-markdown', 'remark-gfm'],
+          },
+        },
+      },
+    },
   };
 });
+
