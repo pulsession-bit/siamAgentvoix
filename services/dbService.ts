@@ -19,7 +19,7 @@ import {
     LegacyAuditSession,
     AuditPayload
 } from './ingressAdapter';
-import { ChatSummary, AuditResult } from '../types';
+import { ChatSummary, AuditResult, CaseData } from '../types';
 
 const sanitize = (obj: any) => {
     try {
@@ -33,19 +33,6 @@ const sanitize = (obj: any) => {
 // ============================================================================
 // CASE RESOLUTION LOGIC (SCHEMA.md Section 3)
 // ============================================================================
-
-interface CaseData {
-    case_id: string;
-    lead_id: string;
-    intent: string;
-    status: string;
-    owner_uid: string | null;
-    site_id: string;
-    confidence_score: number;
-    last_event_at: string;
-    next_action_at: string | null;
-    created_at: string;
-}
 
 const CASE_MERGE_WINDOW_DAYS = 30;
 
@@ -384,8 +371,8 @@ export const sendAuditEmail = async (
               <h2 style="color: #0f172a; margin-top: 0;">Résultat de votre analyse</h2>
 
               <div style="display: flex; align-items: center; gap: 16px; background: #fff; padding: 16px; border-radius: 8px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                <div style="width: 64px; height: 64px; border-radius: 50%; background: ${score >= 70 ? '#effdf5' : score >= 50 ? '#fffbeb' : '#fef2f2'}; color: ${score >= 70 ? '#15803d' : score >= 50 ? '#b45309' : '#b91c1c'}; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; border: 2px solid currentColor;">
-                  ${score}%
+                <div style="width: 64px; height: 64px; border-radius: 50%; background: ${score >= 70 ? '#effdf5' : score >= 50 ? '#fffbeb' : '#fef2f2'}; color: ${score >= 70 ? '#15803d' : score >= 50 ? '#b45309' : '#b91c1c'}; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; border: 2px solid currentColor;">
+                  ${score}/100
                 </div>
                 <div>
                   <p style="margin: 0; font-weight: bold; font-size: 16px;">Visa cible : ${visa}</p>
@@ -436,7 +423,7 @@ export const sendAuditEmail = async (
             to: [to],
             cc: ['Sophie.bernard168@gmail.com', 'pulsessiontest@gmail.com'],
             message: {
-                subject: `Votre Audit Visa "${visa}" - Résultat : ${score}%`,
+                subject: `Votre Audit Visa "${visa}" - Résultat : ${score}/100`,
                 html: htmlContent,
             },
             timestamp: Timestamp.now()

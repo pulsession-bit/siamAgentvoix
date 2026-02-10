@@ -1,5 +1,5 @@
-import React, { useState, useEffect, Suspense, lazy } from 'react';
-import { ShieldCheck, FileText, CreditCard, Phone, Menu, X, Trash2, Loader2, AlertCircle, LogOut } from 'lucide-react';
+import React, { useState, useEffect, Suspense, lazy, useRef } from 'react';
+import { ShieldCheck, FileText, CreditCard, Phone, Menu, X, Trash2, Loader2, AlertCircle, LogOut, History } from 'lucide-react';
 import { Analytics } from "@vercel/analytics/react"
 import Chat from './components/Chat';
 import InputArea from './components/InputArea';
@@ -10,6 +10,7 @@ import AuditScore from './components/AuditScore';
 const CallModal = lazy(() => import('./components/CallModal'));
 const SummaryView = lazy(() => import('./components/SummaryView'));
 const VoiceUpsellModal = lazy(() => import('./components/VoiceUpsellModal'));
+const HistoryView = lazy(() => import('./components/HistoryView'));
 
 import { AppStep, FileAttachment } from './types';
 import { translations, Language } from './locales/translations';
@@ -26,6 +27,7 @@ function App() {
   // UI State
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUpsellOpen, setIsUpsellOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   // Email capture state (restored from localStorage for persistence)
   const [capturedEmail, setCapturedEmail] = useState<string>(() => {
@@ -139,18 +141,35 @@ function App() {
     setIsMobileMenuOpen(false);
   };
 
+  const lastEmailSentRef = useRef<string | null>(null);
+  const isEmailSendingRef = useRef(false);
+
   const handleGenerateSummary = async () => {
+    if (isEmailSendingRef.current) return;
+
     try {
+      isEmailSendingRef.current = true;
       const summary = await generateSummary();
       setIsMobileMenuOpen(false);
 
       if (summary && effectiveEmail) {
-        sendAuditEmail(effectiveEmail, summary, auditResult).then(() => {
-          addMessage("📧 Une copie officielle de votre audit a été envoyée par email.", 'system');
-        }).catch(err => console.error("Email send failed", err));
+        // Simple hash/key to avoid sending the exact same summary twice in a row
+        const summaryKey = `${effectiveEmail}-${summary.visa_score}-${summary.visa_type}`;
+
+        if (lastEmailSentRef.current === summaryKey) {
+          console.log("Summary already sent recently, skipping email.");
+          return;
+        }
+
+        await sendAuditEmail(effectiveEmail, summary, auditResult);
+        lastEmailSentRef.current = summaryKey;
+        addMessage("📧 Une copie officielle de votre audit a été envoyée par email.", 'system');
       }
     } catch (error: any) {
-      alert(error.message);
+      console.error("Summary/Email error:", error);
+      // Only alert if it's not a background call from handleCallClose
+    } finally {
+      isEmailSendingRef.current = false;
     }
   };
 
@@ -158,7 +177,10 @@ function App() {
     setCallPayload(null);
     if (transcript) {
       appendTranscript(transcript);
-      await handleGenerateSummary();
+      // Add a small delay to ensure chat history is updated before summary
+      setTimeout(() => {
+        handleGenerateSummary();
+      }, 500);
     }
   };
 
@@ -234,6 +256,22 @@ function App() {
           <StepItem active={step === AppStep.QUALIFICATION} completed={step !== AppStep.QUALIFICATION} label={t.nav_qualification} desc={t.nav_qualification_desc} icon={<FileText size={18} />} />
           <StepItem active={step === AppStep.AUDIT} completed={step === AppStep.PAYMENT} label={t.nav_audit} desc={t.nav_audit_desc} icon={<ShieldCheck size={18} />} />
           <StepItem active={step === AppStep.PAYMENT} completed={false} label={t.nav_payment} desc={t.nav_payment_desc} icon={<CreditCard size={18} />} />
+
+          {/* History Link */}
+          {effectiveEmail && (
+            <button
+              onClick={() => setIsHistoryOpen(true)}
+              className="w-full flex items-center gap-4 px-2 py-3 rounded-xl hover:bg-white/5 transition-colors group"
+            >
+              <div className="w-10 h-10 rounded-full flex items-center justify-center border-2 border-slate-700 text-slate-500 group-hover:border-brand-amber group-hover:text-brand-amber transition-colors flex-shrink-0">
+                <History size={18} />
+              </div>
+              <div className="text-left">
+                <h3 className="text-sm font-bold text-slate-300 group-hover:text-brand-amber transition-colors">{t.history_title}</h3>
+                <p className="text-[10px] text-slate-500">{language === 'fr' ? 'Consulter vos dossiers' : 'Check your files'}</p>
+              </div>
+            </button>
+          )}
         </nav>
 
         {/* Footer */}
@@ -408,6 +446,17 @@ function App() {
         </main>
 
         <Suspense fallback={null}>
+          {/* History Modal */}
+          {isHistoryOpen && effectiveEmail && (
+            <div className="absolute inset-0 z-[100] bg-brand-navy/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-300">
+              <HistoryView
+                email={effectiveEmail}
+                lang={language}
+                onClose={() => setIsHistoryOpen(false)}
+              />
+            </div>
+          )}
+
           {/* Summary Modal */}
           {chatSummary && (
             <div className="absolute inset-0 z-40 bg-brand-light/95 backdrop-blur-md p-4 overflow-y-auto animate-in fade-in duration-300">

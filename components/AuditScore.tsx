@@ -50,7 +50,7 @@ const AuditScore: React.FC<AuditScoreProps> = ({ result, lang }) => {
             </RadialBarChart>
           </ResponsiveContainer>
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <span className="text-2xl md:text-3xl font-bold text-brand-navy">{score}%</span>
+            <span className="text-2xl md:text-3xl font-bold text-brand-navy">{score}/100</span>
             <span className="text-[10px] md:text-xs text-slate-500 uppercase tracking-wide">{t.audit_score_confidence}</span>
           </div>
         </div>

@@ -114,6 +114,16 @@ export const translations = {
         audit_corrections_required: "Corrections requises :",
         audit_missing_docs: "Documents manquants :",
         audit_success_msg: "Tous les feux sont au vert. Vous pouvez procéder au paiement sécurisé pour finaliser votre demande.",
+
+        // History
+        history_title: "Mes Audits",
+        history_empty: "Aucun audit trouvé.",
+        history_back: "Retour au chat",
+        history_date: "Date",
+        history_visa: "Visa",
+        history_score: "Score",
+        history_status: "Statut",
+        history_view: "Voir détails",
     },
     en: {
         // General
@@ -226,5 +236,15 @@ export const translations = {
         audit_corrections_required: "Corrections required:",
         audit_missing_docs: "Missing documents:",
         audit_success_msg: "All lights are green. You can proceed to secure payment to finalize your application.",
+
+        // History
+        history_title: "My Audits",
+        history_empty: "No audits found.",
+        history_back: "Back to chat",
+        history_date: "Date",
+        history_visa: "Visa",
+        history_score: "Score",
+        history_status: "Status",
+        history_view: "View details",
     }
 };

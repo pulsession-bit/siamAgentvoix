@@ -61,6 +61,19 @@ export enum AppStep {
   PAYMENT = 'PAYMENT'
 }
 
+export interface CaseData {
+  case_id: string;
+  lead_id: string;
+  intent: string;
+  status: string;
+  owner_uid: string | null;
+  site_id: string;
+  confidence_score: number;
+  last_event_at: string;
+  next_action_at: string | null;
+  created_at: string;
+}
+
 // Fixed missing types for AudioPlayer.tsx
 export interface GlobalTTSState {
   currentPlayingMessageId: string | null;
