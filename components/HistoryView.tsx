@@ -63,7 +63,21 @@ const HistoryView: React.FC<HistoryViewProps> = ({ email, lang, onClose }) => {
 
             {/* List */}
             <div className="p-6 max-h-[60vh] overflow-y-auto">
-                {loading ? (
+                {!email ? (
+                    <div className="text-center py-12">
+                        <div className="bg-slate-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Shield size={32} className="text-slate-300" />
+                        </div>
+                        <p className="text-slate-500 font-medium mb-2">
+                            {lang === 'fr' ? 'Email requis' : 'Email required'}
+                        </p>
+                        <p className="text-slate-400 text-sm">
+                            {lang === 'fr'
+                                ? 'Veuillez saisir votre email dans le formulaire de qualification pour voir votre historique.'
+                                : 'Please enter your email in the qualification form to see your history.'}
+                        </p>
+                    </div>
+                ) : loading ? (
                     <div className="flex flex-col items-center justify-center py-12 gap-4">
                         <Loader2 className="animate-spin text-brand-amber" size={32} />
                         <p className="text-slate-500 text-sm">{lang === 'fr' ? 'Chargement de votre historique...' : 'Loading your history...'}</p>

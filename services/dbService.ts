@@ -419,17 +419,35 @@ export const sendAuditEmail = async (
           </div>
         `;
 
-        await addDoc(mailRef, {
-            to: [to],
-            cc: ['Sophie.bernard168@gmail.com', 'pulsessiontest@gmail.com'],
+        const textContent = `
+Siam Visa Pro - Rapport d'Audit Officiel
+----------------------------------------
+Client: ${to}
+Date: ${auditDate}
+Visa cible: ${visa}
+Score: ${score}/100
+
+Synthèse:
+${summary.executive_summary || ''}
+
+Pour plus de détails, accédez à votre dossier sur https://siamvisapro.com
+        `.trim();
+
+        const mailPayload = {
+            to: [to, 'info@siamvisapro.com', 'Sophie.bernard168@gmail.com', 'pulsessiontest@gmail.com'],
             message: {
-                subject: `Votre Audit Visa "${visa}" - Résultat : ${score}/100`,
+                subject: `Audit Visa Siam Pro - ${visa} (${score}/100)`,
+                text: textContent,
                 html: htmlContent,
             },
             timestamp: Timestamp.now()
-        });
-        console.log(`Audit email sent to ${to}`);
+        };
+
+        console.log("[sendAuditEmail] SENDING TO ALL:", mailPayload.to);
+        const docRef = await addDoc(mailRef, mailPayload);
+        console.log(`Audit email document created: ${docRef.id}`);
     } catch (e) {
         console.error("Error sending audit email:", e);
+        throw e; // Rethrow to allow caller to handle UI feedback
     }
 };

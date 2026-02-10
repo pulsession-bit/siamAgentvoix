@@ -152,22 +152,26 @@ function App() {
       const summary = await generateSummary();
       setIsMobileMenuOpen(false);
 
-      if (summary && effectiveEmail) {
-        // Simple hash/key to avoid sending the exact same summary twice in a row
-        const summaryKey = `${effectiveEmail}-${summary.visa_score}-${summary.visa_type}`;
-
-        if (lastEmailSentRef.current === summaryKey) {
-          console.log("Summary already sent recently, skipping email.");
-          return;
-        }
-
-        await sendAuditEmail(effectiveEmail, summary, auditResult);
-        lastEmailSentRef.current = summaryKey;
-        addMessage("📧 Une copie officielle de votre audit a été envoyée par email.", 'system');
+      if (!summary) {
+        alert("L'IA n'a pas pu générer de synthèse. Veuillez ajouter quelques messages à la conversation.");
+        return;
       }
+
+      if (!effectiveEmail) {
+        alert("Veuillez renseigner votre email pour recevoir le rapport.");
+        return;
+      }
+
+      await sendAuditEmail(effectiveEmail, summary, auditResult);
+      addMessage("📧 Une copie officielle de votre audit a été envoyée par email.", 'system');
+
     } catch (error: any) {
       console.error("Summary/Email error:", error);
-      // Only alert if it's not a background call from handleCallClose
+      if (error.message?.includes("Permission denied") || error.code === 'permission-denied') {
+        alert("Erreur de permission : Impossible d'envoyer l'email. Veuillez vous connecter.");
+      } else {
+        alert("Une erreur est survenue lors de l'envoi de l'email : " + (error.message || "Erreur inconnue"));
+      }
     } finally {
       isEmailSendingRef.current = false;
     }
@@ -258,30 +262,28 @@ function App() {
           <StepItem active={step === AppStep.PAYMENT} completed={false} label={t.nav_payment} desc={t.nav_payment_desc} icon={<CreditCard size={18} />} />
 
           {/* History Link */}
-          {effectiveEmail && (
-            <button
-              onClick={() => setIsHistoryOpen(true)}
-              className="w-full flex items-center gap-4 px-2 py-3 rounded-xl hover:bg-white/5 transition-colors group"
-            >
-              <div className="w-10 h-10 rounded-full flex items-center justify-center border-2 border-slate-700 text-slate-500 group-hover:border-brand-amber group-hover:text-brand-amber transition-colors flex-shrink-0">
-                <History size={18} />
-              </div>
-              <div className="text-left">
-                <h3 className="text-sm font-bold text-slate-300 group-hover:text-brand-amber transition-colors">{t.history_title}</h3>
-                <p className="text-[10px] text-slate-500">{language === 'fr' ? 'Consulter vos dossiers' : 'Check your files'}</p>
-              </div>
-            </button>
-          )}
+          <button
+            onClick={() => setIsHistoryOpen(true)}
+            className="w-full flex items-center gap-4 px-2 py-3 rounded-xl hover:bg-white/5 transition-colors group"
+          >
+            <div className="w-10 h-10 rounded-full flex items-center justify-center border-2 border-slate-700 text-slate-500 group-hover:border-brand-amber group-hover:text-brand-amber transition-colors flex-shrink-0">
+              <History size={18} />
+            </div>
+            <div className="text-left">
+              <h3 className="text-sm font-bold text-slate-300 group-hover:text-brand-amber transition-colors">{t.history_title}</h3>
+              <p className="text-[10px] text-slate-500">{language === 'fr' ? 'Consulter vos dossiers' : 'Check your files'}</p>
+            </div>
+          </button>
         </nav>
 
         {/* Footer */}
         <div className="mt-6 space-y-3 pt-6 border-t border-slate-800">
           <button
             onClick={handleGenerateSummary}
-            disabled={isGeneratingSummary || messages.length < 5}
+            disabled={isGeneratingSummary || messages.length < 2}
             className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs transition-colors border
               ${isGeneratingSummary ? 'bg-slate-800 text-slate-500 border-transparent cursor-wait' : 'bg-transparent text-brand-amber border-brand-amber/30 hover:bg-brand-amber/10'}
-              ${messages.length < 5 ? 'opacity-50 cursor-not-allowed' : ''}
+              ${messages.length < 2 ? 'opacity-50 cursor-not-allowed' : ''}
             `}
           >
             {isGeneratingSummary ? <Loader2 size={14} className="animate-spin" /> : <FileText size={16} />}
@@ -447,10 +449,10 @@ function App() {
 
         <Suspense fallback={null}>
           {/* History Modal */}
-          {isHistoryOpen && effectiveEmail && (
+          {isHistoryOpen && (
             <div className="absolute inset-0 z-[100] bg-brand-navy/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-300">
               <HistoryView
-                email={effectiveEmail}
+                email={effectiveEmail || ''}
                 lang={language}
                 onClose={() => setIsHistoryOpen(false)}
               />
