@@ -72,6 +72,8 @@ export interface CaseData {
   last_event_at: string;
   next_action_at: string | null;
   created_at: string;
+  summary?: ChatSummary;
+  audit?: AuditResult;
 }
 
 // Fixed missing types for AudioPlayer.tsx

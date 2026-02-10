@@ -345,7 +345,9 @@ export const getCasesByLead = async (email: string): Promise<CaseData[]> => {
                 created_at: data.updated_at || new Date().toISOString(),
                 owner_uid: null,
                 site_id: 'siamvisapro',
-                next_action_at: null
+                next_action_at: null,
+                summary: data.ai_data?.summary,
+                audit: data.ai_data?.audit_result
             };
         });
 

@@ -23,14 +23,11 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose, lang = 'fr' }) 
 
   const liveAgentRef = useRef<LiveAgent | null>(null);
 
-  // Auto-connect on mount if "urgent" or manual request
-  const autoStart = payload.reason === 'user_request' || payload.reason === 'urgent_departure';
+  // No auto-connect on mount to avoid surprising the user
+  const autoStart = false;
 
   useEffect(() => {
-    if (autoStart && status === 'idle') {
-      startCall();
-    }
-
+    // Only used to handle cleanup
     return () => {
       // Cleanup on unmount (must clear ref for React StrictMode double-invoke)
       if (liveAgentRef.current) {
