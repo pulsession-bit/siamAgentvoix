@@ -56,6 +56,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                             <div className="flex gap-2 mt-2">
                                 <button onClick={() => setLanguage('fr')} className={`text-[10px] px-2 py-0.5 rounded border transition-colors ${language === 'fr' ? 'bg-brand-amber text-brand-navy border-brand-amber' : 'text-slate-500 border-slate-700 hover:border-slate-500'}`}>FR</button>
                                 <button onClick={() => setLanguage('en')} className={`text-[10px] px-2 py-0.5 rounded border transition-colors ${language === 'en' ? 'bg-brand-amber text-brand-navy border-brand-amber' : 'text-slate-500 border-slate-700 hover:border-slate-500'}`}>EN</button>
+                                <button onClick={() => setLanguage('de')} className={`text-[10px] px-2 py-0.5 rounded border transition-colors ${language === 'de' ? 'bg-brand-amber text-brand-navy border-brand-amber' : 'text-slate-500 border-slate-700 hover:border-slate-500'}`}>DE</button>
+                                <button onClick={() => setLanguage('ru')} className={`text-[10px] px-2 py-0.5 rounded border transition-colors ${language === 'ru' ? 'bg-brand-amber text-brand-navy border-brand-amber' : 'text-slate-500 border-slate-700 hover:border-slate-500'}`}>RU</button>
                             </div>
                         </div>
                     </div>

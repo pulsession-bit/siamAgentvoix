@@ -352,7 +352,25 @@ export const getCasesByLead = async (email: string): Promise<CaseData[]> => {
         });
 
         // 3. MERGE & SORT
-        const merged = [...caseResults, ...legacyResults];
+        // SMART DEDUPLICATION: We prioritize 'cases' (New System). 
+        // If a legacy session looks like a duplicate (similar time + same type), hide it.
+        const cleanLegacy = legacyResults.filter(legacy => {
+            const legacyTime = new Date(legacy.last_event_at || 0).getTime();
+
+            // Check if there is a "twin" in the new case results
+            const hasNewTwin = caseResults.some(newCase => {
+                const newTime = new Date(newCase.last_event_at || 0).getTime();
+                const timeDiff = Math.abs(newTime - legacyTime);
+                const isSameIntent = newCase.intent === legacy.intent;
+
+                // Match if same intent and created/updated within 10 minutes (dual-write delay)
+                return isSameIntent && timeDiff < 600000;
+            });
+
+            return !hasNewTwin;
+        });
+
+        const merged = [...caseResults, ...cleanLegacy];
 
         // Remove duplicates by session_id/case_id if they exist in both (unlikely but safe)
         const unique = Array.from(new Map(merged.map(item => [item.case_id, item])).values());
@@ -418,7 +436,7 @@ export const sendAuditEmail = async (
               <h2 style="color: #0f172a; margin-top: 0;">Résultat de votre analyse</h2>
 
               <div style="display: flex; align-items: center; gap: 16px; background: #fff; padding: 16px; border-radius: 8px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                <div style="width: 64px; height: 64px; border-radius: 50%; background: ${score >= 70 ? '#effdf5' : score >= 50 ? '#fffbeb' : '#fef2f2'}; color: ${score >= 70 ? '#15803d' : score >= 50 ? '#b45309' : '#b91c1c'}; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; border: 2px solid currentColor;">
+                <div style="width: 64px; height: 64px; min-width: 64px; flex-shrink: 0; border-radius: 50%; background: ${score >= 70 ? '#effdf5' : score >= 50 ? '#fffbeb' : '#fef2f2'}; color: ${score >= 70 ? '#15803d' : score >= 50 ? '#b45309' : '#b91c1c'}; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; border: 2px solid currentColor;">
                   ${score}/100
                 </div>
                 <div>

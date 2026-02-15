@@ -301,9 +301,53 @@ function App() {
             />
           )}
 
-          {/* Payment Overlay */}
+          {/* Payment Overlay replaced by Human Auditor Confirmation */}
           {step === AppStep.PAYMENT && (
-            <PaymentStep auditResult={auditResult} setStep={setStep} />
+            <div className="absolute inset-0 z-50 bg-brand-navy/95 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-500">
+              <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-brand-amber via-brand-blue to-brand-amber animate-pulse"></div>
+
+                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600 animate-bounce">
+                  <Phone size={40} />
+                </div>
+
+                <h2 className="text-2xl font-black text-brand-navy mb-2">
+                  {language === 'fr' ? 'Audit Validé !' : 'Audit Validated!'}
+                </h2>
+                <p className="text-slate-500 mb-8 px-4">
+                  {language === 'fr'
+                    ? 'Votre dossier a été transmis à notre équipe d\'experts. Un auditeur humain va prendre le relais pour finaliser votre stratégie.'
+                    : 'Your file has been sent to our expert team. A human auditor will take over to finalize your strategy.'}
+                </p>
+
+                <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-8">
+                  <p className="text-sm text-brand-blue font-bold flex items-center justify-center gap-2">
+                    <History className="w-4 h-4" />
+                    {language === 'fr' ? 'Rendez-vous confirmé' : 'Appointment confirmed'}
+                  </p>
+                  <p className="text-xs text-brand-blue/70 mt-1">
+                    {language === 'fr' ? 'Vous serez contacté sous 24h.' : 'You will be contacted within 24h.'}
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <button
+                    onClick={() => setIsHistoryOpen(true)}
+                    className="w-full py-4 bg-brand-amber text-brand-navy font-bold rounded-xl hover:bg-amber-400 transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-amber/20"
+                  >
+                    <History size={20} />
+                    {language === 'fr' ? 'Voir mon dossier complet' : 'View my full file'}
+                  </button>
+
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="w-full py-3 text-slate-400 text-sm hover:text-brand-navy underline"
+                  >
+                    {language === 'fr' ? 'Retour à l\'accueil' : 'Back to home'}
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
 
           {/* Chat View */}

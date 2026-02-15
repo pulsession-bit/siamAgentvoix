@@ -1,0 +1,124 @@
+export const de = {
+    // General
+    loading_app: "Experte wird geladen...",
+    loading_error: "Initialisierungsfehler",
+    analysis_error: "Ein technischer Fehler ist bei der Analyse aufgetreten. Bitte versuchen Sie es erneut. (Sitzung wird zurückgesetzt)",
+
+    // Live Transcript
+    transcript_user: "Ich",
+    transcript_agent: "Agent",
+
+    // Sidebar
+    reset_audit: "Audit zurücksetzen",
+    reset_confirm: "Möchten Sie wirklich den gesamten Verlauf löschen und neu beginnen?",
+    logout: "Abmelden",
+    login_btn: "Google Anmeldung",
+    save_file: "Meine Akte speichern",
+
+    // Navigation Steps
+    nav_qualification: "Qualifikation",
+    nav_qualification_desc: "Auswahl des Visumtyps",
+    nav_audit: "KI-Audit",
+    nav_audit_desc: "Dokumentenprüfung",
+    nav_payment: "Validierung",
+    nav_payment_desc: "Zahlung & Einreichung",
+
+    // Sidebar CTA
+    cta_live_support: "Live-Support",
+    cta_expert: "Mit einem Experten sprechen",
+
+    // Input Area
+    input_placeholder: "Beschreiben Sie Ihre Situation...",
+    input_listening: "Zuhören...",
+    mic_start: "Nachricht diktieren",
+    mic_stop: "Zuhören beenden",
+    mic_denied: "Zugriff auf Mikrofon verweigert. Bitte überprüfen Sie Ihre Browsereinstellungen.",
+
+    // Welcome
+    welcome_msg: "Hallo und willkommen bei **Siam Visa Pro**.\n\nIch bin Ihr Experten-Assistent für Thailand-Visa. Meine Rolle ist:\n1. Ihnen zu helfen, das richtige Visum zu wählen.\n2. Ihre Akte zu prüfen (Audit).\n3. Ihre Genehmigungschancen zu maximieren.\n\nUm zu beginnen, sagen Sie mir bitte:\n- Was ist Ihre **Nationalität**?\n- Was ist der **Zweck Ihres Aufenthalts** (Tourismus, Arbeit, Ruhestand...)?\n- Wie lange planen Sie zu bleiben?",
+
+    // Chat
+    auditor_analyzing: "Der Auditor analysiert...",
+    agent_name: "Visa Experte",
+    user_name: "Sie",
+
+    // Voice Upsell
+    upsell_title: "Schalten Sie einen Gang höher",
+    upsell_desc: "Unser KI-Sprachexperte kann Ihre Akte <strong>3x schneller</strong> qualifizieren als schriftlich. Möchten Sie die Spracherfahrung ausprobieren?",
+    upsell_accept: "Ja, Anruf starten (Empfohlen)",
+    upsell_decline: "Nein, ich schreibe lieber",
+    upsell_start_msg: "📞 Start des Sprach-Audits...",
+    upsell_decline_msg: "Ich möchte mich für ein Visum {visaType} bewerben.",
+
+    // Call Modal
+    call_active: "Anruf läuft...",
+    call_ended: "Anruf beendet",
+    mic_error: "Mikrofon nicht verfügbar",
+    end_call_btn: "Auflegen",
+    call_secure_channel: "Sicherer Kanal",
+    call_ready: "Bereit zu sprechen?",
+    call_default_topic: "Wir werden Ihre Akte gemeinsam klären.",
+    call_subject: "Thema des Anrufs",
+    call_start_btn: "Anruf starten",
+    call_connecting: "Verbindung wird hergestellt...",
+    call_waiting_speech: "Warte auf Sprache...",
+    call_error_title: "Verbindung gescheitert",
+    call_error_desc: "Verbindung zum Sprach-Agenten konnte nicht hergestellt werden. Überprüfen Sie Ihr Mikrofon oder versuchen Sie es später erneut.",
+    call_close_btn: "Schließen",
+
+    // Audit Section
+    audit_title: "Visa Audit",
+    audit_subtitle: "Wählen Sie Ihren Visumtyp, um die Konformitätsanalyse zu starten.",
+    email_label: "Ihre E-Mail für die Auditergebnisse",
+    email_placeholder: "ihre@email.com",
+    email_error: "Bitte geben Sie eine gültige E-Mail ein.",
+    email_confirmed: "E-Mail bestätigt",
+
+    // Visa Options
+    visa_expat_label: "Relocation & Expatriation",
+    visa_expat_desc: "VIP-Begleitung: Visum, Unterkunft, Schule, Bank & Installation",
+    visa_dtv_label: "DTV Visum",
+    visa_dtv_desc: "Digitale Nomaden, Muay Thai, Kochkurs",
+    visa_retire_label: "Ruhestand (O-A/O-X)",
+    visa_retire_desc: "+50 Jahre, Langzeit",
+    visa_tourist_label: "Tourismus (TR)",
+    visa_tourist_desc: "Aufenthalt < 60 Tage",
+    visa_business_label: "Business (Non-B)",
+    visa_business_desc: "Arbeit und Unternehmensgründung",
+
+
+    // Summary
+    summary_title: "Zusammenfassung des Audits",
+    generating_summary: "Generierung Ihrer offiziellen Zusammenfassung...",
+    summary_subtitle: "Detaillierte Profilanalyse und Empfehlungen",
+    val_targeted_visa: "Ziel-Visum",
+    val_visa_score: "Visa Score",
+    val_status_solid: "Solide Akte",
+    val_status_risky: "Vorsicht geboten",
+    val_status_high_risk: "Hohes Risiko",
+    val_synthesis: "Synthese",
+    val_strengths: "Stärken",
+    val_weaknesses: "Aufmerksamkeitspunkte",
+    val_action_plan: "Empfohlener Aktionsplan",
+    val_docs_required: "Wichtige Dokumente vorzubereiten",
+    btn_hide_summary: "Zusammenfassung ausblenden",
+
+    // Audit Score
+    audit_score_confidence: "Vertrauen",
+    audit_status_valid: "Akte Konform",
+    audit_status_invalid: "Akte Unvollständig",
+    audit_status_pending: "Analyse läuft",
+    audit_corrections_required: "Korrekturen erforderlich:",
+    audit_missing_docs: "Fehlende Dokumente:",
+    audit_success_msg: "Alles im grünen Bereich. Sie können zur sicheren Zahlung übergehen, um Ihren Antrag abzuschließen.",
+
+    // History
+    history_title: "Meine Audits",
+    history_empty: "Kein Audit gefunden.",
+    history_back: "Zurück zum Chat",
+    history_date: "Datum",
+    history_visa: "Visum",
+    history_score: "Score",
+    history_status: "Status",
+    history_view: "Details ansehen",
+};
