@@ -121,4 +121,18 @@ export const de = {
     history_score: "Score",
     history_status: "Status",
     history_view: "Details ansehen",
+    btn_close: "Schließen",
+
+    // History Details
+    history_no_technical_data: "Keine technischen Auditdaten verfügbar.",
+    history_no_summary: "Keine detaillierte Zusammenfassung verfügbar.",
+    history_back_to_list: "Zurück zur Liste",
+    email_required: "E-Mail erforderlich",
+    email_required_desc: "Bitte geben Sie Ihre E-Mail im Qualifikationsformular ein, um Ihren Verlauf zu sehen.",
+    history_loading: "Verlauf wird geladen...",
+
+    // Missing Call Modal
+    live_agent_connection: "Live-Agent-Verbindung",
+    gemini_api_initializing: "Initialisierung der Gemini Live-API",
+    powered_by: "Unterstützt von Google Gemini Live 3.0",
 };

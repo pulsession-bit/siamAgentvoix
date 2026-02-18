@@ -5,6 +5,7 @@ import { GoogleGenAI, GenerateContentResponse, Chat, Content } from "@google/gen
 import { getSystemPrompt } from '../constants';
 import { AuditResult, FileAttachment, AgentAction, ChatMessage } from '../types';
 import { translations, Language } from '../locales/translations';
+import { getKnowledgeContext } from './knowledge';
 
 let aiClient: GoogleGenAI | null = null;
 // Use Chat type instead of ChatSession as per @google/genai guidelines
@@ -99,7 +100,7 @@ export const startAuditSession = async (sessionId: string | null = null, skipWel
   chatSession = client.chats.create({
     model: 'gemini-2.0-flash',
     config: {
-      systemInstruction: getSystemPrompt(currentUserEmail, currentLanguage),
+      systemInstruction: getSystemPrompt(currentUserEmail, currentLanguage) + `\n\n[OFFICIAL KNOWLEDGE BASE]\nUse the following official data to answer questions about Visas. Do not use external knowledge if it conflicts with this:\n${getKnowledgeContext()}`,
       temperature: 0.2, // Low temperature for consistent auditing
     },
   });
@@ -134,7 +135,7 @@ export const resumeAuditSession = async (existingMessages: ChatMessage[], sessio
   chatSession = client.chats.create({
     model: 'gemini-2.0-flash',
     config: {
-      systemInstruction: getSystemPrompt(currentUserEmail, currentLanguage),
+      systemInstruction: getSystemPrompt(currentUserEmail, currentLanguage) + `\n\n[OFFICIAL KNOWLEDGE BASE]\nUse the following official data to answer questions about Visas. Do not use external knowledge if it conflicts with this:\n${getKnowledgeContext()}`,
       temperature: 0.2,
     },
     history: history
@@ -195,7 +196,7 @@ export const sendMessageToAgent = async (
     chatSession = client.chats.create({
       model: 'gemini-2.0-flash',
       config: {
-        systemInstruction: getSystemPrompt(currentUserEmail, currentLanguage),
+        systemInstruction: getSystemPrompt(currentUserEmail, currentLanguage) + `\n\n[OFFICIAL KNOWLEDGE BASE]\nUse the following official data to answer questions about Visas. Do not use external knowledge if it conflicts with this:\n${getKnowledgeContext()}`,
         temperature: 0.2, // Low temperature for consistent auditing
       },
       history: history
@@ -300,6 +301,7 @@ export const generateChatSummary = async (): Promise<import('../types').ChatSumm
       }
       
       Be precise, professional, and constructive.
+      IMPORTANT: If the visa is DTV, ensure financial requirements mentioned are 500k THB savings, NOT 80k USD income (that's LTR).
     ` : `
       SYNTHÈSE DE FIN DE SESSION
       Génère un résumé structuré de l'ensemble de notre conversation pour l'utilisateur au format JSON uniquement.
@@ -319,6 +321,7 @@ export const generateChatSummary = async (): Promise<import('../types').ChatSumm
       }
       
       Sois précis, professionnel et constructif.
+      IMPORTANT: Si le visa est DTV, vérifie que les critères financiers sont bien 500k THB d'épargne, PAS 80k USD de revenus (ça c'est le LTR).
     `;
 
     const result = await chatSession.sendMessage({ message: prompt });

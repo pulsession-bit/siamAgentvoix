@@ -1,10 +1,8 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Phone, X, Mic, MicOff, Signal } from 'lucide-react';
 import { CallPayload } from '../types';
 import { LiveAgent, TranscriptUpdate } from '../services/liveService';
-// Import Language type for prop compatibility, though unused in logic for now
-import { Language } from '../locales/translations';
+import { translations, Language } from '../locales/translations';
 
 interface CallModalProps {
   payload: CallPayload;
@@ -15,7 +13,7 @@ interface CallModalProps {
 }
 
 const CallModal: React.FC<CallModalProps> = ({ payload, onClose, lang = 'fr' }) => {
-  const en = lang === 'en';
+  const t = translations[lang];
   const [status, setStatus] = useState<'idle' | 'connecting' | 'connected' | 'error'>('idle');
   const [isMuted, setIsMuted] = useState(false);
   const [visualizerWidth, setVisualizerWidth] = useState(5); // Start small
@@ -103,7 +101,7 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose, lang = 'fr' }) 
         <div className="absolute inset-0 z-0">
           <img
             src="https://img.antiquiscore.com/global/Natt.webp"
-            alt={en ? "Siam Visa Secretary" : "Secrétaire Siam Visa"}
+            alt={t.agent_name}
             className="w-full h-full object-cover grayscale-[10%]"
           />
           {/* Gradient overlay for readability across the whole card */}
@@ -116,7 +114,7 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose, lang = 'fr' }) 
             <h2 className="text-xl font-bold text-brand-navy flex items-center gap-2">
               Siam Visa
               <span className="text-brand-navy/40 font-light mx-1">|</span>
-              <span className="font-medium text-lg">{en ? 'Secure Channel' : 'Canal Sécurisé'}</span>
+              <span className="font-medium text-lg">{t.call_secure_channel}</span>
               {status === 'connected' && (
                 <span className="flex items-center gap-1 ml-2 text-green-600">
                   <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
@@ -125,7 +123,7 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose, lang = 'fr' }) 
               )}
             </h2>
             <p className="text-brand-navy/60 text-xs font-medium uppercase tracking-wider mt-1">
-              Live Agent Connection
+              {t.live_agent_connection}
             </p>
           </div>
           <button onClick={endCall} className="text-brand-navy/60 hover:text-brand-navy transition-colors bg-white/20 rounded-full p-1 hover:bg-white/40">
@@ -147,14 +145,14 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose, lang = 'fr' }) 
                 <Phone size={40} />
               </div>
               <div className="bg-white/40 backdrop-blur-sm p-4 rounded-xl">
-                <h3 className="text-lg font-bold text-brand-navy">{en ? 'Ready to talk?' : 'Prêt à discuter ?'}</h3>
+                <h3 className="text-lg font-bold text-brand-navy">{t.call_ready}</h3>
                 <p className="text-slate-800 text-sm mt-2 font-medium">
-                  {payload.notes || (en ? "Let's review your file together." : "Nous allons clarifier votre dossier ensemble.")}
+                  {payload.notes || t.call_default_topic}
                 </p>
               </div>
 
               <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 text-left border border-slate-200 shadow-sm">
-                <p className="text-xs text-slate-500 uppercase font-bold mb-1">{en ? 'Call subject' : "Sujet de l'appel"}</p>
+                <p className="text-xs text-slate-500 uppercase font-bold mb-1">{t.call_subject}</p>
                 <div className="flex gap-2 flex-wrap">
                   <span className="px-2 py-1 bg-white border rounded text-xs text-slate-700 font-medium shadow-sm">{payload.visaType}</span>
                   <span className="px-2 py-1 bg-white border rounded text-xs text-slate-700 font-medium shadow-sm">{payload.reason}</span>
@@ -166,7 +164,7 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose, lang = 'fr' }) 
                 className="w-full bg-brand-amber hover:bg-brand-yellow text-brand-navy font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3"
               >
                 <Phone size={24} />
-                <span>{en ? 'Start call' : "Lancer l'appel"}</span>
+                <span>{t.call_start_btn}</span>
               </button>
             </div>
           )}
@@ -181,8 +179,8 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose, lang = 'fr' }) 
                 </div>
               </div>
               <div className="bg-white/80 backdrop-blur px-4 py-2 rounded-lg shadow-sm border border-white/50">
-                <p className="text-slate-800 font-bold">{en ? 'Establishing connection...' : 'Établissement de la connexion...'}</p>
-                <p className="text-xs text-slate-500 mt-1">{en ? 'Gemini Live API Initializing' : 'Gemini Live API Initializing'}</p>
+                <p className="text-slate-800 font-bold">{t.call_connecting}</p>
+                <p className="text-xs text-slate-500 mt-1">{t.gemini_api_initializing}</p>
               </div>
             </div>
           )}
@@ -215,14 +213,14 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose, lang = 'fr' }) 
                       : 'bg-brand-navy/90 text-white'}
                    `}>
                     <span className="opacity-50 text-[10px] uppercase block mb-1">
-                      {liveTranscript.role === 'agent' ? 'Expert' : (en ? 'You' : 'Vous')}
+                      {liveTranscript.role === 'agent' ? t.transcript_agent : t.transcript_user}
                     </span>
                     {liveTranscript.text}
                     {!liveTranscript.isFinal && <span className="animate-pulse">|</span>}
                   </div>
                 ) : (
                   <div className="text-slate-500 text-sm italic opacity-70 bg-white/50 px-4 py-2 rounded-full backdrop-blur-sm">
-                    {en ? 'Waiting for speech...' : 'En attente de parole...'}
+                    {t.call_waiting_speech}
                   </div>
                 )}
               </div>
@@ -252,16 +250,16 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose, lang = 'fr' }) 
                 <X size={40} />
               </div>
               <div className="bg-white/90 p-4 rounded-xl shadow-sm border border-red-100">
-                <h3 className="text-lg font-bold text-slate-800">{en ? 'Connection failed' : 'Échec de la connexion'}</h3>
+                <h3 className="text-lg font-bold text-slate-800">{t.call_error_title}</h3>
                 <p className="text-slate-500 text-sm mt-1">
-                  {en ? 'Unable to connect to the voice agent. Check your microphone or try again later.' : "Impossible d'établir la liaison avec l'agent vocal. Vérifiez votre micro ou réessayez plus tard."}
+                  {t.call_error_desc}
                 </p>
               </div>
               <button
                 onClick={() => onClose(null)}
                 className="mt-4 px-6 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg font-medium transition-colors shadow-sm"
               >
-                {en ? 'Close' : 'Fermer'}
+                {t.call_close_btn}
               </button>
             </div>
           )}
@@ -270,7 +268,7 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose, lang = 'fr' }) 
         {/* Footer */}
         <div className="bg-transparent p-3 text-center border-t border-slate-200/50 relative z-10">
           <p className="text-[10px] text-slate-400 uppercase tracking-widest">
-            Powered by Google Gemini Live 3.0
+            {t.powered_by}
           </p>
         </div>
 

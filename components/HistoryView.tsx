@@ -38,7 +38,14 @@ const HistoryView: React.FC<HistoryViewProps> = ({ email, lang, onClose }) => {
     }, [email]);
 
     const formatDate = (isoString: string) => {
-        return new Date(isoString).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', {
+        // Map our internal lang codes to standard locales
+        const localeMap: Record<string, string> = {
+            'fr': 'fr-FR',
+            'en': 'en-US',
+            'de': 'de-DE',
+            'ru': 'ru-RU'
+        };
+        return new Date(isoString).toLocaleDateString(localeMap[lang] || 'en-US', {
             day: '2-digit',
             month: 'short',
             year: 'numeric',
@@ -109,7 +116,7 @@ const HistoryView: React.FC<HistoryViewProps> = ({ email, lang, onClose }) => {
                             <AuditScore result={selectedCase.audit} lang={lang} />
                         ) : (
                             <div className="bg-white p-6 rounded-xl border border-slate-200 text-center text-slate-500 italic">
-                                {lang === 'fr' ? 'Aucune donnée technique d\'audit disponible.' : 'No technical audit data available.'}
+                                {t.history_no_technical_data}
                             </div>
                         )}
 
@@ -120,7 +127,7 @@ const HistoryView: React.FC<HistoryViewProps> = ({ email, lang, onClose }) => {
                             </div>
                         ) : (
                             <div className="bg-white p-6 rounded-xl border border-slate-200 text-center text-slate-500 italic">
-                                {lang === 'fr' ? 'Aucun résumé détaillé disponible.' : 'No detailed summary available.'}
+                                {t.history_no_summary}
                             </div>
                         )}
 
@@ -130,7 +137,7 @@ const HistoryView: React.FC<HistoryViewProps> = ({ email, lang, onClose }) => {
                                 className="px-6 py-2 bg-white border border-slate-300 text-slate-700 font-medium rounded-full hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2"
                             >
                                 <ArrowLeft size={16} />
-                                {lang === 'fr' ? 'Retour à la liste' : 'Back to list'}
+                                {t.history_back_to_list}
                             </button>
                         </div>
                     </div>
@@ -140,18 +147,16 @@ const HistoryView: React.FC<HistoryViewProps> = ({ email, lang, onClose }) => {
                             <Shield size={32} className="text-slate-300" />
                         </div>
                         <p className="text-slate-500 font-medium mb-2">
-                            {lang === 'fr' ? 'Email requis' : 'Email required'}
+                            {t.email_required}
                         </p>
                         <p className="text-slate-400 text-sm max-w-xs mx-auto">
-                            {lang === 'fr'
-                                ? 'Veuillez saisir votre email dans le formulaire de qualification pour voir votre historique.'
-                                : 'Please enter your email in the qualification form to see your history.'}
+                            {t.email_required_desc}
                         </p>
                     </div>
                 ) : loading ? (
                     <div className="flex flex-col items-center justify-center py-12 gap-4">
                         <Loader2 className="animate-spin text-brand-amber" size={32} />
-                        <p className="text-slate-500 text-sm">{lang === 'fr' ? 'Chargement de votre historique...' : 'Loading your history...'}</p>
+                        <p className="text-slate-500 text-sm">{t.history_loading}</p>
                     </div>
                 ) : cases.length === 0 ? (
                     <div className="text-center py-12">

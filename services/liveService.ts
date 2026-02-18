@@ -299,7 +299,18 @@ export class LiveAgent {
     if (this.transcriptionHistory.length === 0) return null;
 
     return this.transcriptionHistory
-      .map(item => `[${item.role === 'user' ? 'Moi' : 'Agent'}] : ${item.text}`)
+      .map(item => {
+        // Remove JSON blocks from agent output
+        const cleanText = item.text
+          .replace(/```(?:json)?\s*[\s\S]*?\s*```/gi, '')
+          .replace(/\{[\s\S]*?"visa_type"[\s\S]*?\}/g, '')
+          .replace(/\{[\s\S]*?"audit_status"[\s\S]*?\}/g, '')
+          .replace(/\{[\s\S]*?"action"[\s\S]*?\}/g, '')
+          .trim();
+        if (!cleanText) return null;
+        return `[${item.role === 'user' ? 'Moi' : 'Agent'}] : ${cleanText}`;
+      })
+      .filter(Boolean)
       .join('\n\n');
   }
 

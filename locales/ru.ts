@@ -121,4 +121,18 @@ export const ru = {
     history_score: "Балл",
     history_status: "Статус",
     history_view: "Смотреть детали",
+    btn_close: "Закрыть",
+
+    // History Details
+    history_no_technical_data: "Нет данных технического аудита.",
+    history_no_summary: "Нет детального резюме.",
+    history_back_to_list: "Назад к списку",
+    email_required: "Требуется Email",
+    email_required_desc: "Пожалуйста, введите ваш email в форме квалификации, чтобы увидеть историю.",
+    history_loading: "Загрузка истории...",
+
+    // Missing Call Modal
+    live_agent_connection: "Связь с агентом в реальном времени",
+    gemini_api_initializing: "Инициализация API Gemini Live",
+    powered_by: "При поддержке Google Gemini Live 3.0",
 };
