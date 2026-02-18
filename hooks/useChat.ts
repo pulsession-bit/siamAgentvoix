@@ -24,7 +24,8 @@ export function useChat(): UseChatReturn {
   const addMessage = useCallback((
     text: string,
     sender: 'user' | 'agent' | 'system',
-    attachments?: FileAttachment[]
+    attachments?: FileAttachment[],
+    suggestedReplies?: string[]
   ) => {
     setMessages(prev => [...prev, {
       id: Date.now().toString(),
@@ -32,6 +33,7 @@ export function useChat(): UseChatReturn {
       sender,
       timestamp: Date.now(),
       attachments,
+      suggestedReplies,
     }]);
   }, []);
 
@@ -46,7 +48,7 @@ export function useChat(): UseChatReturn {
       // Use ref to always get the latest messages, avoiding stale closure
       const currentMessages = messagesRef.current;
       const response = await sendMessageToAgent(text, files, currentMessages);
-      addMessage(response.text, 'agent');
+      addMessage(response.text, 'agent', undefined, response.suggestedReplies || undefined);
 
       return {
         auditResult: response.auditResult,

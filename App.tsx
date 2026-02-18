@@ -361,7 +361,7 @@ function App() {
             )}
 
             <div className="flex-1 flex flex-col overflow-hidden relative">
-              <Chat messages={messages} isTyping={isTyping} lang={language} />
+              <Chat messages={messages} isTyping={isTyping} lang={language} onReply={(text) => handleUserMessage(text, [])} />
             </div>
 
             <div className="flex-none">

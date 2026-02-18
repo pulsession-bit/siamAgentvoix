@@ -10,6 +10,7 @@ export interface ChatMessage {
   sender: Sender;
   timestamp: number;
   attachments?: FileAttachment[];
+  suggestedReplies?: string[];
 }
 
 export interface FileAttachment {

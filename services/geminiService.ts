@@ -178,6 +178,7 @@ interface AgentResponse {
   text: string;
   auditResult: AuditResult | null;
   action: AgentAction | null;
+  suggestedReplies: string[] | null;
 }
 
 export const sendMessageToAgent = async (
@@ -234,10 +235,16 @@ export const sendMessageToAgent = async (
 
     let auditResult: AuditResult | null = null;
     let action: AgentAction | null = null;
+    let suggestedReplies: string[] | null = null;
 
     if (jsonMatch && jsonMatch[1]) {
       try {
         const parsed = JSON.parse(jsonMatch[1]);
+
+        // Extract suggested replies if present (can be in any JSON block)
+        if (Array.isArray(parsed.suggested_replies)) {
+          suggestedReplies = parsed.suggested_replies;
+        }
 
         // Handle "action": "request_call" format
         if (parsed.action === 'request_call') {
@@ -263,7 +270,8 @@ export const sendMessageToAgent = async (
     return {
       text: cleanText,
       auditResult,
-      action
+      action,
+      suggestedReplies
     };
 
   } catch (error) {
@@ -271,7 +279,8 @@ export const sendMessageToAgent = async (
     return {
       text: translations[currentLanguage].analysis_error,
       auditResult: null,
-      action: null
+      action: null,
+      suggestedReplies: null
     };
   }
 };
