@@ -18,6 +18,7 @@ interface SidebarProps {
     handleGoogleLogin: () => void;
     handleLogout: () => void;
     clearSession: () => void;
+    setCapturedEmail: (email: string) => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -34,7 +35,8 @@ const Sidebar: React.FC<SidebarProps> = ({
     userEmail,
     handleGoogleLogin,
     handleLogout,
-    clearSession
+    clearSession,
+    setCapturedEmail
 }) => {
     const t = translations[language];
 
@@ -69,7 +71,20 @@ const Sidebar: React.FC<SidebarProps> = ({
                 {/* Expert CTA */}
                 <div className="mb-6">
                     <button
-                        onClick={handleManualCallRequest}
+                        onClick={() => {
+                            if (!userEmail) {
+                                const email = prompt(language === 'fr'
+                                    ? "Pour contactez un expert, veuillez d'abord renseigner votre email :"
+                                    : "To contact an expert, please enter your email first:");
+
+                                if (email && email.includes('@')) {
+                                    setCapturedEmail(email);
+                                    handleManualCallRequest();
+                                }
+                            } else {
+                                handleManualCallRequest();
+                            }
+                        }}
                         className="w-full relative group overflow-hidden bg-gradient-to-r from-brand-amber to-brand-yellow rounded-xl p-[2px] shadow-lg hover:shadow-brand-amber/20 transition-all duration-300 transform hover:scale-[1.02]"
                     >
                         <div className="bg-brand-navy rounded-[10px] p-3 flex items-center gap-3 h-full">

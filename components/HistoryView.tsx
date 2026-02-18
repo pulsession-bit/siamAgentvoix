@@ -37,21 +37,26 @@ const HistoryView: React.FC<HistoryViewProps> = ({ email, lang, onClose }) => {
         fetchHistory();
     }, [email]);
 
-    const formatDate = (isoString: string) => {
-        // Map our internal lang codes to standard locales
-        const localeMap: Record<string, string> = {
-            'fr': 'fr-FR',
-            'en': 'en-US',
-            'de': 'de-DE',
-            'ru': 'ru-RU'
-        };
-        return new Date(isoString).toLocaleDateString(localeMap[lang] || 'en-US', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+    const formatDate = (isoString?: string) => {
+        if (!isoString) return '';
+        try {
+            // Map our internal lang codes to standard locales
+            const localeMap: Record<string, string> = {
+                'fr': 'fr-FR',
+                'en': 'en-US',
+                'de': 'de-DE',
+                'ru': 'ru-RU'
+            };
+            return new Date(isoString).toLocaleDateString(localeMap[lang] || 'en-US', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (e) {
+            return isoString;
+        }
     };
 
     const getLocalizedVisaType = (intent: string) => {
