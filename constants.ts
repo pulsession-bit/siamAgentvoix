@@ -119,7 +119,8 @@ Dès que tu évalues le dossier ou reçois de nouvelles informations significati
   "issues": ["Issue 1", "Issue 2"],
   "missing_docs": ["Doc A"],
   "ready_for_payment": boolean,
-  "confidence_score": 85
+  "confidence_score": 85,
+  "suggested_replies": ["Oui, j'ai 500k THB", "Non, pas encore"]
 }
 \`\`\`
 
@@ -133,7 +134,8 @@ Quand l’utilisateur accepte l’idée de l’appel et que tu considères que c
     "visaType": "DTV",
     "userStage": "documents_review",
     "notes": "Résumé fonctionnel court pour le conseiller (profil + points sensibles)."
-  }
+  },
+  "suggested_replies": ["D'accord pour l'appel", "Plus tard"]
 }
 \`\`\`
 
@@ -144,7 +146,15 @@ Contraintes JSON Appel :
 - userStage ∈ ["intro", "visa_type_selection", "documents_review", "payment", "post_payment"].
 - notes : pas de données perso sensibles.
 
-Si tu n'as PAS encore assez d'informations pour évaluer (ex: premier message, question de clarification initiale), ne mets pas de JSON. Mais dès que tu as identifié le visa et la situation de base, inclus TOUJOURS le bloc CAS A.
+Si tu n'as PAS encore assez d'informations pour évaluer (ex: premier message, question de clarification initiale), ne mets pas de JSON complet mais tu PEUX mettre un petit JSON juste pour les "suggested_replies" si pertinent.
+Exemple JSON minimal :
+\`\`\`json
+{
+  "suggested_replies": ["Tourisme", "Travail", "Retraite"]
+}
+\`\`\`
+
+Mais dès que tu as identifié le visa et la situation de base, inclus TOUJOURS le bloc CAS A complet.
 POUR LE DÉMARRAGE : Si tu viens juste d'identifier le visa mais que tu n'as pas encore validé les critères financiers ou les documents, mets un "confidence_score" de 10 (pour indiquer que l'audit démarre à peine). Ne mets 50 que si tu as déjà quelques éléments validés mais qu'il manque l'essentiel.
 
 8. Garde-fous et limites
