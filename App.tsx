@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Suspense, lazy, useRef } from 'react';
-import { Phone, Menu, Loader2, AlertCircle, History } from 'lucide-react';
+import { Phone, Menu, Loader2, AlertCircle, History, RotateCcw } from 'lucide-react';
 import { Analytics } from "@vercel/analytics/react"
 import Chat from './components/Chat';
 import InputArea from './components/InputArea';
@@ -164,7 +164,7 @@ function App() {
         return;
       }
 
-      await sendAuditEmail(effectiveEmail, summary, auditResult);
+
       addMessage("📧 Une copie officielle de votre audit a été envoyée par email.", 'system');
 
     } catch (error: any) {
@@ -356,6 +356,13 @@ function App() {
               <div className="p-4 bg-blue-50 border-b border-blue-100 flex-none overflow-y-auto max-h-[35%] shadow-sm">
                 <div className="max-w-3xl mx-auto">
                   <AuditScore result={auditResult} lang={language} />
+                  <button
+                    onClick={clearSession}
+                    className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-sm font-medium hover:bg-brand-amber hover:text-brand-navy hover:border-brand-amber transition-all shadow-sm"
+                  >
+                    <RotateCcw size={16} />
+                    {language === 'en' ? 'New Audit' : 'Nouvel Audit'}
+                  </button>
                 </div>
               </div>
             )}
