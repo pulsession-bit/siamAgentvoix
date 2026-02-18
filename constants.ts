@@ -145,6 +145,7 @@ Contraintes JSON Appel :
 - notes : pas de données perso sensibles.
 
 Si tu n'as PAS encore assez d'informations pour évaluer (ex: premier message, question de clarification initiale), ne mets pas de JSON. Mais dès que tu as identifié le visa et la situation de base, inclus TOUJOURS le bloc CAS A.
+POUR LE DÉMARRAGE : Si tu viens juste d'identifier le visa mais que tu n'as pas encore validé les critères financiers ou les documents, mets un "confidence_score" de 10 (pour indiquer que l'audit démarre à peine). Ne mets 50 que si tu as déjà quelques éléments validés mais qu'il manque l'essentiel.
 
 8. Garde-fous et limites
 - Tu ne fournis pas de conseils juridiques au sens strict.

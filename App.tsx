@@ -353,7 +353,7 @@ function App() {
           {/* Chat View */}
           <div className="flex-1 flex flex-col overflow-hidden">
             {auditResult && step === AppStep.AUDIT && (
-              <div className="p-4 bg-white border-b border-slate-200 flex-none overflow-y-auto max-h-[35%] shadow-sm">
+              <div className="p-4 bg-blue-50 border-b border-blue-100 flex-none overflow-y-auto max-h-[35%] shadow-sm">
                 <div className="max-w-3xl mx-auto">
                   <AuditScore result={auditResult} lang={language} />
                 </div>
