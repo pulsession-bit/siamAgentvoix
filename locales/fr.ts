@@ -110,7 +110,7 @@ export const fr = {
     audit_status_pending: "Analyse en cours",
     audit_corrections_required: "Corrections requises :",
     audit_missing_docs: "Documents manquants :",
-    audit_success_msg: "Tous les feux sont au vert. Vous pouvez procéder au paiement sécurisé pour finaliser votre demande.",
+    audit_success_msg: "Tous les feux sont au vert. Pour finaliser votre demande, laissez-nous votre numéro de téléphone pour convenir d'un rendez-vous, ou contactez Son Nontree sur WhatsApp : +66 82 414 98 40.",
 
     // History
     history_title: "Mes Audits",
