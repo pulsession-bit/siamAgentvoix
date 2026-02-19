@@ -2,18 +2,14 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
+
     // --- Helper Functions ---
     function isAuthenticated() {
       return request.auth != null;
     }
-    
+
     function isOwner(userId) {
       return request.auth.uid == userId;
-    }
-
-    function isEmailOwner(email) {
-      return isAuthenticated() && request.auth.token.email == email;
     }
 
     // --- Users (Profiles) ---
@@ -23,32 +19,28 @@ service cloud.firestore {
     }
 
     // --- Leads (Users Identities) ---
-    // Users can read/write their own lead document (email based ID)
     match /leads/{email} {
-      allow read, write: if isEmailOwner(email);
+      allow read, write: if true;
     }
 
     // --- Audit Sessions (Legacy) ---
     match /audit_sessions/{sessionId} {
-      allow read: if true;
-      allow write: if isAuthenticated();
+      allow read, write: if true;
     }
 
     // --- Cases (New CRM) ---
     match /cases/{caseId} {
-      allow read: if true;
-      allow create, update: if isAuthenticated();
+      allow read, create, update: if true;
 
       // --- Events (Sub-collection) ---
       match /events/{eventId} {
-        allow read: if true;
-        allow create: if isAuthenticated();
+        allow read, create: if true;
       }
     }
 
     // --- Mail Trigger (Extension) ---
     match /mail/{mailId} {
-      allow create: if isAuthenticated();
+      allow create: if true;
     }
   }
 }
