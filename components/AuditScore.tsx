@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer } from 'recharts';
-import { AlertCircle, CheckCircle, XCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle, XCircle, Calendar } from 'lucide-react';
 import { AuditResult } from '../types';
 
 import { translations, Language } from '../locales/translations';
@@ -98,6 +98,16 @@ const AuditScore: React.FC<AuditScoreProps> = ({ result, lang }) => {
                 </p>
               </div>
             )}
+
+            <a
+              href="https://wa.me/66824149840"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-6 w-full flex items-center justify-center gap-2 py-3 bg-brand-navy text-white rounded-xl font-bold hover:bg-brand-navy/90 transition-all shadow-md active:scale-[0.98]"
+            >
+              <Calendar size={18} />
+              {lang === 'fr' ? 'Prendre Rendez-vous' : 'Book Appointment'}
+            </a>
           </div>
         </div>
       </div>
