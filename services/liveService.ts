@@ -2,7 +2,7 @@
 
 
 import { GoogleGenAI, LiveServerMessage, Modality, Blob } from "@google/genai";
-import { SYSTEM_PROMPT } from '../constants';
+import { LIVE_SYSTEM_PROMPT } from '../constants';
 
 interface TranscriptItem {
   role: 'user' | 'agent';
@@ -103,7 +103,7 @@ export class LiveAgent {
           },
           inputAudioTranscription: {},
           outputAudioTranscription: {},
-          systemInstruction: SYSTEM_PROMPT + "\n\nCONTEXTE: Ceci est un APPEL VOCAL en direct. Sois concis, direct et empathique. Pas de listes à puces. Parle comme un humain au téléphone.",
+          systemInstruction: LIVE_SYSTEM_PROMPT,
         },
         callbacks: {
           onopen: () => {
