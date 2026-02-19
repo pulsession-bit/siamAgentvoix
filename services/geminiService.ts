@@ -277,7 +277,7 @@ export const sendMessageToAgent = async (
   } catch (error) {
     console.error("Gemini Error:", error);
     return {
-      text: translations[currentLanguage].analysis_error,
+      text: error instanceof Error ? `Erreur technique : ${error.message}` : translations[currentLanguage].analysis_error,
       auditResult: null,
       action: null,
       suggestedReplies: null

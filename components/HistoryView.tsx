@@ -10,14 +10,17 @@ interface HistoryViewProps {
     email: string;
     lang: Language;
     onClose: () => void;
+    currentSessionId?: string | null;
 }
 
-const HistoryView: React.FC<HistoryViewProps> = ({ email, lang, onClose }) => {
+const HistoryView: React.FC<HistoryViewProps> = ({ email, lang, onClose, currentSessionId }) => {
+    // ... existing state ...
     const [cases, setCases] = useState<CaseData[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedCase, setSelectedCase] = useState<CaseData | null>(null);
     const t = translations[lang];
 
+    // ... useEffect ...
     useEffect(() => {
         const fetchHistory = async () => {
             if (!email) {
@@ -37,6 +40,7 @@ const HistoryView: React.FC<HistoryViewProps> = ({ email, lang, onClose }) => {
         fetchHistory();
     }, [email]);
 
+    // ... formatDate ...
     const formatDate = (isoString?: string) => {
         if (!isoString) return '';
         try {
@@ -59,6 +63,7 @@ const HistoryView: React.FC<HistoryViewProps> = ({ email, lang, onClose }) => {
         }
     };
 
+    // ... localized helpers ...
     const getLocalizedVisaType = (intent: string) => {
         const i = intent.toLowerCase();
         if (i.includes('retire')) return t.visa_retire_label;
@@ -96,9 +101,13 @@ const HistoryView: React.FC<HistoryViewProps> = ({ email, lang, onClose }) => {
                         <h2 className="text-xl font-bold">
                             {selectedCase ? getLocalizedVisaType(selectedCase.intent) : t.history_title}
                         </h2>
-                        {selectedCase && (
+                        {selectedCase ? (
                             <span className="text-xs font-normal text-slate-300">
                                 {formatDate(selectedCase.last_event_at)}
+                            </span>
+                        ) : (
+                            <span className="text-xs font-normal text-slate-300">
+                                {cases.length} {cases.length > 1 ? 'dossiers archivés' : 'dossier archivé'}
                             </span>
                         )}
                     </div>
@@ -172,46 +181,64 @@ const HistoryView: React.FC<HistoryViewProps> = ({ email, lang, onClose }) => {
                     </div>
                 ) : (
                     <div className="space-y-4">
-                        {cases.map((c) => (
-                            <button
-                                key={c.case_id}
-                                onClick={() => setSelectedCase(c)}
-                                className="w-full text-left group bg-white hover:bg-white border border-slate-200 hover:border-brand-amber/50 rounded-xl p-4 transition-all duration-300 hover:shadow-lg active:scale-[0.99]"
-                            >
-                                <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
-                                    <div className="flex items-center gap-4">
-                                        <div className={`p-3 rounded-xl ${c.confidence_score > 80 ? 'bg-green-100 text-green-600' : 'bg-brand-amber/10 text-brand-amber'} transition-colors`}>
-                                            <Shield size={24} />
-                                        </div>
-                                        <div>
-                                            <div className="flex items-center gap-2 flex-wrap">
-                                                <span className="font-bold text-lg text-brand-navy">{getLocalizedVisaType(c.intent)}</span>
-                                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide ${c.status.includes('DONE') || c.status.includes('VALID') ? 'bg-green-500 text-white' : 'bg-slate-200 text-slate-600'
-                                                    }`}>
-                                                    {getLocalizedStatus(c.status)}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center gap-2 text-xs text-slate-400 mt-1">
-                                                <Calendar size={12} />
-                                                <span>{formatDate(c.last_event_at)}</span>
-                                            </div>
-                                        </div>
-                                    </div>
+                        {cases.map((c) => {
+                            const isCurrent = currentSessionId && (c.case_id === currentSessionId || c.case_id === currentSessionId); // simplified check
+                            // Check legacy session match too just in case
+                            const isMatch = isCurrent || (c.case_id === currentSessionId);
 
-                                    <div className="flex items-center justify-between sm:justify-end gap-6 pl-14 sm:pl-0">
-                                        <div className="text-right">
-                                            <div className="text-xl font-black text-brand-navy">
-                                                {c.confidence_score}<span className="text-sm text-slate-300 font-normal">/100</span>
+                            return (
+                                <button
+                                    key={c.case_id}
+                                    onClick={() => setSelectedCase(c)}
+                                    className={`w-full text-left group bg-white hover:bg-white border rounded-xl p-4 transition-all duration-300 hover:shadow-lg active:scale-[0.99] ${isMatch ? 'border-brand-amber ring-1 ring-brand-amber/30' : 'border-slate-200 hover:border-brand-amber/50'
+                                        }`}
+                                >
+                                    <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
+                                        <div className="flex items-center gap-4">
+                                            <div className={`p-3 rounded-xl ${c.confidence_score > 80 ? 'bg-green-100 text-green-600' : 'bg-brand-amber/10 text-brand-amber'} transition-colors relative`}>
+                                                <Shield size={24} />
+                                                {isMatch && (
+                                                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-brand-amber rounded-full border-2 border-white" />
+                                                )}
                                             </div>
-                                            <div className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">
-                                                {t.val_visa_score}
+                                            <div>
+                                                <div className="flex items-center gap-2 flex-wrap mb-1">
+                                                    <span className="font-bold text-lg text-brand-navy">{getLocalizedVisaType(c.intent)}</span>
+                                                    {isMatch && (
+                                                        <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wide bg-brand-amber text-brand-navy">
+                                                            {lang === 'fr' ? 'Actuel' : 'Current'}
+                                                        </span>
+                                                    )}
+                                                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide ${c.status.includes('DONE') || c.status.includes('VALID') ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'
+                                                        }`}>
+                                                        {getLocalizedStatus(c.status)}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-3 text-xs text-slate-400">
+                                                    <div className="flex items-center gap-1">
+                                                        <Calendar size={12} />
+                                                        <span>{formatDate(c.last_event_at)}</span>
+                                                    </div>
+                                                    <span className="opacity-50">#{c.case_id.slice(-6)}</span>
+                                                </div>
                                             </div>
                                         </div>
-                                        <ArrowRight size={20} className="text-slate-300 group-hover:text-brand-amber transition-colors mt-0.5" />
+
+                                        <div className="flex items-center justify-between sm:justify-end gap-6 pl-14 sm:pl-0">
+                                            <div className="text-right">
+                                                <div className="text-xl font-black text-brand-navy">
+                                                    {c.confidence_score}<span className="text-sm text-slate-300 font-normal">/100</span>
+                                                </div>
+                                                <div className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">
+                                                    {t.val_visa_score}
+                                                </div>
+                                            </div>
+                                            <ArrowRight size={20} className="text-slate-300 group-hover:text-brand-amber transition-colors mt-0.5" />
+                                        </div>
                                     </div>
-                                </div>
-                            </button>
-                        ))}
+                                </button>
+                            )
+                        })}
                     </div>
                 )}
             </div>

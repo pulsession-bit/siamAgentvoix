@@ -258,9 +258,7 @@ export const saveSessionToFirestore = async (email: string, sessionData: any) =>
         console.log("Lead & Audit synced for:", safeEmail);
     } catch (e: any) {
         console.error("Error saving to DB:", e);
-        if (e.code !== 'permission-denied') {
-            console.warn("Save failed:", e.message);
-        }
+        throw e; // Rethrow to allow caller (App.tsx) to handle login prompt or error display
     }
 };
 

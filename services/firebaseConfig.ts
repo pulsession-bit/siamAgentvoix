@@ -31,3 +31,17 @@ export const signInWithGoogle = async () => {
     throw error;
   }
 };
+export const createAccount = async (email, password) => {
+  const { createUserWithEmailAndPassword } = await import("firebase/auth");
+  return createUserWithEmailAndPassword(auth, email, password);
+};
+
+export const signInWithEmail = async (email, password) => {
+  const { signInWithEmailAndPassword } = await import("firebase/auth");
+  return signInWithEmailAndPassword(auth, email, password);
+};
+
+export const updateUserProfile = async (user, profile) => {
+  const { updateProfile } = await import("firebase/auth");
+  return updateProfile(user, profile);
+};

@@ -20,6 +20,8 @@ export function useAuth() {
     login,
     logout,
     refreshSession,
+    loginWithEmail,
+    signupWithEmail,
   } = useAuthContext();
 
   // Backward compatibility: expose userEmail as before
@@ -37,6 +39,8 @@ export function useAuth() {
     isLoading,
     sessionId,
     refreshSession,
+    loginWithEmail,
+    signupWithEmail,
 
     // Original API (backward compatible)
     userEmail,

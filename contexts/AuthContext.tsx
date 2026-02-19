@@ -33,6 +33,8 @@ interface AuthContextType {
   login: () => Promise<UserProfile | null>;
   logout: () => Promise<void>;
   refreshSession: () => Promise<void>;
+  loginWithEmail: (email: string, password: string) => Promise<UserProfile | null>;
+  signupWithEmail: (email: string, password: string, name: string) => Promise<UserProfile | null>;
 }
 
 // Context
@@ -230,6 +232,61 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await syncUserToFirestore(refreshedUser);
   }, [user]);
 
+  // Login with Email
+  const loginWithEmail = useCallback(async (email: string, password: string): Promise<UserProfile | null> => {
+    try {
+      setIsLoading(true);
+      const { signInWithEmail } = await import('../services/firebaseConfig');
+      const userCredential = await signInWithEmail(email, password);
+      const firebaseUser = userCredential.user;
+
+      const profile = firebaseUserToProfile(firebaseUser);
+      setUser(profile);
+      saveSessionToStorage(profile);
+      await syncUserToFirestore(profile);
+      return profile;
+    } catch (error) {
+      console.error('Email Login error:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Signup with Email
+  const signupWithEmail = useCallback(async (email: string, password: string, name: string): Promise<UserProfile | null> => {
+    try {
+      setIsLoading(true);
+      const { createAccount, updateUserProfile } = await import('../services/firebaseConfig');
+      const userCredential = await createAccount(email, password);
+      const firebaseUser = userCredential.user;
+
+      if (name) {
+        try {
+          await updateUserProfile(firebaseUser, { displayName: name });
+          // Manually update the user object before creating profile
+          // Note: firebaseUser is read-only usually, but profile creation reads it
+        } catch (e) {
+          console.warn("Name update failed", e);
+        }
+      }
+
+      const profile = firebaseUserToProfile(firebaseUser);
+      // Manually set displayName if it wasn't picked up
+      if (name && !profile.displayName) profile.displayName = name;
+
+      setUser(profile);
+      saveSessionToStorage(profile);
+      await syncUserToFirestore(profile);
+      return profile;
+    } catch (error) {
+      console.error('Email Signup error:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   const value: AuthContextType = {
     user,
     isAuthenticated,
@@ -238,6 +295,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     login,
     logout,
     refreshSession,
+    loginWithEmail,
+    signupWithEmail,
   };
 
   return (

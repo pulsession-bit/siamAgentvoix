@@ -13,6 +13,7 @@ const CallModal = lazy(() => import('./components/CallModal'));
 const SummaryView = lazy(() => import('./components/SummaryView'));
 const VoiceUpsellModal = lazy(() => import('./components/VoiceUpsellModal'));
 const HistoryView = lazy(() => import('./components/HistoryView'));
+const AuthModal = lazy(() => import('./components/AuthModal'));
 
 import { AppStep, FileAttachment } from './types';
 import { translations, Language } from './locales/translations';
@@ -30,6 +31,7 @@ function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUpsellOpen, setIsUpsellOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isAuditSubmitted, setIsAuditSubmitted] = useState(false);
 
   // Email capture state (restored from localStorage for persistence)
@@ -166,15 +168,29 @@ function App() {
         return;
       }
 
+      // Save session to Firestore so it appears in History
+      await saveSessionToFirestore(effectiveEmail, {
+        sessionId,
+        messages,
+        step,
+        visaType,
+        auditResult,
+        chatSummary: summary,
+        userEmail: effectiveEmail,
+        timestamp: Date.now()
+      });
+
+      // Send Email
+      await sendAuditEmail(effectiveEmail, summary, auditResult);
 
       addMessage("📧 Une copie officielle de votre audit a été envoyée par email.", 'system');
 
     } catch (error: any) {
       console.error("Summary/Email error:", error);
-      if (error.message?.includes("Permission denied") || error.code === 'permission-denied') {
-        alert("Erreur de permission : Impossible d'envoyer l'email. Veuillez vous connecter.");
+      if (error.code === 'permission-denied' || error.message?.includes("Permission denied") || error.message?.includes("Missing or insufficient permissions")) {
+        setIsAuthModalOpen(true);
       } else {
-        alert("Une erreur est survenue lors de l'envoi de l'email : " + (error.message || "Erreur inconnue"));
+        alert("Une erreur est survenue : " + (error.message || "Erreur inconnue"));
       }
     } finally {
       isEmailSendingRef.current = false;
@@ -185,10 +201,7 @@ function App() {
     setCallPayload(null);
     if (transcript) {
       appendTranscript(transcript);
-      // Add a small delay to ensure chat history is updated before summary
-      setTimeout(() => {
-        handleGenerateSummary();
-      }, 500);
+      // Removed automatic summary generation after call to prevent premature email sending
     }
   };
 
@@ -460,12 +473,26 @@ function App() {
         </main>
 
         <Suspense fallback={null}>
+          {isAuthModalOpen && (
+            <AuthModal
+              lang={language}
+              onClose={() => setIsAuthModalOpen(false)}
+              onSuccess={() => {
+                alert(language === 'fr'
+                  ? "Connexion réussie ! Veuillez cliquer à nouveau sur le bouton 'Je Confirme' pour envoyer l'audit."
+                  : "Login successful! Please click 'Confirm' again to send the audit."
+                );
+              }}
+            />
+          )}
+
           {/* History Modal */}
           {isHistoryOpen && (
             <div className="absolute inset-0 z-[100] bg-brand-navy/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-300">
               <HistoryView
                 email={effectiveEmail || ''}
                 lang={language}
+                currentSessionId={sessionId}
                 onClose={() => setIsHistoryOpen(false)}
               />
             </div>
