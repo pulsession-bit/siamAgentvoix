@@ -92,17 +92,17 @@ export const getSystemPrompt = (userEmail: string | null = null, language: Langu
   let prompt = SYSTEM_PROMPT;
 
   if (language === 'en') {
-    prompt += \`
-    
+    prompt += `
+
     [IMPORTANT LANGUAGE OVERRIDE]
     The user is browsing in ENGLISH.
     You MUST interact in ENGLISH.
     Translate all your responses into clear, professional English.
-    \`;
+    `;
   }
 
   if (userEmail) {
-    prompt += \`\n\n[CONTEXT] User Email: \${userEmail}\`;
+    prompt += `\n\n[CONTEXT] User Email: ${userEmail}`;
   }
 
   return prompt;

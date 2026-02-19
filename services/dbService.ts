@@ -249,6 +249,16 @@ export const saveSessionToFirestore = async (email: string, sessionData: any) =>
 
                 const { case_id, event_id } = await ingestEvent(ingressEvent);
                 console.log(`[Dual-Write] Event ingested: case=${case_id}, event=${event_id}`);
+
+                // Save audit + summary to the case document so HistoryView can display them
+                const caseRef = doc(db, "cases", case_id);
+                const enrichment: Record<string, any> = {};
+                if (sessionData.auditResult) enrichment.audit = sanitize(sessionData.auditResult);
+                if (sessionData.chatSummary) enrichment.summary = sanitize(sessionData.chatSummary);
+                if (Object.keys(enrichment).length > 0) {
+                    await updateDoc(caseRef, enrichment);
+                    console.log(`[Dual-Write] Case enriched with audit/summary: ${case_id}`);
+                }
             }
         } catch (ingressError: any) {
             // Don't fail the whole save if ingress fails (graceful degradation)
