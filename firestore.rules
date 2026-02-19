@@ -30,17 +30,18 @@ service cloud.firestore {
 
     // --- Audit Sessions (Legacy) ---
     match /audit_sessions/{sessionId} {
-      allow read, write: if isAuthenticated();
+      allow read: if true;
+      allow write: if isAuthenticated();
     }
 
     // --- Cases (New CRM) ---
     match /cases/{caseId} {
-      allow create: if isAuthenticated();
-      allow read, update: if isAuthenticated();
-      
+      allow read: if true;
+      allow create, update: if isAuthenticated();
+
       // --- Events (Sub-collection) ---
       match /events/{eventId} {
-        allow read: if isAuthenticated();
+        allow read: if true;
         allow create: if isAuthenticated();
       }
     }
