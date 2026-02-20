@@ -285,6 +285,44 @@ export class LiveAgent {
     return sum / dataArray.length;
   }
 
+  /**
+   * Extract audit JSON data from the raw agent transcription (before JSON is stripped).
+   * Returns the last audit JSON block found, or null.
+   */
+  getExtractedAuditData(): any | null {
+    // Flush pending transcripts
+    if (this.currentInputTranscription.trim()) {
+      this.transcriptionHistory.push({ role: 'user', text: this.currentInputTranscription.trim() });
+      this.currentInputTranscription = '';
+    }
+    if (this.currentOutputTranscription.trim()) {
+      this.transcriptionHistory.push({ role: 'agent', text: this.currentOutputTranscription.trim() });
+      this.currentOutputTranscription = '';
+    }
+
+    // Search backwards (latest data first) for JSON blocks with visa_type
+    for (let i = this.transcriptionHistory.length - 1; i >= 0; i--) {
+      const item = this.transcriptionHistory[i];
+      if (item.role !== 'agent') continue;
+
+      // Try code-fenced JSON first
+      const fencedMatch = item.text.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+      if (fencedMatch) {
+        try {
+          const parsed = JSON.parse(fencedMatch[1]);
+          if (parsed.visa_type || parsed.audit_status) return parsed;
+        } catch { /* continue */ }
+      }
+
+      // Try bare JSON objects with audit fields
+      const bareMatch = item.text.match(/\{[\s\S]*?"visa_type"[\s\S]*?\}/);
+      if (bareMatch) {
+        try { return JSON.parse(bareMatch[0]); } catch { /* continue */ }
+      }
+    }
+    return null;
+  }
+
   getFormattedTranscript(): string | null {
     // Flush pending transcripts
     if (this.currentInputTranscription.trim()) {

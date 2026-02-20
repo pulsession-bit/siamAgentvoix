@@ -149,22 +149,28 @@ function App() {
 
   const lastEmailSentRef = useRef<string | null>(null);
   const isEmailSendingRef = useRef(false);
+  const lastCallTranscriptRef = useRef<string | null>(null);
 
   const handleGenerateSummary = async () => {
     if (isEmailSendingRef.current) return;
 
     try {
       isEmailSendingRef.current = true;
-      const summary = await generateSummary();
+      // Pass call transcript if available so Gemini can generate summary from it
+      const summary = await generateSummary(lastCallTranscriptRef.current || undefined);
       setIsMobileMenuOpen(false);
 
       if (!summary) {
-        alert("L'IA n'a pas pu générer de synthèse. Veuillez ajouter quelques messages à la conversation.");
+        alert(language === 'fr'
+          ? "L'IA n'a pas pu générer de synthèse. Veuillez ajouter quelques messages à la conversation."
+          : "AI could not generate a summary. Please add some messages to the conversation.");
         return;
       }
 
       if (!effectiveEmail) {
-        alert("Veuillez renseigner votre email pour recevoir le rapport.");
+        alert(language === 'fr'
+          ? "Veuillez renseigner votre email pour recevoir le rapport."
+          : "Please enter your email to receive the report.");
         return;
       }
 
@@ -183,25 +189,38 @@ function App() {
       // Send Email
       await sendAuditEmail(effectiveEmail, summary, auditResult);
 
-      addMessage("📧 Une copie officielle de votre audit a été envoyée par email.", 'system');
+      addMessage(language === 'fr'
+        ? "📧 Une copie officielle de votre audit a été envoyée par email."
+        : "📧 An official copy of your audit has been sent by email.",
+        'system');
 
     } catch (error: any) {
       console.error("Summary/Email error:", error);
       if (error.code === 'permission-denied' || error.message?.includes("Permission denied") || error.message?.includes("Missing or insufficient permissions")) {
         setIsAuthModalOpen(true);
       } else {
-        alert("Une erreur est survenue : " + (error.message || "Erreur inconnue"));
+        alert(language === 'fr'
+          ? "Une erreur est survenue : " + (error.message || "Erreur inconnue")
+          : "An error occurred: " + (error.message || "Unknown error"));
       }
     } finally {
       isEmailSendingRef.current = false;
     }
   };
 
-  const handleCallClose = async (transcript?: string) => {
+  const handleCallClose = async (transcript?: string | null, auditData?: any) => {
     setCallPayload(null);
+
     if (transcript) {
+      lastCallTranscriptRef.current = transcript;
       appendTranscript(transcript);
-      // Removed automatic summary generation after call to prevent premature email sending
+    }
+
+    // If the Live agent extracted audit data, display it and move to confirmation
+    if (auditData && (auditData.visa_type || auditData.audit_status)) {
+      updateAuditFromResponse(auditData);
+      setIsAuditSubmitted(false);
+      setStep(AppStep.PAYMENT);
     }
   };
 

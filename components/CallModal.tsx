@@ -6,8 +6,7 @@ import { translations, Language } from '../locales/translations';
 
 interface CallModalProps {
   payload: CallPayload;
-  onClose: (transcript?: string | null) => void;
-  // Props present in App.tsx but unused in this simplified version
+  onClose: (transcript?: string | null, auditData?: any) => void;
   chatContext?: string;
   lang?: Language;
 }
@@ -85,17 +84,20 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose, lang = 'fr' }) 
 
   const endCall = () => {
     let transcript = null;
+    let auditData = null;
     if (liveAgentRef.current) {
+      // Extract audit data BEFORE getFormattedTranscript (both flush pending transcripts)
+      auditData = liveAgentRef.current.getExtractedAuditData();
       transcript = liveAgentRef.current.getFormattedTranscript();
       liveAgentRef.current.disconnect();
       liveAgentRef.current = null;
     }
-    onClose(transcript);
+    onClose(transcript, auditData);
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-navy/80 backdrop-blur-sm transition-opacity">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100 opacity-100 flex flex-col h-[500px] relative">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100 opacity-100 flex flex-col h-[650px] relative">
 
         {/* GLOBAL BACKGROUND: Secretary Image + Overlay covering the whole modal */}
         <div className="absolute inset-0 z-0">
@@ -186,47 +188,59 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose, lang = 'fr' }) 
           )}
 
           {status === 'connected' && (
-            <div className="space-y-8 w-full z-10 animate-in zoom-in-95 duration-500 relative flex flex-col items-center">
-              {/* "Door Handle" Visualizer (Agent Voice Only) */}
-              <div className="h-24 flex flex-col items-center justify-center w-full max-w-[150px] mx-auto">
-
-                {/* No static line above. Just the dynamic handle. */}
-                <div className="flex items-center justify-center w-full h-2">
-                  <div
-                    className="h-1 bg-brand-navy rounded-full transition-all duration-75 ease-out shadow-sm"
-                    style={{
-                      width: `${visualizerWidth}%`,
-                      opacity: 0.6 + (visualizerWidth / 200)
-                    }}
-                  ></div>
-                </div>
-
-              </div>
-
-              {/* Live Transcript Display (Low Latency) */}
-              <div className="w-full min-h-[80px] flex items-center justify-center">
+            <div className="w-full h-full z-10 animate-in zoom-in-95 duration-500 relative flex flex-col items-center">
+              {/* Live Transcript Display (Low Latency) - Moved UP */}
+              <div className="w-full flex-1 min-h-0 flex items-center justify-center overflow-hidden py-4">
                 {liveTranscript && liveTranscript.text ? (
                   <div className={`
-                      max-w-[90%] p-3 rounded-xl backdrop-blur-md shadow-sm border border-white/50 text-sm font-medium transition-all duration-300
+                      max-w-[90%] w-full max-h-full flex flex-col p-4 rounded-xl backdrop-blur-md shadow-lg border border-white/50 text-sm font-medium transition-all duration-300 text-left
                       ${liveTranscript.role === 'agent'
-                      ? 'bg-white/90 text-brand-navy'
-                      : 'bg-brand-navy/90 text-white'}
+                      ? 'bg-white/95 text-brand-navy'
+                      : 'bg-brand-navy/95 text-white'}
                    `}>
-                    <span className="opacity-50 text-[10px] uppercase block mb-1">
+                    <span className="opacity-50 text-[10px] uppercase block mb-2 shrink-0 font-bold">
                       {liveTranscript.role === 'agent' ? t.transcript_agent : t.transcript_user}
                     </span>
-                    {liveTranscript.text}
-                    {!liveTranscript.isFinal && <span className="animate-pulse">|</span>}
+                    <div className="overflow-y-auto break-words whitespace-pre-wrap pr-2 scrollbar-styled text-base leading-relaxed">
+                      {liveTranscript.text}
+                      {!liveTranscript.isFinal && <span className="animate-pulse ml-1 inline-block w-1.5 h-4 bg-current opacity-70 align-middle"></span>}
+                    </div>
                   </div>
                 ) : (
-                  <div className="text-slate-500 text-sm italic opacity-70 bg-white/50 px-4 py-2 rounded-full backdrop-blur-sm">
+                  <div className="text-slate-500 text-sm italic opacity-80 bg-white/70 px-6 py-3 rounded-full backdrop-blur-md shadow-sm border border-white/50">
                     {t.call_waiting_speech}
                   </div>
                 )}
               </div>
 
+              {/* Enhanced Visualizer (Agent Voice) - Moved DOWN */}
+              <div className="h-32 flex flex-col items-center justify-center w-full shrink-0 relative mt-4">
+                <div className="relative flex items-center justify-center w-24 h-24">
+                  {/* Outer pulsing ring based on volume */}
+                  <div
+                    className="absolute inset-0 bg-brand-navy/20 rounded-full transition-all duration-75 ease-out"
+                    style={{
+                      transform: `scale(${1 + (visualizerWidth / 100) * 0.8})`,
+                      opacity: visualizerWidth > 10 ? 0.8 : 0,
+                    }}
+                  ></div>
+                  {/* Inner pulsing ring */}
+                  <div
+                    className="absolute inset-0 bg-brand-navy/30 rounded-full transition-all duration-75 ease-out"
+                    style={{
+                      transform: `scale(${1 + (visualizerWidth / 100) * 0.4})`,
+                      opacity: visualizerWidth > 10 ? 1 : 0,
+                    }}
+                  ></div>
+                  {/* Center solid circle */}
+                  <div className="relative z-10 w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(0,0,0,0.1)] border border-slate-100">
+                    <Signal className={`text-brand-navy transition-all duration-150 ${visualizerWidth > 10 ? 'opacity-100 scale-110' : 'opacity-50 scale-100'}`} size={28} />
+                  </div>
+                </div>
+              </div>
+
               {/* Controls */}
-              <div className="flex items-center justify-center gap-6 mt-auto">
+              <div className="flex items-center justify-center gap-6 mt-6 shrink-0 pb-4">
                 <button
                   onClick={() => setIsMuted(!isMuted)}
                   className={`p-4 rounded-full transition-all shadow-md ${isMuted ? 'bg-slate-200 text-slate-600' : 'bg-white text-brand-navy hover:bg-slate-50 border border-slate-200'}`}
@@ -236,7 +250,7 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose, lang = 'fr' }) 
 
                 <button
                   onClick={endCall}
-                  className="p-5 bg-slate-700 hover:bg-slate-800 text-white rounded-full shadow-lg hover:shadow-slate-700/30 transition-all transform hover:scale-105 border-4 border-white"
+                  className="p-5 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-lg hover:shadow-red-500/30 transition-all transform hover:scale-105 border-4 border-white"
                 >
                   <Phone size={28} className="rotate-[135deg]" />
                 </button>

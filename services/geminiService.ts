@@ -285,17 +285,37 @@ export const sendMessageToAgent = async (
   }
 };
 
-// New function to generate a structured summary of the chat
-export const generateChatSummary = async (): Promise<import('../types').ChatSummary | null> => {
-  if (!chatSession) return null;
+// Generate a structured summary of the chat (or call transcript)
+export const generateChatSummary = async (callTranscript?: string): Promise<import('../types').ChatSummary | null> => {
   checkRateLimit();
+  const client = getClient();
 
   try {
+    // If we have a call transcript, create a fresh session with it as context
+    // This ensures summary generation works even when the chat session has no call history
+    let session = chatSession;
+    if (callTranscript) {
+      session = client.chats.create({
+        model: 'gemini-2.0-flash',
+        config: {
+          systemInstruction: getSystemPrompt(currentUserEmail, currentLanguage),
+          temperature: 0.2,
+        },
+        history: [
+          { role: 'user', parts: [{ text: 'Voici le transcript de mon appel vocal avec votre agent:\n\n' + callTranscript }] },
+          { role: 'model', parts: [{ text: "Merci, j'ai bien reçu le transcript de votre appel. Je suis prêt à générer votre rapport d'audit." }] },
+        ]
+      });
+    }
+
+    if (!session) return null;
+
     const prompt = currentLanguage === 'en' ? `
       SESSION SUMMARY
       Generate a structured summary of our entire conversation for the user in JSON format only.
-      
-      Expected format based on the French structure but with English content where appropriate:
+      ${callTranscript ? 'IMPORTANT: Base your summary on the call transcript provided above.' : ''}
+
+      Expected format:
       {
         "visa_score": 0 to 100,
         "visa_type": "Identified Visa Name",
@@ -308,13 +328,14 @@ export const generateChatSummary = async (): Promise<import('../types').ChatSumm
         ],
         "required_documents": ["Doc 1", "Doc 2"]
       }
-      
+
       Be precise, professional, and constructive.
       IMPORTANT: If the visa is DTV, ensure financial requirements mentioned are 500k THB savings, NOT 80k USD income (that's LTR).
     ` : `
       SYNTHÈSE DE FIN DE SESSION
       Génère un résumé structuré de l'ensemble de notre conversation pour l'utilisateur au format JSON uniquement.
-      
+      ${callTranscript ? "IMPORTANT: Base ta synthèse sur le transcript de l'appel vocal ci-dessus." : ''}
+
       Format attendu :
       {
         "visa_score": 0 à 100,
@@ -328,12 +349,12 @@ export const generateChatSummary = async (): Promise<import('../types').ChatSumm
         ],
         "required_documents": ["Doc 1", "Doc 2"]
       }
-      
+
       Sois précis, professionnel et constructif.
       IMPORTANT: Si le visa est DTV, vérifie que les critères financiers sont bien 500k THB d'épargne, PAS 80k USD de revenus (ça c'est le LTR).
     `;
 
-    const result = await chatSession.sendMessage({ message: prompt });
+    const result = await session.sendMessage({ message: prompt });
     const fullText = result.text || "";
 
     // Extract JSON

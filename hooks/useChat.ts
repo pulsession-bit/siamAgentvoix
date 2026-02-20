@@ -81,17 +81,17 @@ interface UseSummaryReturn {
   chatSummary: ChatSummary | null;
   setChatSummary: React.Dispatch<React.SetStateAction<ChatSummary | null>>;
   isGeneratingSummary: boolean;
-  generateSummary: () => Promise<ChatSummary | null>;
+  generateSummary: (callTranscript?: string) => Promise<ChatSummary | null>;
 }
 
 export function useSummary(): UseSummaryReturn {
   const [chatSummary, setChatSummary] = useState<ChatSummary | null>(null);
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
 
-  const generateSummary = useCallback(async (): Promise<ChatSummary | null> => {
+  const generateSummary = useCallback(async (callTranscript?: string): Promise<ChatSummary | null> => {
     setIsGeneratingSummary(true);
     try {
-      const summary = await generateChatSummary();
+      const summary = await generateChatSummary(callTranscript);
       if (summary) {
         setChatSummary(summary);
         return summary;
