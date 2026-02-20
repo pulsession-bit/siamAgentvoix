@@ -216,17 +216,9 @@ function App() {
       appendTranscript(transcript);
     }
 
-    // If the Live agent extracted JSON audit data inline, use it directly
-    if (auditData && (auditData.visa_type || auditData.audit_status)) {
-      updateAuditFromResponse(auditData);
-      setIsAuditSubmitted(false);
-      setStep(AppStep.PAYMENT);
-      return;
-    }
-
-    // Otherwise: Live audio model can't produce JSON, so analyze transcript
-    // with the text model to extract structured audit data post-call
-    if (transcript) {
+    // Resolve audit data: either from inline JSON or post-call text analysis
+    let resolvedAudit = auditData;
+    if (!(resolvedAudit && (resolvedAudit.visa_type || resolvedAudit.audit_status)) && transcript) {
       addMessage(
         language === 'fr'
           ? "⏳ Analyse de votre appel en cours..."
@@ -234,14 +226,53 @@ function App() {
         'system'
       );
       try {
-        const extracted = await analyzeCallTranscript(transcript);
-        if (extracted && (extracted.visa_type || extracted.audit_status)) {
-          updateAuditFromResponse(extracted);
-          setIsAuditSubmitted(false);
-          setStep(AppStep.PAYMENT);
-        }
+        resolvedAudit = await analyzeCallTranscript(transcript);
       } catch (err) {
         console.error("[handleCallClose] Post-call analysis failed:", err);
+      }
+    }
+
+    // If we have audit data, display it and auto-send email
+    if (resolvedAudit && (resolvedAudit.visa_type || resolvedAudit.audit_status)) {
+      updateAuditFromResponse(resolvedAudit);
+
+      // Auto-generate summary + save + send email (no manual confirmation needed)
+      try {
+        const summary = await generateSummary(transcript || undefined);
+        if (summary && effectiveEmail) {
+          await saveSessionToFirestore(effectiveEmail, {
+            sessionId,
+            messages,
+            step,
+            visaType: resolvedAudit.visa_type || visaType,
+            auditResult: resolvedAudit,
+            chatSummary: summary,
+            userEmail: effectiveEmail,
+            timestamp: Date.now()
+          });
+          await sendAuditEmail(effectiveEmail, summary, resolvedAudit);
+          addMessage(
+            language === 'fr'
+              ? "📧 Votre rapport d'audit a été envoyé par email."
+              : "📧 Your audit report has been sent by email.",
+            'system'
+          );
+        } else if (!effectiveEmail) {
+          addMessage(
+            language === 'fr'
+              ? "⚠️ Aucun email renseigné. Connectez-vous pour recevoir votre rapport."
+              : "⚠️ No email found. Please log in to receive your report.",
+            'system'
+          );
+        }
+      } catch (err: any) {
+        console.error("[handleCallClose] Summary/email error:", err);
+        addMessage(
+          language === 'fr'
+            ? "⚠️ Erreur lors de l'envoi du rapport. Vous pouvez réessayer depuis le menu."
+            : "⚠️ Error sending the report. You can retry from the menu.",
+          'system'
+        );
       }
     }
   };
