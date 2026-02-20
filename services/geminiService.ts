@@ -285,6 +285,71 @@ export const sendMessageToAgent = async (
   }
 };
 
+/**
+ * Post-call analysis: sends the voice call transcript to the text model
+ * to extract structured audit data (visa_type, confidence_score, etc.).
+ * The Live audio model can only produce audio, so JSON is never in the transcription.
+ * This function bridges that gap by analyzing the transcript after the call.
+ */
+export const analyzeCallTranscript = async (transcript: string): Promise<AuditResult | null> => {
+  checkRateLimit();
+  const client = getClient();
+
+  try {
+    const session = client.chats.create({
+      model: 'gemini-2.0-flash',
+      config: {
+        systemInstruction: getSystemPrompt(currentUserEmail, currentLanguage),
+        temperature: 0.2,
+      },
+      history: [
+        { role: 'user', parts: [{ text: 'Voici le transcript complet de mon appel vocal avec votre agent:\n\n' + transcript }] },
+        { role: 'model', parts: [{ text: "Merci, j'ai bien analysé le transcript de votre appel. Je vais générer votre rapport d'audit." }] },
+      ]
+    });
+
+    const prompt = `
+      ANALYSE POST-APPEL
+      À partir du transcript ci-dessus, génère un audit structuré au format JSON uniquement.
+
+      Format OBLIGATOIRE :
+      \`\`\`json
+      {
+        "visa_type": "DTV" | "Tourist" | "Retirement" | "Non-O" | "LTR" | "Business",
+        "audit_status": "VALID" | "INVALID" | "PENDING",
+        "confidence_score": 0 à 100,
+        "summary": "Synthèse narrative du profil en 3-4 phrases.",
+        "strengths": ["Point fort 1", "Point fort 2"],
+        "issues": ["Point d'attention 1", "Point d'attention 2"],
+        "missing_docs": ["Document manquant 1"],
+        "key_documents": ["Passeport", "Relevé bancaire 3 mois"],
+        "ready_for_payment": false
+      }
+      \`\`\`
+
+      Sois précis et base-toi uniquement sur les informations échangées pendant l'appel.
+      IMPORTANT: DTV = 500k THB d'épargne. LTR = 80k USD/an. Ne confonds pas.
+    `;
+
+    const result = await session.sendMessage({ message: prompt });
+    const fullText = result.text || "";
+
+    const jsonMatch = fullText.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+    if (jsonMatch && jsonMatch[1]) {
+      return JSON.parse(jsonMatch[1]);
+    }
+    try {
+      return JSON.parse(fullText);
+    } catch {
+      return null;
+    }
+
+  } catch (error) {
+    console.error("Error analyzing call transcript:", error);
+    return null;
+  }
+};
+
 // Generate a structured summary of the chat (or call transcript)
 export const generateChatSummary = async (callTranscript?: string): Promise<import('../types').ChatSummary | null> => {
   checkRateLimit();

@@ -19,7 +19,7 @@ import { AppStep, FileAttachment } from './types';
 import { translations, Language } from './locales/translations';
 import { useAuth, useChat, useSummary, useAudit, useSession } from './hooks';
 import { saveSessionToFirestore, sendAuditEmail } from './services/dbService';
-import { setCurrentUserEmail, setCurrentLanguage } from './services/geminiService';
+import { setCurrentUserEmail, setCurrentLanguage, analyzeCallTranscript } from './services/geminiService';
 import { AUDIT_SESSION_KEY } from './contexts/AuthContext';
 
 function App() {
@@ -216,11 +216,33 @@ function App() {
       appendTranscript(transcript);
     }
 
-    // If the Live agent extracted audit data, display it and move to confirmation
+    // If the Live agent extracted JSON audit data inline, use it directly
     if (auditData && (auditData.visa_type || auditData.audit_status)) {
       updateAuditFromResponse(auditData);
       setIsAuditSubmitted(false);
       setStep(AppStep.PAYMENT);
+      return;
+    }
+
+    // Otherwise: Live audio model can't produce JSON, so analyze transcript
+    // with the text model to extract structured audit data post-call
+    if (transcript) {
+      addMessage(
+        language === 'fr'
+          ? "⏳ Analyse de votre appel en cours..."
+          : "⏳ Analyzing your call...",
+        'system'
+      );
+      try {
+        const extracted = await analyzeCallTranscript(transcript);
+        if (extracted && (extracted.visa_type || extracted.audit_status)) {
+          updateAuditFromResponse(extracted);
+          setIsAuditSubmitted(false);
+          setStep(AppStep.PAYMENT);
+        }
+      } catch (err) {
+        console.error("[handleCallClose] Post-call analysis failed:", err);
+      }
     }
   };
 
