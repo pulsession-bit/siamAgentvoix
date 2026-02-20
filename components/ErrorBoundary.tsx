@@ -27,6 +27,22 @@ class ErrorBoundary extends Component<Props, State> {
     }
 
     componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+        // Auto-reload on chunk load error (vite dynamic import failure on new deployments)
+        const isChunkLoadError =
+            error.name === 'ChunkLoadError' ||
+            error.message.includes('Failed to fetch dynamically imported module') ||
+            error.message.includes('Importing a module script failed');
+
+        if (isChunkLoadError) {
+            const hasReloaded = sessionStorage.getItem('chunk_error_reloaded');
+            if (!hasReloaded) {
+                sessionStorage.setItem('chunk_error_reloaded', 'true');
+                console.warn('[ErrorBoundary] ChunkLoadError detected. Auto-reloading page...');
+                window.location.reload();
+                return;
+            }
+        }
+
         this.setState({ errorInfo });
         console.error('[ErrorBoundary] Caught error:', error, errorInfo);
     }
