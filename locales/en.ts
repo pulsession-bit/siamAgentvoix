@@ -116,6 +116,9 @@ export const en = {
     audit_429_error: "Technical saturation. Your audit is saved. Click \"Book my call\".",
     audit_push_rdv: "To avoid a refusal (and losing fees), the auditor confirms compliance and gives you the exact list of documents to submit.",
     audit_success_msg: "All lights are green. To finalize your request, click the button below to book your validation call.",
+    audit_status_valid: "Validated",
+    audit_status_invalid: "Incomplete",
+    audit_status_pending: "Pending",
 
     // History
     history_title: "My Audits",

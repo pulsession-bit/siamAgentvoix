@@ -116,6 +116,9 @@ export const fr = {
     audit_429_error: "Saturation technique. Votre audit est sauvegardé. Cliquez “Réserver mon appel”.",
     audit_push_rdv: "Pour éviter un refus (et perdre les frais), l’auditeur confirme la conformité et vous donne la liste exacte des pièces à soumettre.",
     audit_success_msg: "Tous les feux sont au vert. Pour finaliser votre demande, cliquez sur le bouton ci-dessous pour réserver votre appel de validation.",
+    audit_status_valid: "Validé",
+    audit_status_invalid: "Incomplet",
+    audit_status_pending: "En attente",
 
     // History
     history_title: "Mes Audits",

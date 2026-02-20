@@ -116,6 +116,9 @@ export const de = {
     audit_429_error: "Technische Sättigung. Ihr Audit wurde gespeichert. Klicken Sie auf „Meinen Anruf buchen“.",
     audit_push_rdv: "Um eine Ablehnung (und den Verlust der Gebühren) zu vermeiden, bestätigt der Prüfer die Konformität und gibt Ihnen die genaue Liste der einzureichenden Dokumente.",
     audit_success_msg: "Alle Lichter sind grün. Um Ihre Anfrage abzuschließen, klicken Sie auf die Schaltfläche unten, um Ihren Validierungsanruf zu buchen.",
+    audit_status_valid: "Validiert",
+    audit_status_invalid: "Unvollständig",
+    audit_status_pending: "Ausstehend",
 
     // History
     history_title: "Meine Audits",
