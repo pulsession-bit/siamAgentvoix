@@ -2,6 +2,7 @@ import { useState, useCallback, useRef } from 'react';
 import { ChatMessage, FileAttachment, AuditResult, AgentAction } from '../types';
 import { sendMessageToAgent, generateChatSummary, updateChatSessionHistoryWithTranscript } from '../services/geminiService';
 import type { ChatSummary } from '../types';
+import { translations, Language } from '../locales/translations';
 
 interface UseChatReturn {
   messages: ChatMessage[];
@@ -15,7 +16,7 @@ interface UseChatReturn {
   appendTranscript: (transcript: string) => void;
 }
 
-export function useChat(): UseChatReturn {
+export function useChat(currentLanguage: Language = 'fr'): UseChatReturn {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const messagesRef = useRef<ChatMessage[]>(messages);
@@ -54,8 +55,8 @@ export function useChat(): UseChatReturn {
         auditResult: response.auditResult,
         action: response.action,
       };
-    } catch (error) {
-      addMessage('Désolé, une erreur de connexion est survenue.', 'system');
+    } catch (error: any) {
+      addMessage(error?.message || translations[currentLanguage].analysis_error, 'system');
       return null;
     } finally {
       setIsTyping(false);

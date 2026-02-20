@@ -104,13 +104,18 @@ export const de = {
     btn_hide_summary: "Zusammenfassung ausblenden",
 
     // Audit Score
-    audit_score_confidence: "Vertrauen",
-    audit_status_valid: "Akte Konform",
-    audit_status_invalid: "Akte Unvollständig",
-    audit_status_pending: "Analyse läuft",
-    audit_corrections_required: "Korrekturen erforderlich:",
-    audit_missing_docs: "Fehlende Dokumente:",
-    audit_success_msg: "Alles im grünen Bereich. Sie können zur sicheren Zahlung übergehen, um Ihren Antrag abzuschließen.",
+    audit_terminated: "Audit abgeschlossen. Ihr vorläufiger VisaScore: {score}/100.",
+    audit_verdict: "Urteil: ",
+    audit_verdict_eligible: "Berechtigt",
+    audit_verdict_conditional: "Berechtigt unter Bedingungen",
+    audit_verdict_risky: "Risikoreich",
+    audit_points_ok: "Punkte OK",
+    audit_next_step: "Nächster Schritt: Ein menschlicher Prüfer validiert Ihre Unterlagen und bereitet die e-Visa-Strategie vor.",
+    audit_cta_call: "Meinen Anruf buchen (15 Min.)",
+    audit_upload_reminder: "Keine Dokumente per Chat. Nur sicherer Upload / E-Mail an audit@siamvisapro.com.",
+    audit_429_error: "Technische Sättigung. Ihr Audit wurde gespeichert. Klicken Sie auf „Meinen Anruf buchen“.",
+    audit_push_rdv: "Um eine Ablehnung (und den Verlust der Gebühren) zu vermeiden, bestätigt der Prüfer die Konformität und gibt Ihnen die genaue Liste der einzureichenden Dokumente.",
+    audit_success_msg: "Alle Lichter sind grün. Um Ihre Anfrage abzuschließen, klicken Sie auf die Schaltfläche unten, um Ihren Validierungsanruf zu buchen.",
 
     // History
     history_title: "Meine Audits",

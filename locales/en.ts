@@ -104,13 +104,18 @@ export const en = {
     btn_hide_summary: "Hide Summary",
 
     // Audit Score
-    audit_score_confidence: "Confidence",
-    audit_status_valid: "File Compliant",
-    audit_status_invalid: "File Incomplete",
-    audit_status_pending: "Analysis in progress",
-    audit_corrections_required: "Corrections Required:",
-    audit_missing_docs: "Missing Documents:",
-    audit_success_msg: "All lights are green. You can proceed to secure payment to finalize your application.",
+    audit_terminated: "Audit completed. Your provisional VisaScore: {score}/100.",
+    audit_verdict: "Verdict: ",
+    audit_verdict_eligible: "Eligible",
+    audit_verdict_conditional: "Eligible under conditions",
+    audit_verdict_risky: "Risky",
+    audit_points_ok: "Points OK",
+    audit_next_step: "Next step: a human auditor validates your file and prepares the e-Visa strategy.",
+    audit_cta_call: "Book my call (15 min)",
+    audit_upload_reminder: "No documents via chat. Secure upload / email audit@siamvisapro.com only.",
+    audit_429_error: "Technical saturation. Your audit is saved. Click \"Book my call\".",
+    audit_push_rdv: "To avoid a refusal (and losing fees), the auditor confirms compliance and gives you the exact list of documents to submit.",
+    audit_success_msg: "All lights are green. To finalize your request, click the button below to book your validation call.",
 
     // History
     history_title: "My Audits",

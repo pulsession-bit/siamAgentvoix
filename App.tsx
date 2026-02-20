@@ -48,7 +48,7 @@ function App() {
 
   // Custom Hooks
   const { userEmail, login, logout } = useAuth();
-  const { messages, setMessages, isTyping, addMessage, sendMessage, appendTranscript } = useChat();
+  const { messages, setMessages, isTyping, addMessage, sendMessage, appendTranscript } = useChat(language);
   const { chatSummary, setChatSummary, isGeneratingSummary, generateSummary } = useSummary();
   const {
     step, setStep,

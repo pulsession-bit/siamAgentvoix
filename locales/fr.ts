@@ -104,13 +104,18 @@ export const fr = {
     btn_hide_summary: "Masquer la synthèse",
 
     // Audit Score
-    audit_score_confidence: "Confiance",
-    audit_status_valid: "Dossier Conforme",
-    audit_status_invalid: "Dossier Incomplet",
-    audit_status_pending: "Analyse en cours",
-    audit_corrections_required: "Corrections requises :",
-    audit_missing_docs: "Documents manquants :",
-    audit_success_msg: "Tous les feux sont au vert. Pour finaliser votre demande, laissez-nous votre numéro de téléphone pour convenir d'un rendez-vous, ou contactez-nous sur notre WhatsApp : +66 82 414 98 40.",
+    audit_terminated: "Audit terminé. Votre VisaScore provisoire : {score}/100.",
+    audit_verdict: "Verdict : ",
+    audit_verdict_eligible: "Éligible",
+    audit_verdict_conditional: "Éligible sous conditions",
+    audit_verdict_risky: "Risqué",
+    audit_points_ok: "Points OK",
+    audit_next_step: "Prochaine étape : un auditeur humain valide votre dossier et prépare la stratégie d’e-Visa.",
+    audit_cta_call: "Réserver mon appel (15 min)",
+    audit_upload_reminder: "Aucun document par chat. Upload sécurisé / email audit@siamvisapro.com uniquement.",
+    audit_429_error: "Saturation technique. Votre audit est sauvegardé. Cliquez “Réserver mon appel”.",
+    audit_push_rdv: "Pour éviter un refus (et perdre les frais), l’auditeur confirme la conformité et vous donne la liste exacte des pièces à soumettre.",
+    audit_success_msg: "Tous les feux sont au vert. Pour finaliser votre demande, cliquez sur le bouton ci-dessous pour réserver votre appel de validation.",
 
     // History
     history_title: "Mes Audits",

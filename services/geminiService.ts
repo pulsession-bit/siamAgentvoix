@@ -39,7 +39,7 @@ function checkRateLimit(): void {
   }
 
   if (rateLimitTokens <= 0) {
-    throw new Error('Trop de requêtes. Veuillez patienter quelques secondes avant de réessayer.');
+    throw new Error(translations[currentLanguage].audit_429_error);
   }
 
   rateLimitTokens--;

@@ -104,13 +104,18 @@ export const ru = {
     btn_hide_summary: "Скрыть резюме",
 
     // Audit Score
-    audit_score_confidence: "Уверенность",
-    audit_status_valid: "Досье соответствует",
-    audit_status_invalid: "Досье неполное",
-    audit_status_pending: "Идет анализ",
-    audit_corrections_required: "Требуются исправления:",
-    audit_missing_docs: "Отсутствующие документы:",
-    audit_success_msg: "Все показатели в норме. Вы можете перейти к безопасной оплате для завершения заявки.",
+    audit_terminated: "Аудит завершен. Ваш предварительный VisaScore: {score}/100.",
+    audit_verdict: "Вердикт: ",
+    audit_verdict_eligible: "Соответствует",
+    audit_verdict_conditional: "Соответствует при определенных условиях",
+    audit_verdict_risky: "Рискованно",
+    audit_points_ok: "Пункты в порядке",
+    audit_next_step: "Следующий шаг: человек-аудитор проверяет ваш файл и готовит стратегию e-Visa.",
+    audit_cta_call: "Забронировать звонок (15 мин)",
+    audit_upload_reminder: "Никаких документов через чат. Только защищенная загрузка / электронная почта audit@siamvisapro.com.",
+    audit_429_error: "Техническая перегрузка. Ваш аудит сохранен. Нажмите «Забронировать звонок».",
+    audit_push_rdv: "Чтобы избежать отказа (и потери сборов), аудитор подтверждает соответствие и дает вам точный список документов для подачи.",
+    audit_success_msg: "Все огни зеленые. Чтобы завершить запрос, нажмите кнопку ниже, чтобы забронировать звонок для подтверждения.",
 
     // History
     history_title: "Мои Аудиты",
