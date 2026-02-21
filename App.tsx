@@ -339,7 +339,7 @@ function App() {
 
       <div className="flex-1 flex flex-col h-full relative min-w-0">
         {/* Site Header */}
-        <header className="flex-none bg-brand-navy p-4 flex items-center justify-between border-b border-slate-800 z-30 shadow-md">
+        <header className="flex-none bg-brand-navy p-4 flex items-center justify-between border-b border-slate-800 z-[70] shadow-md relative">
           <div className="flex items-center gap-3">
             <button onClick={() => setIsMobileMenuOpen(true)} className="text-white p-2 -ml-2 md:hidden">
               <Menu size={24} />
@@ -392,7 +392,7 @@ function App() {
           </div>
         </header>
 
-        <main className="flex-1 flex flex-col overflow-hidden relative">
+        <main className="flex-1 flex flex-col overflow-hidden relative z-0">
           {/* Qualification Overlay */}
           {step === AppStep.QUALIFICATION && messages.length < 3 && (
             <QualificationStep
@@ -576,7 +576,7 @@ function App() {
 
           {/* History Modal */}
           {isHistoryOpen && (
-            <div className="absolute inset-0 z-[100] bg-brand-navy/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-300">
+            <div className="absolute inset-0 z-[160] bg-brand-navy/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-300">
               <HistoryView
                 email={effectiveEmail || ''}
                 lang={language}
@@ -588,7 +588,7 @@ function App() {
 
           {/* Summary Modal */}
           {chatSummary && (
-            <div className="absolute inset-0 z-40 bg-brand-light/95 backdrop-blur-md p-4 overflow-y-auto animate-in fade-in duration-300">
+            <div className="absolute inset-0 z-[150] bg-brand-light/95 backdrop-blur-md p-4 overflow-y-auto animate-in fade-in duration-300">
               <div className="max-w-5xl mx-auto">
                 <SummaryView summary={chatSummary} onClose={() => setChatSummary(null)} lang={language} />
               </div>

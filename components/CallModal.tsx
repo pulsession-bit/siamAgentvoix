@@ -97,7 +97,7 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose, lang = 'fr' }) 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-navy/80 backdrop-blur-sm transition-opacity">
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-brand-navy/80 backdrop-blur-sm transition-opacity">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100 opacity-100 flex flex-col h-[650px] relative">
 
         {/* GLOBAL BACKGROUND: Secretary Image + Overlay covering the whole modal */}

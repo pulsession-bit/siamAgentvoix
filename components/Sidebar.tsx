@@ -42,7 +42,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
     return (
         <aside className={`
-      fixed inset-0 z-[60] md:static md:inset-auto w-full md:w-80 bg-brand-navy flex flex-col h-full transition-transform duration-300
+      fixed inset-0 z-[100] md:static md:inset-auto w-full md:w-80 bg-brand-navy flex flex-col h-full transition-transform duration-300
       ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
     `}>
             <div className="p-6 flex flex-col h-full overflow-y-auto">
