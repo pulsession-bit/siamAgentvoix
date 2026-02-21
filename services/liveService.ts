@@ -50,7 +50,8 @@ export class LiveAgent {
 
   async connect(
     onStatusChange: (status: string) => void,
-    onTranscriptUpdate?: (update: TranscriptUpdate) => void
+    onTranscriptUpdate?: (update: TranscriptUpdate) => void,
+    language: string = 'fr'
   ) {
     if (this.isConnected) {
       console.log("[LiveAgent] Already connected, skipping");
@@ -103,7 +104,7 @@ export class LiveAgent {
           },
           inputAudioTranscription: {},
           outputAudioTranscription: {},
-          systemInstruction: LIVE_SYSTEM_PROMPT,
+          systemInstruction: LIVE_SYSTEM_PROMPT + `\n\n[IMPORTANT: LANGUAGE OVERRIDE]\nYou MUST interact with the user in ${language === 'fr' ? 'FRENCH' : language === 'en' ? 'ENGLISH' : language === 'de' ? 'GERMAN' : language === 'ru' ? 'RUSSIAN' : 'FRENCH'}. Translate your responses and use the appropriate cultural tone for this language.`,
         },
         callbacks: {
           onopen: () => {

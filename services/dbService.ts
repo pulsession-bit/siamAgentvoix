@@ -142,7 +142,7 @@ export async function ingestEvent<T>(event: IngressEvent<T>): Promise<{ case_id:
         site_id,
         status: statusMap[event.type] || 'ACTIVE',
         last_event_at: event.occurred_at || now,
-        confidence_score: (event.payload as any)?.confidence_score || 0,
+        confidence_score: (event.payload as any)?.audit_score || (event.payload as any)?.confidence_score || (event.payload as any)?.visa_score || 0,
     };
 
     if (isNew) {
@@ -185,7 +185,7 @@ export const saveSessionToFirestore = async (email: string, sessionData: any) =>
             email: safeEmail,
             lead_id: safeEmail,
             visa_type: sessionData.visaType || null,
-            audit_score: sessionData.auditResult?.confidence_score || 0,
+            audit_score: sessionData.auditResult?.confidence_score || sessionData.auditResult?.visa_score || 0,
             audit_status: sessionData.auditResult?.audit_status || 'PENDING',
             ai_data: {
                 audit_result: sessionData.auditResult || null,

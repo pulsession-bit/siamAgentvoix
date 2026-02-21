@@ -13,7 +13,7 @@ interface AuditScoreProps {
 
 const AuditScore: React.FC<AuditScoreProps> = ({ result, lang }) => {
   const t = translations[lang];
-  const score = result.confidence_score || 0;
+  const score = result.confidence_score ?? (result as any).visa_score ?? 0;
 
   // Use brand colors for chart: Green for high score, Amber for mid, Red for low
   const fillColor = score > 85 ? '#22c55e' : score > 60 ? '#FFAB00' : '#ef4444';

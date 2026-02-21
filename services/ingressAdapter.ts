@@ -93,7 +93,7 @@ export const auditSessionToIngress = async (
     const payload: AuditPayload = {
         visa_type: session.visa_type || result?.visa_type || "UNKNOWN",
         audit_status: (session.audit_status as any) || result?.audit_status || "PENDING",
-        confidence_score: session.audit_score || result?.confidence_score || 0,
+        confidence_score: session.audit_score || result?.confidence_score || result?.visa_score || 0,
         issues: result?.issues || [],
         missing_docs: result?.missing_docs || [],
         ready_for_payment: !!(result?.ready_for_payment),

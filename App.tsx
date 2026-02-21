@@ -7,6 +7,7 @@ import QualificationStep from './components/QualificationStep';
 import PaymentStep from './components/PaymentStep';
 import Sidebar from './components/Sidebar';
 import AuditScore from './components/AuditScore';
+import LanguageSelector from './components/LanguageSelector';
 
 // Lazy Load Heavy Modals
 const CallModal = lazy(() => import('./components/CallModal'));
@@ -337,25 +338,40 @@ function App() {
       />
 
       <div className="flex-1 flex flex-col h-full relative min-w-0">
-        {/* Mobile Header */}
-        <header className="flex-none bg-brand-navy p-4 flex items-center justify-between md:hidden border-b border-slate-800 z-30 shadow-md">
-          <button onClick={() => setIsMobileMenuOpen(true)} className="text-white p-2 -ml-2">
-            <Menu size={24} />
-          </button>
-          <div className="flex flex-col items-center">
-            <span className="text-[9px] text-brand-amber font-black uppercase tracking-[0.2em] mb-0.5">Siam Visa Pro</span>
-            <div className="flex items-center gap-1.5">
-              <span className="text-white font-bold text-xs">
-                {step === AppStep.QUALIFICATION ? t.nav_qualification : step === AppStep.AUDIT ? t.nav_audit : t.nav_payment}
-              </span>
-              <div className="flex gap-0.5">
-                <div className={`w-1 h-1 rounded-full ${step === AppStep.QUALIFICATION ? 'bg-brand-amber' : 'bg-green-500'}`} />
-                <div className={`w-1 h-1 rounded-full ${step === AppStep.AUDIT ? 'bg-brand-amber' : step === AppStep.PAYMENT ? 'bg-green-500' : 'bg-slate-700'}`} />
-                <div className={`w-1 h-1 rounded-full ${step === AppStep.PAYMENT ? 'bg-brand-amber' : 'bg-slate-700'}`} />
+        {/* Site Header */}
+        <header className="flex-none bg-brand-navy p-4 flex items-center justify-between border-b border-slate-800 z-30 shadow-md">
+          <div className="flex items-center gap-3">
+            <button onClick={() => setIsMobileMenuOpen(true)} className="text-white p-2 -ml-2 md:hidden">
+              <Menu size={24} />
+            </button>
+            <div className="hidden md:flex flex-col">
+              <span className="text-[10px] text-brand-amber font-black uppercase tracking-[0.2em] mb-0.5">Siam Visa Pro</span>
+              <span className="text-white font-bold text-xs uppercase tracking-wider">AI Audit Agent</span>
+            </div>
+            <div className="flex flex-col items-center md:hidden">
+              <span className="text-[9px] text-brand-amber font-black uppercase tracking-[0.2em] mb-0.5">Siam Visa Pro</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-white font-bold text-xs">
+                  {step === AppStep.QUALIFICATION ? t.nav_qualification : step === AppStep.AUDIT ? t.nav_audit : t.nav_payment}
+                </span>
+                <div className="flex gap-0.5">
+                  <div className={`w-1 h-1 rounded-full ${step === AppStep.QUALIFICATION ? 'bg-brand-amber' : 'bg-green-500'}`} />
+                  <div className={`w-1 h-1 rounded-full ${step === AppStep.AUDIT ? 'bg-brand-amber' : step === AppStep.PAYMENT ? 'bg-green-500' : 'bg-slate-700'}`} />
+                  <div className={`w-1 h-1 rounded-full ${step === AppStep.PAYMENT ? 'bg-brand-amber' : 'bg-slate-700'}`} />
+                </div>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+
+          <div className="flex items-center gap-3">
+            <LanguageSelector
+              currentLanguage={language}
+              onLanguageChange={setLanguage}
+              isDark={true}
+            />
+
+            <div className="h-6 w-[1px] bg-slate-700 mx-1 hidden sm:block" />
+
             <button
               onClick={() => setIsHistoryOpen(true)}
               className="w-10 h-10 rounded-full flex items-center justify-center bg-slate-800 text-brand-amber border border-slate-700 shadow-lg active:scale-95 transition-transform"
