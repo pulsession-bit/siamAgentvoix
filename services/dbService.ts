@@ -481,7 +481,13 @@ export const sendAuditEmail = async (
                 `).join('')}
               </table>
     
-              <div style="text-align: center; margin-top: 32px;">
+              <div style="text-align: center; margin-top: 32px; background: #f0fdf4; border: 2px solid #bbf7d0; border-radius: 12px; padding: 24px;">
+                <p style="margin: 0 0 8px; font-size: 18px; font-weight: bold; color: #15803d;">📅 Consultez un expert gratuitement</p>
+                <p style="margin: 0 0 20px; font-size: 14px; color: #475569;">Réservez un créneau gratuit avec notre équipe pour analyser votre dossier en détail.</p>
+                <a href="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ3jkouOVtd1LAjPwzOklBSnyFlyY1_JUcBGeZtF5djNfgDe3zPHye5FZaPitzyoXeGYEQoonCtX" style="background-color: #15803d; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 15px;">📞 Prendre mon RDV gratuit</a>
+              </div>
+
+              <div style="text-align: center; margin-top: 16px;">
                 <a href="https://siamvisapro.com" style="background-color: #fbbf24; color: #0f172a; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Accéder à mon dossier sécurisé</a>
               </div>
             </div>
@@ -502,6 +508,9 @@ Score: ${score}/100
 
 Synthèse:
 ${summary.executive_summary || ''}
+
+📅 Prenez votre RDV gratuit avec un expert :
+https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ3jkouOVtd1LAjPwzOklBSnyFlyY1_JUcBGeZtF5djNfgDe3zPHye5FZaPitzyoXeGYEQoonCtX
 
 Pour plus de détails, accédez à votre dossier sur https://siamvisapro.com
         `.trim();

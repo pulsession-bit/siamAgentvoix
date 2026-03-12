@@ -28,8 +28,8 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ ttsState, ttsControls }) => {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-brand-navy border-t border-slate-800 p-3 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg animate-in slide-in-from-bottom duration-300">
-      
+    <div className="fixed bottom-0 left-0 right-0 md:left-80 z-40 bg-brand-navy border-t border-slate-800 p-3 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg animate-in slide-in-from-bottom duration-300">
+
       {/* Play/Pause & Stop Buttons */}
       <div className="flex items-center gap-3 flex-shrink-0">
         {currentLoadingMessageId ? (
@@ -37,17 +37,17 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ ttsState, ttsControls }) => {
             <StopCircle size={24} /> {/* Using stop circle for loading as a temporary visual */}
           </div>
         ) : (
-          <button 
-            onClick={ttsControls.togglePlayPause} 
+          <button
+            onClick={ttsControls.togglePlayPause}
             className="p-2 rounded-full bg-brand-amber text-brand-navy hover:bg-brand-yellow transition-colors"
             title={isPlaying ? "Mettre en pause" : "Jouer"}
           >
             {isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}
           </button>
         )}
-        
-        <button 
-          onClick={ttsControls.stop} 
+
+        <button
+          onClick={ttsControls.stop}
           className="p-2 rounded-full text-slate-400 hover:text-white transition-colors"
           title="Arrêter la lecture"
         >
