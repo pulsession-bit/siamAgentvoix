@@ -73,14 +73,9 @@ const Sidebar: React.FC<SidebarProps> = ({
                     <button
                         onClick={() => {
                             if (!userEmail) {
-                                const email = prompt(language === 'fr'
-                                    ? "Pour contactez un expert, veuillez d'abord renseigner votre email :"
-                                    : "To contact an expert, please enter your email first:");
-
-                                if (email && email.includes('@')) {
-                                    setCapturedEmail(email);
-                                    handleManualCallRequest();
-                                }
+                                alert(language === 'fr'
+                                    ? "Veuillez d'abord créer un compte (Google ou email) pour contacter un expert."
+                                    : "Please create an account first (Google or email) to contact an expert.");
                             } else {
                                 handleManualCallRequest();
                             }
@@ -93,7 +88,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                             </div>
 
                             <div className="flex-1 text-left min-w-0">
-                                <div className="text-[9px] text-brand-amber font-bold uppercase tracking-wider mb-0.5">{t.cta_live_support}</div>
+                                <div className="text-[9px] text-brand-amber font-bold uppercase tracking-wider mb-0.5 flex items-center gap-1.5">{t.cta_live_support} <span className="text-[8px] bg-green-500 text-white px-1.5 py-0.5 rounded-full font-black tracking-wide animate-pulse">IA</span></div>
                                 <div className="text-white font-bold text-sm truncate">{t.cta_expert}</div>
                             </div>
 

@@ -36,9 +36,15 @@ export function useAudit(): UseAuditReturn {
   }, [visaType, step]);
 
   const updateAuditFromResponse = useCallback((result: AuditResult) => {
+    // Reject premature/empty audit results (score 0 or missing = AI sent JSON too early)
+    const score = result.confidence_score ?? (result as any).visa_score ?? 0;
+    if (score === 0) {
+      console.warn('[useAudit] Ignoring audit result with score 0 (premature JSON from AI)');
+      return;
+    }
+
     setAuditResult(result);
-    // Ignore premature ready_for_payment toggles when score is 0
-    if (result.ready_for_payment && result.confidence_score !== 0) {
+    if (result.ready_for_payment) {
       setStep(AppStep.PAYMENT);
     }
   }, []);
