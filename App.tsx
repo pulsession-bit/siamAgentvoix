@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Suspense, lazy, useRef } from 'react';
-import { Phone, Menu, Loader2, AlertCircle, History, RotateCcw, ShieldCheck } from 'lucide-react';
+import { Phone, Menu, Loader2, AlertCircle, History, RotateCcw, ShieldCheck, ChevronDown, ChevronUp } from 'lucide-react';
 import { Analytics } from "@vercel/analytics/react"
 import Chat from './components/Chat';
 import InputArea from './components/InputArea';
@@ -34,6 +34,7 @@ function App() {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isAuditSubmitted, setIsAuditSubmitted] = useState(false);
+  const [isMobileScoreOpen, setIsMobileScoreOpen] = useState(false);
 
   // Email capture state (restored from localStorage for persistence)
   const [capturedEmail, setCapturedEmail] = useState<string>(() => {
@@ -557,17 +558,40 @@ function App() {
           <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
             {/* Chat column */}
             <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-              {/* Mobile only: AuditScore above chat */}
+              {/* Mobile only: AuditScore drawer */}
               {auditResult && step === AppStep.AUDIT && (
-                <div className="md:hidden p-4 bg-blue-50 border-b border-blue-100 flex-none overflow-y-auto max-h-[35%] shadow-sm">
-                  <AuditScore result={auditResult} lang={language} />
+                <div className="md:hidden flex-none border-b border-blue-100 shadow-sm">
+                  {/* Collapsed bar — always visible */}
                   <button
-                    onClick={clearSession}
-                    className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-sm font-medium hover:bg-brand-amber hover:text-brand-navy hover:border-brand-amber transition-all shadow-sm"
+                    onClick={() => setIsMobileScoreOpen(!isMobileScoreOpen)}
+                    className="w-full flex items-center justify-between px-4 py-3 bg-blue-50 hover:bg-blue-100 transition-colors"
                   >
-                    <RotateCcw size={16} />
-                    {language === 'en' ? 'New Audit' : 'Nouvel Audit'}
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold ${(auditResult.confidence_score ?? 0) > 85 ? 'bg-green-500' : (auditResult.confidence_score ?? 0) > 60 ? 'bg-amber-500' : 'bg-red-500'
+                        }`}>
+                        {auditResult.confidence_score ?? 0}
+                      </div>
+                      <div className="text-left">
+                        <span className="text-sm font-bold text-brand-navy">VisaScore</span>
+                        <span className="text-xs text-slate-500 ml-2">{auditResult.visa_type || '—'}</span>
+                      </div>
+                    </div>
+                    {isMobileScoreOpen ? <ChevronUp size={18} className="text-slate-400" /> : <ChevronDown size={18} className="text-slate-400" />}
                   </button>
+
+                  {/* Expanded drawer content */}
+                  {isMobileScoreOpen && (
+                    <div className="p-4 bg-blue-50 overflow-y-auto max-h-[50vh] animate-in fade-in slide-in-from-top-2 duration-200">
+                      <AuditScore result={auditResult} lang={language} />
+                      <button
+                        onClick={clearSession}
+                        className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-sm font-medium hover:bg-brand-amber hover:text-brand-navy hover:border-brand-amber transition-all shadow-sm"
+                      >
+                        <RotateCcw size={16} />
+                        {language === 'en' ? 'New Audit' : 'Nouvel Audit'}
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -582,7 +606,7 @@ function App() {
 
             {/* Desktop only: AuditScore as right sidebar panel */}
             {auditResult && step === AppStep.AUDIT && (
-              <div className="hidden md:flex flex-col w-[380px] flex-shrink-0 bg-blue-50/80 border-l border-blue-100 overflow-y-auto p-4">
+              <div className="hidden md:flex flex-col w-1/2 flex-shrink-0 bg-blue-50/80 border-l border-blue-100 overflow-y-auto p-4">
                 <AuditScore result={auditResult} lang={language} />
                 <button
                   onClick={clearSession}
