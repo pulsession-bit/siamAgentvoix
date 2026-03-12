@@ -37,7 +37,8 @@ export function useAudit(): UseAuditReturn {
 
   const updateAuditFromResponse = useCallback((result: AuditResult) => {
     setAuditResult(result);
-    if (result.ready_for_payment) {
+    // Ignore premature ready_for_payment toggles when score is 0
+    if (result.ready_for_payment && result.confidence_score !== 0) {
       setStep(AppStep.PAYMENT);
     }
   }, []);

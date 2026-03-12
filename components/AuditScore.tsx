@@ -97,7 +97,7 @@ const AuditScore: React.FC<AuditScoreProps> = ({ result, lang }) => {
 
           <div className="space-y-4">
             <a
-              href="https://wa.me/66824149840"
+              href="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ3jkouOVtd1LAjPwzOklBSnyFlyY1_JUcBGeZtF5djNfgDe3zPHye5FZaPitzyoXeGYEQoonCtX"
               target="_blank"
               rel="noopener noreferrer"
               className="w-full flex items-center justify-center gap-2 py-4 bg-brand-navy text-white rounded-xl font-bold hover:bg-brand-navy/90 transition-all shadow-md active:scale-[0.98] text-lg"

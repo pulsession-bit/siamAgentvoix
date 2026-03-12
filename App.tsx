@@ -438,7 +438,17 @@ function App() {
                       </p>
                     </div>
 
-                    <p className="text-xs text-slate-400 italic mb-6">
+                    {/* RDV Gratuit CTA */}
+                    <a
+                      href="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ3jkouOVtd1LAjPwzOklBSnyFlyY1_JUcBGeZtF5djNfgDe3zPHye5FZaPitzyoXeGYEQoonCtX"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 w-full py-3 mb-4 bg-green-50 border-2 border-green-400 text-green-700 font-bold rounded-xl hover:bg-green-100 transition-all text-sm"
+                    >
+                      📅 {language === 'fr' ? 'Réserver un RDV gratuit avec un expert' : 'Book a free consultation with an expert'}
+                    </a>
+
+                    <p className="text-xs text-slate-400 italic mb-4">
                       {language === 'fr' ? 'Aucune action sans votre confirmation.' : 'No action without your confirmation.'}
                     </p>
 
@@ -494,15 +504,25 @@ function App() {
                         : 'Your file has been received. An expert will contact you very shortly.'}
                     </p>
 
-                    <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-8">
+                    <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-4">
                       <p className="text-sm text-brand-blue font-bold flex items-center justify-center gap-2">
                         <History className="w-4 h-4" />
-                        {language === 'fr' ? 'Rendez-vous confirmé' : 'Appointment confirmed'}
+                        {language === 'fr' ? 'Dossier transmis à notre équipe' : 'File sent to our team'}
                       </p>
                       <p className="text-xs text-brand-blue/70 mt-1">
                         {language === 'fr' ? 'Vous serez contacté sous 24h.' : 'You will be contacted within 24h.'}
                       </p>
                     </div>
+
+                    {/* RDV Gratuit CTA - Succès */}
+                    <a
+                      href="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ3jkouOVtd1LAjPwzOklBSnyFlyY1_JUcBGeZtF5djNfgDe3zPHye5FZaPitzyoXeGYEQoonCtX"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 w-full py-3 mb-6 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition-all shadow-lg shadow-green-600/20 transform hover:scale-[1.02]"
+                    >
+                      📅 {language === 'fr' ? 'Réserver mon RDV gratuit maintenant' : 'Book my free consultation now'}
+                    </a>
 
                     <div className="space-y-3">
                       <button
@@ -533,11 +553,13 @@ function App() {
             </div>
           )}
 
-          {/* Chat View */}
-          <div className="flex-1 flex flex-col overflow-hidden">
-            {auditResult && step === AppStep.AUDIT && (
-              <div className="p-4 bg-blue-50 border-b border-blue-100 flex-none overflow-y-auto max-h-[35%] shadow-sm">
-                <div className="max-w-3xl mx-auto">
+          {/* Chat View — desktop: side-by-side (chat left, score right) */}
+          <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+            {/* Chat column */}
+            <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+              {/* Mobile only: AuditScore above chat */}
+              {auditResult && step === AppStep.AUDIT && (
+                <div className="md:hidden p-4 bg-blue-50 border-b border-blue-100 flex-none overflow-y-auto max-h-[35%] shadow-sm">
                   <AuditScore result={auditResult} lang={language} />
                   <button
                     onClick={clearSession}
@@ -547,16 +569,30 @@ function App() {
                     {language === 'en' ? 'New Audit' : 'Nouvel Audit'}
                   </button>
                 </div>
+              )}
+
+              <div className="flex-1 flex flex-col overflow-hidden relative">
+                <Chat messages={messages} isTyping={isTyping} lang={language} onReply={(text) => handleUserMessage(text, [])} />
+              </div>
+
+              <div className="flex-none">
+                <InputArea onSendMessage={handleUserMessage} disabled={step === AppStep.PAYMENT} lang={language} />
+              </div>
+            </div>
+
+            {/* Desktop only: AuditScore as right sidebar panel */}
+            {auditResult && step === AppStep.AUDIT && (
+              <div className="hidden md:flex flex-col w-[380px] flex-shrink-0 bg-blue-50/80 border-l border-blue-100 overflow-y-auto p-4">
+                <AuditScore result={auditResult} lang={language} />
+                <button
+                  onClick={clearSession}
+                  className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-sm font-medium hover:bg-brand-amber hover:text-brand-navy hover:border-brand-amber transition-all shadow-sm"
+                >
+                  <RotateCcw size={16} />
+                  {language === 'en' ? 'New Audit' : 'Nouvel Audit'}
+                </button>
               </div>
             )}
-
-            <div className="flex-1 flex flex-col overflow-hidden relative">
-              <Chat messages={messages} isTyping={isTyping} lang={language} onReply={(text) => handleUserMessage(text, [])} />
-            </div>
-
-            <div className="flex-none">
-              <InputArea onSendMessage={handleUserMessage} disabled={step === AppStep.PAYMENT} lang={language} />
-            </div>
           </div>
         </main>
 
