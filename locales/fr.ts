@@ -14,6 +14,8 @@ export const fr = {
     logout: "Se déconnecter",
     login_btn: "Connexion Google",
     save_file: "Sauvegarder mon dossier",
+    nav_services: "Services & Tarifs",
+    nav_insurance: "Assurance Voyage",
 
     // Navigation Steps
     nav_qualification: "Qualification",
