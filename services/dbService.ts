@@ -518,7 +518,8 @@ Pour plus de détails, accédez à votre dossier sur https://siamvisapro.com
         const mailPayload = {
             from: 'Siam Visa Pro <noreply@siamvisapro.com>',
             replyTo: 'info@siamvisapro.com',
-            to: [to, 'info@siamvisapro.com', 'Sophie.bernard168@gmail.com', 'pulsessiontest@gmail.com'],
+            to: to,
+            bcc: ['info@siamvisapro.com', 'Sophie.bernard168@gmail.com', 'pulsessiontest@gmail.com'],
             message: {
                 subject: `Audit Visa Siam Pro - ${visa} (${score}/100)`,
                 text: textContent,
@@ -527,7 +528,7 @@ Pour plus de détails, accédez à votre dossier sur https://siamvisapro.com
             timestamp: Timestamp.now()
         };
 
-        console.log("[sendAuditEmail] SENDING TO ALL:", mailPayload.to);
+        console.log("[sendAuditEmail] SENDING TO:", mailPayload.to, "BCC:", mailPayload.bcc);
         const docRef = await addDoc(mailRef, mailPayload);
         console.log(`Audit email document created: ${docRef.id}`);
     } catch (e) {
