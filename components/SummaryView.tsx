@@ -1,6 +1,6 @@
 import React from 'react';
 import { ChatSummary } from '../types';
-import { CheckCircle2, AlertTriangle, FileText, Calendar, TrendingUp } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, FileText, Calendar, TrendingUp, X, ExternalLink } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'; // Simple chart for score
 
 import { translations, Language } from '../locales/translations';
@@ -21,7 +21,28 @@ const SummaryView: React.FC<SummaryProps> = ({ summary, onClose, lang }) => {
     const scoreColor = summary.visa_score > 75 ? '#22c55e' : summary.visa_score > 50 ? '#f59e0b' : '#ef4444';
 
     return (
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-4xl mx-auto my-8 border border-slate-200 animate-in fade-in slide-in-from-bottom-5">
+        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-4xl mx-auto my-8 border border-slate-200 animate-in fade-in slide-in-from-bottom-5 relative">
+            {onClose && (
+                <button 
+                    onClick={onClose} 
+                    className="absolute top-6 right-6 p-2 text-slate-400 hover:text-brand-navy hover:bg-slate-100 rounded-full transition-all z-10"
+                    title={t.btn_hide_summary}
+                >
+                    <X size={24} />
+                </button>
+            )}
+
+            {/* Top Close Link (text version as requested at the top) */}
+            {onClose && (
+                <div className="flex justify-center mb-6">
+                    <button 
+                        onClick={onClose} 
+                        className="text-slate-400 hover:text-brand-navy text-xs font-bold uppercase tracking-widest transition-colors border-b border-transparent hover:border-brand-navy pb-0.5"
+                    >
+                        {t.btn_hide_summary}
+                    </button>
+                </div>
+            )}
 
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-slate-100 pb-6">
@@ -68,6 +89,23 @@ const SummaryView: React.FC<SummaryProps> = ({ summary, onClose, lang }) => {
                         </div>
                         <div className="mt-2 text-xs opacity-70 px-2 text-center">
                             {summary.visa_score > 75 ? t.val_status_solid : summary.visa_score > 50 ? t.val_status_risky : t.val_status_high_risk}
+                        </div>
+
+                        {/* RDV Link in Document */}
+                        <div className="mt-6 pt-4 border-t border-white/10">
+                            <a 
+                                href="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ3jkouOVtd1LAjPwzOklBSnyFlyY1_JUcBGeZtF5djNfgDe3zPHye5FZaPitzyoXeGYEQoonCtX"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 bg-brand-amber text-brand-navy px-4 py-3 rounded-xl font-bold text-xs hover:bg-amber-400 transition-all shadow-lg active:scale-95"
+                            >
+                                <Calendar size={14} />
+                                {lang === 'fr' ? 'Réserver mon RDV expert' : 'Book my expert consultation'}
+                                <ExternalLink size={12} className="opacity-50" />
+                            </a>
+                            <p className="mt-2 text-[10px] opacity-60 italic">
+                                {lang === 'fr' ? 'Analyse gratuite de 15 min' : 'Free 15 min analysis'}
+                            </p>
                         </div>
                     </div>
 
@@ -161,13 +199,6 @@ const SummaryView: React.FC<SummaryProps> = ({ summary, onClose, lang }) => {
                 </div>
             </div>
 
-            {onClose && (
-                <div className="mt-8 text-center pt-6 border-t border-slate-100">
-                    <button onClick={onClose} className="text-slate-400 hover:text-brand-navy text-sm font-medium transition-colors">
-                        {t.btn_hide_summary}
-                    </button>
-                </div>
-            )}
         </div>
     );
 };
