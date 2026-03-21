@@ -382,7 +382,7 @@ function App() {
             </button>
             <button
               onClick={handleManualCallRequest}
-              className="w-10 h-10 rounded-full border-2 border-brand-amber overflow-hidden bg-white shadow-lg relative group active:scale-95 transition-transform"
+              className="size-[60px] rounded-full border-2 border-brand-amber overflow-hidden bg-white shadow-lg relative group active:scale-95 transition-transform"
             >
               <img src="https://img.antiquiscore.com/global/Natt.webp" alt="Expert" className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-black/10 group-active:bg-brand-amber/30 transition-colors" />

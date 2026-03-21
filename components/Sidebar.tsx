@@ -83,7 +83,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                         className="w-full relative group overflow-hidden bg-gradient-to-r from-brand-amber to-brand-yellow rounded-xl p-[2px] shadow-lg hover:shadow-brand-amber/20 transition-all duration-300 transform hover:scale-[1.02]"
                     >
                         <div className="bg-brand-navy rounded-[10px] p-3 flex items-center gap-3 h-full">
-                            <div className="w-10 h-10 rounded-full border border-brand-amber/50 overflow-hidden bg-white flex-shrink-0">
+                            <div className="size-[60px] rounded-full border border-brand-amber/50 overflow-hidden bg-white flex-shrink-0">
                                 <img src="https://img.antiquiscore.com/global/Natt.webp" alt="Expert" className="w-full h-full object-cover" />
                             </div>
 
