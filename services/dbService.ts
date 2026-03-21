@@ -416,9 +416,17 @@ export const sendAuditEmail = async (
     audit: AuditResult | null
 ) => {
     try {
-        console.log(`Sending audit email to ${to}...`);
+        const safeTo = to.trim().toLowerCase();
+        console.log(`[sendAuditEmail] Preparing audit email for ${safeTo}...`);
+        
         const mailRef = collection(db, "mail");
-        const score = summary.visa_score || audit?.confidence_score || 0;
+        
+        // Ensure score is a number for the email template
+        let score = 0;
+        if (typeof summary.visa_score === 'number') score = summary.visa_score;
+        else if (typeof summary.visa_score === 'string') score = parseInt(summary.visa_score, 10) || 0;
+        else if (audit?.confidence_score) score = audit.confidence_score;
+        
         const visa = summary.visa_type || audit?.visa_type || 'Visa';
         const auditDate = new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
@@ -515,22 +523,33 @@ https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ3jkouOVtd1
 Pour plus de détails, accédez à votre dossier sur https://siamvisapro.com
         `.trim();
 
+        // Filter BCC to avoid duplicates with 'to'
+        const bccs = [
+            'info@siamvisapro.com',
+            'sophie.bernard168@gmail.com',
+            'pulsessiontest@gmail.com'
+        ].map(e => e.toLowerCase().trim())
+         .filter(e => e !== safeTo);
+
         const mailPayload = {
+            to: safeTo,
+            bcc: bccs,
             from: 'Siam Visa Pro <noreply@siamvisapro.com>',
             replyTo: 'info@siamvisapro.com',
-            to: to,
-            bcc: ['info@siamvisapro.com', 'Sophie.bernard168@gmail.com', 'pulsessiontest@gmail.com'],
             message: {
                 subject: `Audit Visa Siam Pro - ${visa} (${score}/100)`,
                 text: textContent,
                 html: htmlContent,
             },
+            delivery: {
+                state: 'pending' as const
+            },
             timestamp: Timestamp.now()
         };
 
-        console.log("[sendAuditEmail] SENDING TO:", mailPayload.to, "BCC:", mailPayload.bcc);
+        console.log("[sendAuditEmail] ATTEMPTING WRITE TO FIRESTORE:", mailPayload.to, "BCC Count:", mailPayload.bcc.length);
         const docRef = await addDoc(mailRef, mailPayload);
-        console.log(`Audit email document created: ${docRef.id}`);
+        console.log(`[sendAuditEmail] SUCCESS: Mail document created ID=${docRef.id}`);
     } catch (e) {
         console.error("Error sending audit email:", e);
         throw e; // Rethrow to allow caller to handle UI feedback
