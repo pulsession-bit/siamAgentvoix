@@ -60,7 +60,7 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose, lang = 'fr' }) 
       console.log("Attempting to initialize LiveAgent...");
       liveAgentRef.current = new LiveAgent();
 
-      // Use the simplified connect signature (3 args)
+      // Use the simplified connect signature (4 args with payload)
       await liveAgentRef.current.connect(
         (newStatus) => {
           console.log("Connection status changed:", newStatus);
@@ -75,7 +75,8 @@ const CallModal: React.FC<CallModalProps> = ({ payload, onClose, lang = 'fr' }) 
         (update) => {
           setLiveTranscript(update);
         },
-        lang
+        lang,
+        payload
       );
     } catch (e) {
       console.error("Failed to start call:", e);

@@ -37,11 +37,11 @@ export const fr = {
     mic_denied: "Accès au microphone refusé. Veuillez vérifier les permissions de votre navigateur.",
 
     // Welcome
-    welcome_msg: "Bonjour et bienvenue sur **Siam Visa Pro**.\n\nJe suis votre assistant expert en visas pour la Thaïlande. Mon rôle est de :\n1. Vous aider à choisir le bon visa.\n2. Vérifier votre dossier (Audit).\n3. Maximiser vos chances d'approbation.\n\nPour commencer, dites-moi :\n- Quelle est votre **nationalité** ?\n- Quel est le **but de votre séjour** (tourisme, travail, retraite...) ?\n- Combien de temps comptez-vous rester ?",
+    welcome_msg: "Bonjour et bienvenue sur **Siam Visa Pro**. Je suis **Worapat**, votre assistant expert en visas pour la Thaïlande.\n\nMon rôle est de :\n1. Vous aider à choisir le bon visa.\n2. Vérifier votre dossier (Audit).\n3. Maximiser vos chances d'approbation.\n\nPour commencer, dites-moi :\n- Quelle est votre **nationalité** ?\n- Quel est le **but de votre séjour** (tourisme, travail, retraite...) ?\n- Combien de temps comptez-vous rester ?",
 
     // Chat
     auditor_analyzing: "L'auditeur analyse...",
-    agent_name: "Expert Visa",
+    agent_name: "Worapat",
     user_name: "Vous",
 
     // Voice Upsell

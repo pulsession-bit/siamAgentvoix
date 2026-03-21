@@ -51,7 +51,8 @@ export class LiveAgent {
   async connect(
     onStatusChange: (status: string) => void,
     onTranscriptUpdate?: (update: TranscriptUpdate) => void,
-    language: string = 'fr'
+    language: string = 'fr',
+    payload?: any
   ) {
     if (this.isConnected) {
       console.log("[LiveAgent] Already connected, skipping");
@@ -104,7 +105,9 @@ export class LiveAgent {
           },
           inputAudioTranscription: {},
           outputAudioTranscription: {},
-          systemInstruction: LIVE_SYSTEM_PROMPT + `\n\n[IMPORTANT: LANGUAGE OVERRIDE]\nYou MUST interact with the user in ${language === 'fr' ? 'FRENCH' : language === 'en' ? 'ENGLISH' : language === 'de' ? 'GERMAN' : language === 'ru' ? 'RUSSIAN' : 'FRENCH'}. Translate your responses and use the appropriate cultural tone for this language.`,
+          systemInstruction: LIVE_SYSTEM_PROMPT + 
+            (payload ? `\n\n[CONTEXTE DU CHAT PRÉCÉDENT]\nLe visiteur a déjà indiqué :\n- Visa : ${payload.visaType}\n- Étape : ${payload.userStage}\n- Notes : ${payload.notes}\nUtilise ces informations pour ne pas lui redemander ce qu'il a déjà dit.` : '') +
+            `\n\n[IMPORTANT: LANGUAGE OVERRIDE]\nYou MUST interact with the user in ${language === 'fr' ? 'FRENCH' : language === 'en' ? 'ENGLISH' : language === 'de' ? 'GERMAN' : language === 'ru' ? 'RUSSIAN' : 'FRENCH'}. Translate your responses and use the appropriate cultural tone for this language.`,
         },
         callbacks: {
           onopen: () => {
@@ -112,6 +115,11 @@ export class LiveAgent {
             onStatusChange('connected');
             this.isConnected = true;
             this.startAudioInput();
+
+            // Automatiquement démarrer la conversation
+            this.sessionPromise?.then((session) => {
+              session.sendRealtimeInput({ text: "L'appel commence. Présente-toi comme étant Worapat, ton nom thaïlandais, brièvement et commence la qualification en tenant compte du contexte." });
+            });
           },
           onmessage: async (message: LiveServerMessage) => {
             console.log("[LiveAgent] Message received:", JSON.stringify(message).substring(0, 200));
