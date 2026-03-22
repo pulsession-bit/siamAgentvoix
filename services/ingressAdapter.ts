@@ -56,7 +56,7 @@ function lcEmail(v?: string) {
 
 export interface LegacyAuditSession {
     email: string;
-    lead_id: string;
+    lead_id?: string; // Deprecated: always equal to email, use email instead
     visa_type?: string;
     audit_score?: number;
     audit_status?: string;

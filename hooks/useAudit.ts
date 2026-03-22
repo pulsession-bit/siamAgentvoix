@@ -44,9 +44,8 @@ export function useAudit(): UseAuditReturn {
     }
 
     setAuditResult(result);
-    if (result.ready_for_payment) {
-      setStep(AppStep.PAYMENT);
-    }
+    // Always advance to AUDIT (never PAYMENT — no payment step in this flow)
+    setStep(prev => prev === AppStep.QUALIFICATION ? AppStep.AUDIT : prev);
   }, []);
 
   return {

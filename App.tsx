@@ -242,16 +242,7 @@ function App() {
       try {
         const summary = await generateSummary(transcript || undefined);
         if (summary && effectiveEmail) {
-          await saveSessionToFirestore(effectiveEmail, {
-            sessionId,
-            messages,
-            step,
-            visaType: resolvedAudit.visa_type || visaType,
-            auditResult: resolvedAudit,
-            chatSummary: summary,
-            userEmail: effectiveEmail,
-            timestamp: Date.now()
-          });
+          // No explicit save here — useSession debounce handles persistence automatically
           await sendAuditEmail(effectiveEmail, summary, resolvedAudit);
           addMessage(
             language === 'fr'

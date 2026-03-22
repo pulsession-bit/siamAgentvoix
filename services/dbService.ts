@@ -172,18 +172,9 @@ export const saveSessionToFirestore = async (email: string, sessionData: any) =>
         const safeEmail = email.toLowerCase();
         const now = new Date().toISOString();
 
-        // 1. LEAD (Master Entité - CRM) - Keyed by Email - STABLE IDENTIFIER
-        const leadData = {
-            email: sessionData.userEmail || email,
-            source: 'AUDIT_IA_AGENT',
-            status: 'NEW_AUDIT',
-            updated_at: now
-        };
-
-        // 2. AUDIT SESSION (Legacy) - AUTO-GENERATED ID
+        // AUDIT SESSION (Legacy) - AUTO-GENERATED ID
         const auditData: LegacyAuditSession = {
             email: safeEmail,
-            lead_id: safeEmail,
             visa_type: sessionData.visaType || null,
             audit_score: sessionData.auditResult?.confidence_score || sessionData.auditResult?.visa_score || 0,
             audit_status: sessionData.auditResult?.audit_status || 'PENDING',
@@ -195,14 +186,11 @@ export const saveSessionToFirestore = async (email: string, sessionData: any) =>
             updated_at: now
         };
 
-        // Extended audit data for legacy collection (includes chat_history)
+        // Lightweight session record — no full chat history (too heavy, use message_count instead)
         const legacyAuditData = {
             ...auditData,
-            chat_history: sessionData.messages || [],
+            message_count: (sessionData.messages || []).length,
         };
-
-        // WRITE LEAD (Idempotent update by Email)
-        const leadPromise = setDoc(doc(db, "leads", safeEmail), sanitize(leadData), { merge: true });
 
         // WRITE AUDIT SESSION (Legacy - Smart Update or Create)
         const auditPromise = (async () => {
@@ -226,8 +214,8 @@ export const saveSessionToFirestore = async (email: string, sessionData: any) =>
             }
         })();
 
-        // Wait for legacy writes
-        const [, legacyDocId] = await Promise.all([leadPromise, auditPromise]);
+        // Wait for legacy write
+        const legacyDocId = await auditPromise;
 
         // ================================================================
         // 3. DUAL-WRITE: Ingest to new schema (cases/events)
