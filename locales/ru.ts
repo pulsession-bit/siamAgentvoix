@@ -104,6 +104,7 @@ export const ru = {
     btn_hide_summary: "Скрыть резюме",
 
     // Audit Score
+    audit_in_progress: "Анализ продолжается… Предварительный VisaScore: {score}/100.",
     audit_terminated: "Аудит завершен. Ваш предварительный VisaScore: {score}/100.",
     audit_verdict: "Вердикт: ",
     audit_verdict_eligible: "Соответствует",

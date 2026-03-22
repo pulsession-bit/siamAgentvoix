@@ -63,7 +63,10 @@ const AuditScore: React.FC<AuditScoreProps> = ({ result, lang }) => {
         {/* Details Section */}
         <div className="flex-1 w-full text-left">
           <h3 className="text-lg md:text-xl font-bold text-brand-navy mb-1 leading-tight">
-            {t.audit_terminated.replace('{score}', score.toString())}
+            {(result.audit_status === 'PENDING'
+              ? t.audit_in_progress
+              : t.audit_terminated
+            ).replace('{score}', score.toString())}
           </h3>
           <p className="text-brand-navy/80 font-medium mb-4">
             {t.audit_verdict} <span className="font-bold underline" style={{ color: fillColor }}>{getVerdict()}</span>

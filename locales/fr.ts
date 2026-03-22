@@ -106,6 +106,7 @@ export const fr = {
     btn_hide_summary: "Masquer la synthèse",
 
     // Audit Score
+    audit_in_progress: "Analyse en cours… VisaScore provisoire : {score}/100.",
     audit_terminated: "Audit terminé. Votre VisaScore provisoire : {score}/100.",
     audit_verdict: "Verdict : ",
     audit_verdict_eligible: "Éligible",

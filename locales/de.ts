@@ -104,6 +104,7 @@ export const de = {
     btn_hide_summary: "Zusammenfassung ausblenden",
 
     // Audit Score
+    audit_in_progress: "Analyse läuft… Vorläufiger VisaScore: {score}/100.",
     audit_terminated: "Audit abgeschlossen. Ihr vorläufiger VisaScore: {score}/100.",
     audit_verdict: "Urteil: ",
     audit_verdict_eligible: "Berechtigt",
