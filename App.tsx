@@ -146,6 +146,27 @@ function App() {
       if (response.auditResult.audit_status !== 'PENDING') {
         setIsMobileScoreOpen(true);
         addMessage('', 'agent', undefined, undefined, true);
+
+        // Auto-send email when audit is finalized (same as voice call flow)
+        if (effectiveEmail && !isEmailSendingRef.current) {
+          isEmailSendingRef.current = true;
+          try {
+            const summary = await generateSummary();
+            if (summary) {
+              await sendAuditEmail(effectiveEmail, summary, response.auditResult);
+              addMessage(
+                language === 'fr'
+                  ? '📧 Votre rapport d\'audit a été envoyé par email.'
+                  : '📧 Your audit report has been sent by email.',
+                'system'
+              );
+            }
+          } catch (err) {
+            console.error('[handleUserMessage] Auto-email error:', err);
+          } finally {
+            isEmailSendingRef.current = false;
+          }
+        }
       }
     }
     if (response?.action?.action === 'request_call') {
