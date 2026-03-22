@@ -74,18 +74,7 @@ RÈGLES :
 - TOUJOURS "false" tant que le score < 50 ou que l'utilisateur n'a pas dit vouloir finaliser.
 - "true" uniquement quand le visiteur demande explicitement à transmettre.
 
-Pour proposer un appel :
-\`\`\`json
-{
-  "action": "request_call",
-  "payload": {
-    "reason": "case_complexity",
-    "visaType": "Nom du Visa",
-    "userStage": "audit",
-    "notes": "Résumé situation"
-  }
-}
-\`\`\`
+
 
 ## 6. RÈGLES MÉTIER
 - DTV : 500k THB d'épargne (~13 500€). Ne PAS confondre avec le LTR.
