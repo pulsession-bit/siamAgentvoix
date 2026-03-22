@@ -22,6 +22,11 @@ export const setCurrentLanguage = (lang: Language) => {
   currentLanguage = lang;
 };
 
+let currentVisaType: string | null = null;
+export const setCurrentVisaType = (visaType: string | null) => {
+  currentVisaType = visaType;
+};
+
 // --- Simple Rate Limiter ---
 const RATE_LIMIT_MAX = 10; // max requests per window
 const RATE_LIMIT_WINDOW_MS = 60_000; // 60 seconds
@@ -56,6 +61,16 @@ const getClient = () => {
     aiClient = new GoogleGenAI({ apiKey });
   }
   return aiClient;
+};
+
+// Builds the full system instruction including visa type context if available
+const buildSystemInstruction = (): string => {
+  let instruction = getSystemPrompt(currentUserEmail, currentLanguage)
+    + `\n\n[OFFICIAL KNOWLEDGE BASE]\nUse the following official data to answer questions about Visas. Do not use external knowledge if it conflicts with this:\n${getKnowledgeContext()}`;
+  if (currentVisaType) {
+    instruction += `\n\n[USER CONTEXT] The user has already selected the visa type: **${currentVisaType}**. Skip questions about which visa they are interested in and focus the audit on this specific visa.`;
+  }
+  return instruction;
 };
 
 // New function to check if chatSession is active
@@ -100,7 +115,7 @@ export const startAuditSession = async (sessionId: string | null = null, skipWel
   chatSession = client.chats.create({
     model: 'gemini-2.0-flash',
     config: {
-      systemInstruction: getSystemPrompt(currentUserEmail, currentLanguage) + `\n\n[OFFICIAL KNOWLEDGE BASE]\nUse the following official data to answer questions about Visas. Do not use external knowledge if it conflicts with this:\n${getKnowledgeContext()}`,
+      systemInstruction: buildSystemInstruction(),
       temperature: 0.2, // Low temperature for consistent auditing
     },
   });
@@ -135,7 +150,7 @@ export const resumeAuditSession = async (existingMessages: ChatMessage[], sessio
   chatSession = client.chats.create({
     model: 'gemini-2.0-flash',
     config: {
-      systemInstruction: getSystemPrompt(currentUserEmail, currentLanguage) + `\n\n[OFFICIAL KNOWLEDGE BASE]\nUse the following official data to answer questions about Visas. Do not use external knowledge if it conflicts with this:\n${getKnowledgeContext()}`,
+      systemInstruction: buildSystemInstruction(),
       temperature: 0.2,
     },
     history: history
@@ -197,7 +212,7 @@ export const sendMessageToAgent = async (
     chatSession = client.chats.create({
       model: 'gemini-2.0-flash',
       config: {
-        systemInstruction: getSystemPrompt(currentUserEmail, currentLanguage) + `\n\n[OFFICIAL KNOWLEDGE BASE]\nUse the following official data to answer questions about Visas. Do not use external knowledge if it conflicts with this:\n${getKnowledgeContext()}`,
+        systemInstruction: buildSystemInstruction(),
         temperature: 0.2, // Low temperature for consistent auditing
       },
       history: history

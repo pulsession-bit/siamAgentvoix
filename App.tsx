@@ -20,7 +20,7 @@ import { AppStep, FileAttachment } from './types';
 import { translations, Language } from './locales/translations';
 import { useAuth, useChat, useSummary, useAudit, useSession } from './hooks';
 import { saveSessionToFirestore, sendAuditEmail } from './services/dbService';
-import { setCurrentUserEmail, setCurrentLanguage, analyzeCallTranscript } from './services/geminiService';
+import { setCurrentUserEmail, setCurrentLanguage, setCurrentVisaType, analyzeCallTranscript } from './services/geminiService';
 import { AUDIT_SESSION_KEY } from './contexts/AuthContext';
 
 function App() {
@@ -74,6 +74,11 @@ function App() {
   useEffect(() => {
     setCurrentLanguage(language);
   }, [language]);
+
+  // Keep geminiService in sync with selected visa type
+  useEffect(() => {
+    setCurrentVisaType(visaType);
+  }, [visaType]);
 
   const {
     sessionId,
