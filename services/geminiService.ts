@@ -351,13 +351,15 @@ export const analyzeCallTranscript = async (transcript: string): Promise<AuditRe
 
     const jsonMatch = fullText.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
     if (jsonMatch && jsonMatch[1]) {
-      return JSON.parse(jsonMatch[1]);
+      try { return JSON.parse(jsonMatch[1]); } catch { /* continue */ }
     }
-    try {
-      return JSON.parse(fullText);
-    } catch {
-      return null;
+    try { return JSON.parse(fullText); } catch { /* continue */ }
+    const jsonObjectMatch = fullText.match(/\{[\s\S]*\}/);
+    if (jsonObjectMatch) {
+      try { return JSON.parse(jsonObjectMatch[0]); } catch { /* continue */ }
     }
+    console.error("[analyzeCallTranscript] Could not parse JSON:", fullText.slice(0, 200));
+    return null;
 
   } catch (error) {
     console.error("Error analyzing call transcript:", error);
@@ -437,17 +439,20 @@ export const generateChatSummary = async (callTranscript?: string): Promise<impo
     const result = await session.sendMessage({ message: prompt });
     const fullText = result.text || "";
 
-    // Extract JSON
+    // 1. Try code block (```json ... ```)
     const jsonMatch = fullText.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
     if (jsonMatch && jsonMatch[1]) {
-      return JSON.parse(jsonMatch[1]);
+      try { return JSON.parse(jsonMatch[1]); } catch { /* continue */ }
     }
-    // Try parsing raw if no block
-    try {
-      return JSON.parse(fullText);
-    } catch {
-      return null;
+    // 2. Try raw JSON
+    try { return JSON.parse(fullText); } catch { /* continue */ }
+    // 3. Extract first {...} object even if there's surrounding text
+    const jsonObjectMatch = fullText.match(/\{[\s\S]*\}/);
+    if (jsonObjectMatch) {
+      try { return JSON.parse(jsonObjectMatch[0]); } catch { /* continue */ }
     }
+    console.error("[generateChatSummary] Could not parse JSON from response:", fullText.slice(0, 200));
+    return null;
 
   } catch (error) {
     console.error("Error generating summary:", error);
