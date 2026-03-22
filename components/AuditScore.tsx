@@ -80,14 +80,17 @@ const AuditScore: React.FC<AuditScoreProps> = ({ result, lang }) => {
               </div>
             )}
 
-            {/* Calculate remaining bullet slots (max 3 total) */}
-            {[
-              ...result.issues.map(i => ({ type: 'issue', text: i })),
-              ...result.missing_docs.map(i => ({ type: 'doc', text: i }))
-            ].slice(0, score > 85 ? 2 : 3).map((item, idx) => (
-              <div key={`bullet-${idx}`} className="flex items-start gap-2 text-sm text-slate-700">
-                <span className="shrink-0">{item.type === 'issue' ? '⚠️' : '📄'}</span>
-                <span>{item.text}</span>
+            {result.issues.map((issue, idx) => (
+              <div key={`issue-${idx}`} className="flex items-start gap-2 text-sm text-slate-700">
+                <span className="shrink-0">⚠️</span>
+                <span>{issue}</span>
+              </div>
+            ))}
+
+            {result.missing_docs.map((doc, idx) => (
+              <div key={`doc-${idx}`} className="flex items-start gap-2 text-sm text-slate-700">
+                <span className="shrink-0">📄</span>
+                <span>{doc}</span>
               </div>
             ))}
           </div>

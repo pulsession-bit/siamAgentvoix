@@ -143,6 +143,9 @@ function App() {
     if (response?.auditResult) {
       setIsAuditSubmitted(false);
       updateAuditFromResponse(response.auditResult);
+      if (response.auditResult.audit_status !== 'PENDING') {
+        setIsMobileScoreOpen(true);
+      }
     }
     if (response?.action?.action === 'request_call') {
       setCallPayload(response.action.payload);
