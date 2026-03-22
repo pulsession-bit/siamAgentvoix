@@ -8,7 +8,7 @@ interface UseChatReturn {
   messages: ChatMessage[];
   setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
   isTyping: boolean;
-  addMessage: (text: string, sender: 'user' | 'agent' | 'system', attachments?: FileAttachment[]) => void;
+  addMessage: (text: string, sender: 'user' | 'agent' | 'system', attachments?: FileAttachment[], suggestedReplies?: string[], isAuditCTA?: boolean) => void;
   sendMessage: (text: string, files: FileAttachment[]) => Promise<{
     auditResult?: AuditResult;
     action?: AgentAction;
@@ -26,7 +26,8 @@ export function useChat(currentLanguage: Language = 'fr'): UseChatReturn {
     text: string,
     sender: 'user' | 'agent' | 'system',
     attachments?: FileAttachment[],
-    suggestedReplies?: string[]
+    suggestedReplies?: string[],
+    isAuditCTA?: boolean
   ) => {
     setMessages(prev => [...prev, {
       id: Date.now().toString(),
@@ -35,6 +36,7 @@ export function useChat(currentLanguage: Language = 'fr'): UseChatReturn {
       timestamp: Date.now(),
       attachments,
       suggestedReplies,
+      isAuditCTA,
     }]);
   }, []);
 

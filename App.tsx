@@ -145,6 +145,7 @@ function App() {
       updateAuditFromResponse(response.auditResult);
       if (response.auditResult.audit_status !== 'PENDING') {
         setIsMobileScoreOpen(true);
+        addMessage('', 'agent', undefined, undefined, true);
       }
     }
     if (response?.action?.action === 'request_call') {
@@ -595,7 +596,7 @@ function App() {
               )}
 
               <div className="flex-1 flex flex-col overflow-hidden relative">
-                <Chat messages={messages} isTyping={isTyping} lang={language} onReply={(text) => handleUserMessage(text, [])} />
+                <Chat messages={messages} isTyping={isTyping} lang={language} onReply={(text) => handleUserMessage(text, [])} onViewAudit={() => { setIsMobileScoreOpen(true); document.getElementById('audit-panel')?.scrollIntoView({ behavior: 'smooth' }); }} />
               </div>
 
               <div className="flex-none">
@@ -605,7 +606,7 @@ function App() {
 
             {/* Desktop only: AuditScore as right sidebar panel */}
             {auditResult && step === AppStep.AUDIT && (
-              <div className="hidden md:flex flex-col w-1/2 flex-shrink-0 bg-blue-50/80 border-l border-blue-100 overflow-y-auto p-4">
+              <div id="audit-panel" className="hidden md:flex flex-col w-1/2 flex-shrink-0 bg-blue-50/80 border-l border-blue-100 overflow-y-auto p-4">
                 <AuditScore result={auditResult} lang={language} />
                 <button
                   onClick={clearSession}

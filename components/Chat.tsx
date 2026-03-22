@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, memo } from 'react';
 import { ChatMessage, Sender } from '../types';
-import { Bot, User, Loader2, Phone } from 'lucide-react';
+import { Bot, User, Loader2, Phone, ClipboardList } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { translations, Language } from '../locales/translations';
@@ -10,9 +10,24 @@ interface ChatProps {
   isTyping: boolean;
   lang: Language;
   onReply: (text: string) => void;
+  onViewAudit?: () => void;
 }
 
-const ChatMessageItem = memo(({ msg, lang, onReply }: { msg: ChatMessage, lang: Language, onReply: (text: string) => void }) => {
+const ChatMessageItem = memo(({ msg, lang, onReply, onViewAudit }: { msg: ChatMessage, lang: Language, onReply: (text: string) => void, onViewAudit?: () => void }) => {
+  if (msg.isAuditCTA) {
+    return (
+      <div className="flex justify-center">
+        <button
+          onClick={onViewAudit}
+          className="flex items-center gap-2 px-5 py-3 bg-brand-amber text-brand-navy rounded-xl font-bold shadow-md hover:bg-brand-navy hover:text-white transition-all active:scale-95 text-sm"
+        >
+          <ClipboardList size={18} />
+          {lang === 'fr' ? 'Voir mon audit complet' : lang === 'en' ? 'View my complete audit' : lang === 'de' ? 'Vollständiges Audit anzeigen' : 'Посмотреть полный аудит'}
+        </button>
+      </div>
+    );
+  }
+
   if (msg.sender === 'system') {
     const transcriptBody = msg.text
       .replace(/📄\s*\*\*RÉSUMÉ DE L'APPEL\*\*\s*/i, '')
@@ -164,7 +179,7 @@ const ChatMessageItem = memo(({ msg, lang, onReply }: { msg: ChatMessage, lang: 
   );
 }, (prevProps, nextProps) => prevProps.msg.id === nextProps.msg.id && prevProps.lang === nextProps.lang && prevProps.msg.text === nextProps.msg.text);
 
-const Chat: React.FC<ChatProps> = ({ messages, isTyping, lang, onReply }) => {
+const Chat: React.FC<ChatProps> = ({ messages, isTyping, lang, onReply, onViewAudit }) => {
   const t = translations[lang];
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -182,7 +197,7 @@ const Chat: React.FC<ChatProps> = ({ messages, isTyping, lang, onReply }) => {
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-6 pb-4 min-h-0"> {/* Removed scrollbar-hide for better UX */}
       {messages.map((msg) => (
-        <ChatMessageItem key={msg.id} msg={msg} lang={lang} onReply={onReply} />
+        <ChatMessageItem key={msg.id} msg={msg} lang={lang} onReply={onReply} onViewAudit={onViewAudit} />
       ))}
 
       {isTyping && (

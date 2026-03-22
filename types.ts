@@ -11,6 +11,7 @@ export interface ChatMessage {
   timestamp: number;
   attachments?: FileAttachment[];
   suggestedReplies?: string[];
+  isAuditCTA?: boolean;
 }
 
 export interface FileAttachment {
