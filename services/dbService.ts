@@ -529,9 +529,6 @@ Pour plus de détails, accédez à votre dossier sur https://siamvisapro.com
                 text: textContent,
                 html: htmlContent,
             },
-            delivery: {
-                state: 'pending' as const
-            },
             timestamp: Timestamp.now()
         };
 
