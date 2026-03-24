@@ -103,14 +103,14 @@ const ChatMessageItem = memo(({ msg, lang, onReply, onViewAudit }: { msg: ChatMe
       </div>
 
       {/* Bubble Container */}
-      <div className={`flex flex-col max-w-[85%] ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
+      <div className={`flex flex-col max-w-[85%] min-w-0 ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
         <div className={`
-        px-5 py-4 text-sm leading-relaxed shadow-sm rounded-2xl
+        px-5 py-4 text-sm leading-relaxed shadow-sm rounded-2xl overflow-hidden
         ${msg.sender === 'agent'
             ? 'bg-brand-navy text-white rounded-tl-none'
             : 'bg-white border border-slate-200 text-slate-800 rounded-tr-none'}
       `}>
-          <div className="text-sm prose prose-sm max-w-none">
+          <div className="text-sm prose prose-sm max-w-none break-words">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
@@ -128,7 +128,22 @@ const ChatMessageItem = memo(({ msg, lang, onReply, onViewAudit }: { msg: ChatMe
                     <div className={`${msg.sender === 'agent' ? 'bg-white/10 border-brand-amber text-slate-200' : 'bg-blue-50 border-brand-blue text-slate-600'} border-l-4 p-3 my-2 rounded-r-lg text-xs italic`} {...rest} />
                   );
                 },
-                a: ({ node, ...props }) => <a className="underline text-brand-blue hover:text-brand-navy" target="_blank" rel="noopener noreferrer" {...props} />,
+                a: ({ node, href, children, ...props }) => {
+                  const isCalendly = href?.includes('calendar.google.com') || href?.includes('calendly.com');
+                  if (isCalendly) {
+                    return (
+                      <a
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 mt-2 px-4 py-2 bg-brand-amber text-brand-navy rounded-xl font-bold text-sm hover:bg-amber-300 transition-all no-underline"
+                      >
+                        📅 {typeof children === 'string' && children !== href ? children : 'Réserver mon RDV gratuit'}
+                      </a>
+                    );
+                  }
+                  return <a href={href} className="underline text-brand-amber hover:text-white break-all" target="_blank" rel="noopener noreferrer" {...props}>{children}</a>;
+                },
               }}
             >
               {msg.text}
