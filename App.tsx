@@ -22,6 +22,7 @@ import { useAuth, useChat, useSummary, useAudit, useSession } from './hooks';
 import { saveSessionToFirestore, sendAuditEmail } from './services/dbService';
 import { setCurrentUserEmail, setCurrentLanguage, setCurrentVisaType, analyzeCallTranscript } from './services/geminiService';
 import { AUDIT_SESSION_KEY } from './contexts/AuthContext';
+import AppFooter from './components/AppFooter';
 
 function App() {
   // Language
@@ -623,6 +624,8 @@ function App() {
               <div className="flex-none">
                 <InputArea onSendMessage={handleUserMessage} disabled={step === AppStep.PAYMENT} lang={language} />
               </div>
+
+              <AppFooter lang={language} />
             </div>
 
             {/* Desktop only: AuditScore as right sidebar panel */}
